@@ -446,9 +446,15 @@
       </select>
     </div>
     <div class="field" style="flex: 1 0 160px;">
-      <label>카테고리</label>
-      <select id="category">
+      <label>대분류</label>
+      <select id="categoryMain" onchange="onCategoryMainChange()">
         <option value="">로딩 중...</option>
+      </select>
+    </div>
+    <div class="field" id="categorySub-wrap" style="flex: 1 0 160px; display: none;">
+      <label>소분류</label>
+      <select id="categorySub">
+        <option value="">선택</option>
       </select>
     </div>
   </div>
@@ -573,6 +579,10 @@
 
     <!-- 소울스토어 -->
     <div class="store-panel active" id="panel-soul">
+      <div class="field" style="grid-column: 1 / -1;">
+        <label>상품명 (소울스토어)</label>
+        <input type="text" id="soul-productName" placeholder="공통 상품명과 다를 경우 수정" />
+      </div>
       <div class="upload-box">
         <div class="upload-box-header">
           <div class="upload-box-title"><span class="dot" id="dot-soul-main"></span>대표 메인이미지</div>
@@ -615,6 +625,10 @@
 
     <!-- 제이원투몰 -->
     <div class="store-panel" id="panel-j1">
+      <div class="field" style="grid-column: 1 / -1;">
+        <label>상품명 (제이원투몰)</label>
+        <input type="text" id="j1-productName" placeholder="공통 상품명과 다를 경우 수정" />
+      </div>
       <div class="upload-box">
         <div class="upload-box-header">
           <div class="upload-box-title"><span class="dot" id="dot-j1-main"></span>대표 메인이미지</div>
@@ -657,6 +671,10 @@
 
     <!-- 행복산업 -->
     <div class="store-panel" id="panel-happy">
+      <div class="field" style="grid-column: 1 / -1;">
+        <label>상품명 (행복산업)</label>
+        <input type="text" id="happy-productName" placeholder="공통 상품명과 다를 경우 수정" />
+      </div>
       <div class="upload-box">
         <div class="upload-box-header">
           <div class="upload-box-title"><span class="dot" id="dot-happy-main"></span>대표 메인이미지</div>
@@ -699,6 +717,10 @@
 
     <!-- 태실장픽앤샵 -->
     <div class="store-panel" id="panel-tae">
+      <div class="field" style="grid-column: 1 / -1;">
+        <label>상품명 (태실장픽앤샵)</label>
+        <input type="text" id="tae-productName" placeholder="공통 상품명과 다를 경우 수정" />
+      </div>
       <div class="upload-box">
         <div class="upload-box-header">
           <div class="upload-box-title"><span class="dot" id="dot-tae-main"></span>대표 메인이미지</div>
@@ -919,7 +941,16 @@ function updateFolderLabel(slot) {
   if (el) el.textContent = `${s.folder}/${pn}_${s.sub}/`;
 }
 
+let prevCommonName = '';
 document.getElementById('productName').addEventListener('input', () => {
+  const newName = document.getElementById('productName').value;
+  ['soul', 'j1', 'happy', 'tae'].forEach(store => {
+    const el = document.getElementById(store + '-productName');
+    if (el && (el.value === '' || el.value === prevCommonName)) {
+      el.value = newName;
+    }
+  });
+  prevCommonName = newName;
   Object.keys(SLOTS).forEach(updateFolderLabel);
 });
 
@@ -1030,24 +1061,31 @@ async function uploadFile(file, r2Key) {
 
 // STEP 5: Send n8n webhook
 async function sendWebhook() {
-  const catSelect = document.getElementById('category');
+  const catMainEl = document.getElementById('categoryMain');
+  const catSubEl = document.getElementById('categorySub');
+  const hasSubVal = catSubEl.value && catSubEl.value !== '';
+  const categoryNo = hasSubVal ? catSubEl.value : catMainEl.value;
+  const categoryText = hasSubVal
+    ? (catSubEl.options[catSubEl.selectedIndex] ? catSubEl.options[catSubEl.selectedIndex].text : '')
+    : (catMainEl.options[catMainEl.selectedIndex] ? catMainEl.options[catMainEl.selectedIndex].text : '');
+  const commonName = document.getElementById('productName').value.trim();
   const payload = {
     product: {
-      name: document.getElementById('productName').value.trim(),
+      name: commonName,
       salePrice: Number(document.getElementById('salePrice').value) || 0,
       supplyPrice: Number(document.getElementById('supplyPrice').value) || 0,
       stock: Number(document.getElementById('stock').value) || 0,
       displayStatus: document.getElementById('displayStatus').value,
       saleStatus: document.getElementById('saleStatus').value,
-      categoryNo: catSelect.value,
-      categoryText: catSelect.options[catSelect.selectedIndex] ? catSelect.options[catSelect.selectedIndex].text : '',
+      categoryNo: categoryNo,
+      categoryText: categoryText,
     },
     noticeInfo: getNoticeData(),
     stores: {
-      soul:  { manufacturer: document.getElementById('soul-manufacturer').value.trim(),  phone: document.getElementById('soul-phone').value.trim(),  options: getStoreOptions('soul'),  images: { main: uploadedUrls['soul-main'],  spec: uploadedUrls['soul-spec']  } },
-      j1:    { manufacturer: document.getElementById('j1-manufacturer').value.trim(),    phone: document.getElementById('j1-phone').value.trim(),    options: getStoreOptions('j1'),    images: { main: uploadedUrls['j1-main'],    spec: uploadedUrls['j1-spec']    } },
-      happy: { manufacturer: document.getElementById('happy-manufacturer').value.trim(), phone: document.getElementById('happy-phone').value.trim(), options: getStoreOptions('happy'), images: { main: uploadedUrls['happy-main'], spec: uploadedUrls['happy-spec'] } },
-      tae:   { manufacturer: document.getElementById('tae-manufacturer').value.trim(),   phone: document.getElementById('tae-phone').value.trim(),   options: getStoreOptions('tae'),   images: { main: uploadedUrls['tae-main'],   spec: uploadedUrls['tae-spec']   } },
+      soul:  { productName: document.getElementById('soul-productName').value.trim() || commonName,  manufacturer: document.getElementById('soul-manufacturer').value.trim(),  phone: document.getElementById('soul-phone').value.trim(),  options: getStoreOptions('soul'),  images: { main: uploadedUrls['soul-main'],  spec: uploadedUrls['soul-spec']  } },
+      j1:    { productName: document.getElementById('j1-productName').value.trim() || commonName,    manufacturer: document.getElementById('j1-manufacturer').value.trim(),    phone: document.getElementById('j1-phone').value.trim(),    options: getStoreOptions('j1'),    images: { main: uploadedUrls['j1-main'],    spec: uploadedUrls['j1-spec']    } },
+      happy: { productName: document.getElementById('happy-productName').value.trim() || commonName, manufacturer: document.getElementById('happy-manufacturer').value.trim(), phone: document.getElementById('happy-phone').value.trim(), options: getStoreOptions('happy'), images: { main: uploadedUrls['happy-main'], spec: uploadedUrls['happy-spec'] } },
+      tae:   { productName: document.getElementById('tae-productName').value.trim() || commonName,   manufacturer: document.getElementById('tae-manufacturer').value.trim(),   phone: document.getElementById('tae-phone').value.trim(),   options: getStoreOptions('tae'),   images: { main: uploadedUrls['tae-main'],   spec: uploadedUrls['tae-spec']   } },
     },
     commonImages: {
       detail: uploadedUrls['common-detail'],
@@ -1170,10 +1208,15 @@ function resetAll() {
     if (container) container.innerHTML = `<div class="options-empty" id="option-empty-${store}">옵션이 없습니다. "옵션 추가" 버튼을 클릭하세요.</div>`;
     const mf = document.getElementById(store + '-manufacturer');
     const ph = document.getElementById(store + '-phone');
+    const sn = document.getElementById(store + '-productName');
     if (mf) mf.value = '';
     if (ph) ph.value = '';
+    if (sn) sn.value = '';
   });
-
+  prevCommonName = '';
+  document.getElementById('categoryMain').innerHTML = '<option value="">로딩 중...</option>';
+  document.getElementById('categorySub').innerHTML = '<option value="">선택</option>';
+  document.getElementById('categorySub-wrap').style.display = 'none';
   document.getElementById('noticeCategory').value = '';
   onNoticeCategoryChange();
 
@@ -1196,25 +1239,36 @@ const CATEGORY_URLS = {
 const categoryData = {};
 let currentTab = 'soul';
 
-function buildCategoryOptions(categories, level) {
-  level = level || 0;
-  let html = '';
-  for (const cat of categories) {
-    const indent = '\u00a0\u00a0\u00a0\u00a0'.repeat(level);
-    const prefix = level > 0 ? '└ ' : '';
-    html += `<option value="${cat.category_no}">${indent}${prefix}${cat.category_name}</option>`;
-    if (cat.children && cat.children.length > 0) html += buildCategoryOptions(cat.children, level + 1);
+function updateCategorySelect(tab) {
+  const mainSelect = document.getElementById('categoryMain');
+  const subWrap = document.getElementById('categorySub-wrap');
+  const subSelect = document.getElementById('categorySub');
+  const data = categoryData[tab];
+  if (!data) {
+    mainSelect.innerHTML = '<option value="">로딩 중...</option>';
+    subWrap.style.display = 'none';
+    return;
   }
-  return html;
+  mainSelect.innerHTML = '<option value="">-- 대분류 선택 --</option>' +
+    data.map(cat => `<option value="${cat.no}">${cat.name}</option>`).join('');
+  subWrap.style.display = 'none';
+  subSelect.innerHTML = '<option value="">선택</option>';
 }
 
-function updateCategorySelect(tab) {
-  const select = document.getElementById('category');
-  const prevVal = select.value;
-  const data = categoryData[tab];
-  if (!data) { select.innerHTML = '<option value="">로딩 중...</option>'; return; }
-  select.innerHTML = '<option value="">선택</option>' + buildCategoryOptions(data, 0);
-  if (prevVal) select.value = prevVal;
+function onCategoryMainChange() {
+  const mainSelect = document.getElementById('categoryMain');
+  const subWrap = document.getElementById('categorySub-wrap');
+  const subSelect = document.getElementById('categorySub');
+  const selectedNo = Number(mainSelect.value);
+  const data = categoryData[currentTab] || [];
+  const parent = data.find(c => c.no === selectedNo);
+  subSelect.innerHTML = '<option value="">선택</option>';
+  if (parent && parent.children && parent.children.length > 0) {
+    subSelect.innerHTML += parent.children.map(c => `<option value="${c.no}">${c.name}</option>`).join('');
+    subWrap.style.display = '';
+  } else {
+    subWrap.style.display = 'none';
+  }
 }
 
 async function loadCategories() {
@@ -1222,7 +1276,10 @@ async function loadCategories() {
     Object.entries(CATEGORY_URLS).map(async ([tab, url]) => {
       try {
         const res = await fetch(url);
-        if (res.ok) categoryData[tab] = await res.json();
+        if (res.ok) {
+          const d = await res.json();
+          categoryData[tab] = d.categories || [];
+        }
       } catch (e) {
         console.warn('카테고리 로드 실패 (' + tab + '):', e);
       }
