@@ -34,7 +34,6 @@
     padding: 0;
   }
 
-  /* HEADER */
   .header {
     background: var(--bg2);
     border-bottom: 1px solid var(--border);
@@ -58,11 +57,7 @@
 
   .logo span { color: var(--text2); font-weight: 500; font-size: 14px; margin-left: 8px; }
 
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
+  .header-right { display: flex; align-items: center; gap: 12px; }
 
   .btn-upload-all {
     background: var(--accent);
@@ -84,14 +79,12 @@
   .btn-upload-all:active { transform: scale(0.97); }
   .btn-upload-all:disabled { background: #444; cursor: not-allowed; }
 
-  /* MAIN */
   .main {
     max-width: 1200px;
     margin: 0 auto;
     padding: 32px 24px 80px;
   }
 
-  /* 상품 정보 */
   .product-info {
     background: var(--bg2);
     border: 1px solid var(--border);
@@ -104,32 +97,11 @@
     align-items: flex-end;
   }
 
-  .field-unit-wrap {
-    position: relative;
-    display: flex;
-    align-items: center;
-    width: 100%;
-  }
+  .field-unit-wrap { position: relative; display: flex; align-items: center; width: 100%; }
+  .field-unit-wrap input { padding-right: 36px; }
+  .unit-suffix { position: absolute; right: 12px; color: var(--text2); font-size: 13px; pointer-events: none; white-space: nowrap; }
 
-  .field-unit-wrap input {
-    padding-right: 36px;
-  }
-
-  .unit-suffix {
-    position: absolute;
-    right: 12px;
-    color: var(--text2);
-    font-size: 13px;
-    pointer-events: none;
-    white-space: nowrap;
-  }
-
-  .field {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    flex: 1;
-  }
+  .field { display: flex; flex-direction: column; gap: 8px; flex: 1; }
 
   .field label {
     font-size: 12px;
@@ -152,21 +124,11 @@
     width: 100%;
   }
 
-  .field input:focus, .field select:focus {
-    border-color: var(--accent);
-  }
-
+  .field input:focus, .field select:focus { border-color: var(--accent); }
   .field select option { background: var(--bg3); }
-
   .field input::placeholder { color: var(--text3); }
 
-  /* SECTION LABEL */
-  .section-label {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 16px;
-  }
+  .section-label { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
 
   .section-label .badge {
     padding: 4px 12px;
@@ -176,39 +138,13 @@
     letter-spacing: 0.5px;
   }
 
-  .badge-common {
-    background: rgba(74, 158, 255, 0.15);
-    color: var(--blue);
-    border: 1px solid rgba(74, 158, 255, 0.3);
-  }
+  .badge-common { background: rgba(74,158,255,0.15); color: var(--blue); border: 1px solid rgba(74,158,255,0.3); }
+  .badge-individual { background: rgba(200,169,110,0.15); color: var(--accent); border: 1px solid rgba(200,169,110,0.3); }
+  .section-title { font-size: 18px; font-weight: 700; color: var(--text); }
+  .section-desc { font-size: 13px; color: var(--text3); margin-left: auto; }
 
-  .badge-individual {
-    background: rgba(200, 169, 110, 0.15);
-    color: var(--accent);
-    border: 1px solid rgba(200, 169, 110, 0.3);
-  }
+  .upload-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px; }
 
-  .section-title {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--text);
-  }
-
-  .section-desc {
-    font-size: 13px;
-    color: var(--text3);
-    margin-left: auto;
-  }
-
-  /* UPLOAD GRID */
-  .upload-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    margin-bottom: 32px;
-  }
-
-  /* UPLOAD BOX */
   .upload-box {
     background: var(--bg2);
     border: 1px solid var(--border);
@@ -219,43 +155,13 @@
 
   .upload-box:hover { border-color: var(--border2); }
 
-  .upload-box-header {
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
+  .upload-box-header { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 4px; }
 
-  .upload-box-title {
-    font-size: 13px;
-    font-weight: 700;
-    color: #a07828;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    white-space: nowrap;
-  }
-
-  .upload-box-title .dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--border2);
-    flex-shrink: 0;
-  }
-
+  .upload-box-title { font-size: 13px; font-weight: 700; color: #a07828; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+  .upload-box-title .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border2); flex-shrink: 0; }
   .upload-box-title .dot.active { background: var(--green); }
 
-  .upload-folder {
-    font-size: 11px;
-    color: var(--text3);
-    font-family: monospace;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    padding-left: 14px;
-  }
+  .upload-folder { font-size: 11px; color: var(--text3); font-family: monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-left: 14px; }
 
   .upload-area {
     padding: 20px 16px;
@@ -269,305 +175,218 @@
     background: transparent;
   }
 
-  .upload-area:hover {
-    border-color: var(--accent);
-    background: rgba(200, 169, 110, 0.06);
-  }
+  .upload-area:hover { border-color: var(--accent); background: rgba(200,169,110,0.06); }
+  .upload-area.dragover { background: rgba(200,169,110,0.12); border-color: var(--accent); border-style: dashed; }
 
-  .upload-area.dragover {
-    background: rgba(200, 169, 110, 0.12);
-    border-color: var(--accent);
-    border-style: dashed;
-  }
+  .upload-area input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
 
-  .upload-area input[type="file"] {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    cursor: pointer;
-    width: 100%;
-    height: 100%;
-  }
+  .upload-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 120px; gap: 10px; pointer-events: none; }
 
-  .upload-placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    min-height: 120px;
-    gap: 10px;
-    pointer-events: none;
-  }
+  .upload-icon { font-size: 36px; line-height: 1; filter: grayscale(0.3); transition: transform 0.2s, filter 0.2s; }
+  .upload-area:hover .upload-icon { transform: scale(1.1); filter: grayscale(0); }
 
-  .upload-icon {
-    font-size: 36px;
-    line-height: 1;
-    filter: grayscale(0.3);
-    transition: transform 0.2s, filter 0.2s;
-  }
+  .upload-placeholder p { font-size: 13px; color: var(--text3); text-align: center; line-height: 1.5; }
+  .upload-placeholder p strong { color: var(--accent); font-weight: 700; }
 
-  .upload-area:hover .upload-icon {
-    transform: scale(1.1);
-    filter: grayscale(0);
-  }
+  .thumb-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 0 16px 16px; }
 
-  .upload-placeholder p {
-    font-size: 13px;
-    color: var(--text3);
-    text-align: center;
-    line-height: 1.5;
-  }
-
-  .upload-placeholder p strong {
-    color: var(--accent);
-    font-weight: 700;
-  }
-
-  /* THUMBNAILS */
-  .thumb-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
-    padding: 0 16px 16px;
-  }
-
-  .thumb-item {
-    position: relative;
-    aspect-ratio: 1;
-    border-radius: 6px;
-    overflow: hidden;
-    background: var(--bg3);
-  }
-
-  .thumb-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+  .thumb-item { position: relative; aspect-ratio: 1; border-radius: 6px; overflow: hidden; background: var(--bg3); }
+  .thumb-item img { width: 100%; height: 100%; object-fit: cover; }
 
   .thumb-item .remove-btn {
-    position: absolute;
-    top: 3px;
-    right: 3px;
-    width: 18px;
-    height: 18px;
-    background: rgba(0,0,0,0.8);
-    border: none;
-    border-radius: 50%;
-    color: #fff;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    opacity: 0;
-    transition: opacity 0.2s;
+    position: absolute; top: 3px; right: 3px; width: 18px; height: 18px;
+    background: rgba(0,0,0,0.8); border: none; border-radius: 50%; color: #fff;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-size: 10px; opacity: 0; transition: opacity 0.2s;
   }
 
   .thumb-item:hover .remove-btn { opacity: 1; }
 
-  .count-badge {
-    font-size: 11px;
-    color: var(--green);
-    font-weight: 700;
-    padding: 2px 8px;
-    background: rgba(46, 204, 113, 0.1);
-    border-radius: 10px;
-  }
+  .count-badge { font-size: 11px; color: var(--green); font-weight: 700; padding: 2px 8px; background: rgba(46,204,113,0.1); border-radius: 10px; }
 
-  /* INDIVIDUAL SECTION */
-  .individual-section {
-    margin-bottom: 32px;
-  }
+  .individual-section { margin-bottom: 32px; }
 
-  .store-tabs {
-    display: flex;
-    gap: 4px;
-    margin-bottom: 16px;
-    background: var(--bg2);
-    padding: 6px;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-  }
+  .store-tabs { display: flex; gap: 4px; margin-bottom: 16px; background: var(--bg2); padding: 6px; border-radius: var(--radius); border: 1px solid var(--border); }
 
   .store-tab {
-    flex: 1;
-    padding: 10px 8px;
-    background: transparent;
-    border: none;
-    border-radius: var(--radius-sm);
-    color: var(--text3);
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    font-family: 'Noto Sans KR', sans-serif;
-    transition: all 0.2s;
-    text-align: center;
-    position: relative;
+    flex: 1; padding: 10px 8px; background: transparent; border: none;
+    border-radius: var(--radius-sm); color: var(--text3); font-size: 13px;
+    font-weight: 500; cursor: pointer; font-family: 'Noto Sans KR', sans-serif;
+    transition: all 0.2s; text-align: center; position: relative;
   }
 
   .store-tab:hover { color: var(--text2); background: var(--bg3); }
-
-  .store-tab.active {
-    background: var(--accent);
-    color: #000;
-    font-weight: 700;
-  }
+  .store-tab.active { background: var(--accent); color: #000; font-weight: 700; }
 
   .store-tab .tab-count {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 16px;
-    height: 16px;
-    background: rgba(255,255,255,0.2);
-    border-radius: 50%;
-    font-size: 10px;
-    margin-left: 4px;
-    font-weight: 700;
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 16px; height: 16px; background: rgba(255,255,255,0.2);
+    border-radius: 50%; font-size: 10px; margin-left: 4px; font-weight: 700;
   }
 
   .store-tab.active .tab-count { background: rgba(255,255,255,0.3); }
 
-  .store-panel {
-    display: none;
-  }
+  .store-panel { display: none; }
+  .store-panel.active { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
-  .store-panel.active {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
-
-  /* PROGRESS */
-  .upload-progress {
-    display: none;
+  /* STEP 3: Options Section */
+  .options-section {
+    grid-column: 1 / -1;
     background: var(--bg2);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 20px 24px;
-    margin-bottom: 24px;
+    padding: 20px;
   }
 
-  .upload-progress.show { display: block; }
+  .options-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .options-title { font-size: 13px; font-weight: 700; color: var(--accent); letter-spacing: 0.5px; }
 
-  .progress-title {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .progress-bar-wrap {
-    background: var(--bg3);
-    border-radius: 4px;
-    height: 6px;
-    overflow: hidden;
-    margin-bottom: 8px;
-  }
-
-  .progress-bar {
-    height: 100%;
-    background: var(--accent);
-    border-radius: 4px;
-    width: 0%;
-    transition: width 0.3s;
-  }
-
-  .progress-log {
-    font-size: 12px;
-    color: var(--text3);
-    font-family: monospace;
-    max-height: 120px;
-    overflow-y: auto;
-    line-height: 1.8;
-  }
-
-  .progress-log .log-ok { color: var(--green); }
-  .progress-log .log-err { color: #FF5C5C; }
-  .progress-log .log-info { color: var(--blue); }
-
-  /* RESULT */
-  .result-panel {
-    display: none;
-    background: var(--bg2);
-    border: 1px solid rgba(46, 204, 113, 0.3);
-    border-radius: var(--radius);
-    padding: 20px 24px;
-    margin-bottom: 24px;
-  }
-
-  .result-panel.show { display: block; }
-
-  .result-title {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--green);
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .result-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 8px;
-  }
-
-  .result-item {
-    background: var(--bg3);
-    border-radius: var(--radius-sm);
-    padding: 10px 12px;
-    font-size: 12px;
-  }
-
-  .result-item .ri-folder { color: var(--text3); margin-bottom: 4px; font-family: monospace; font-size: 11px; word-break: break-all; }
-  .result-item .ri-count { color: var(--green); font-weight: 700; }
-
-  /* DIVIDER */
-  .divider {
-    height: 1px;
-    background: var(--border);
-    margin: 8px 0 24px;
-  }
-
-  /* SPINNER */
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .spinner {
-    width: 14px;
-    height: 14px;
-    border: 2px solid rgba(255,255,255,0.2);
-    border-top-color: #fff;
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    display: inline-block;
-  }
-
-  /* RESET BTN */
-  .btn-reset {
+  .btn-add-option {
     background: transparent;
-    border: 1px solid var(--border2);
-    color: var(--text2);
-    padding: 10px 18px;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 6px 14px;
     border-radius: var(--radius-sm);
-    font-size: 13px;
+    font-size: 12px;
+    font-weight: 700;
     cursor: pointer;
     font-family: 'Noto Sans KR', sans-serif;
     transition: all 0.2s;
   }
+
+  .btn-add-option:hover { background: rgba(200,169,110,0.1); }
+
+  .option-rows { display: flex; flex-direction: column; gap: 8px; }
+
+  .option-row { display: flex; gap: 8px; align-items: center; }
+
+  .option-row input {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: 'Noto Sans KR', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+    flex: 1;
+  }
+
+  .option-row input:focus { border-color: var(--accent); }
+  .option-row input::placeholder { color: var(--text3); }
+  .option-row input.option-name { max-width: 180px; }
+
+  .btn-del-option {
+    width: 30px; height: 30px; background: transparent;
+    border: 1px solid rgba(255,90,90,0.3); border-radius: var(--radius-sm);
+    color: #ff5c5c; cursor: pointer; display: flex; align-items: center;
+    justify-content: center; font-size: 14px; flex-shrink: 0; transition: all 0.2s;
+  }
+
+  .btn-del-option:hover { background: rgba(255,90,90,0.1); border-color: rgba(255,90,90,0.6); }
+
+  .options-empty { font-size: 13px; color: var(--text3); text-align: center; padding: 16px 0; }
+
+  /* STEP 4: 상세정보제공고시 */
+  .notice-section {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+
+  .notice-section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+  .notice-section-title { font-size: 16px; font-weight: 700; color: var(--text); }
+  .notice-category-row { display: flex; align-items: flex-end; gap: 16px; margin-bottom: 20px; }
+
+  .notice-dynamic-fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+  .notice-dynamic-fields .field input { font-size: 14px; padding: 10px 14px; }
+
+  /* Per-store manufacturer/phone */
+  .store-info-section {
+    grid-column: 1 / -1;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+
+  .store-info-title { font-size: 13px; font-weight: 700; color: var(--accent); letter-spacing: 0.5px; margin-bottom: 16px; }
+
+  .store-info-fields { display: flex; gap: 16px; flex-wrap: wrap; }
+  .store-info-fields .field { flex: 1; min-width: 180px; }
+  .store-info-fields .field input { font-size: 14px; padding: 10px 14px; }
+
+  /* Progress */
+  .upload-progress { display: none; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; margin-bottom: 24px; }
+  .upload-progress.show { display: block; }
+
+  .progress-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .progress-bar-wrap { background: var(--bg3); border-radius: 4px; height: 6px; overflow: hidden; margin-bottom: 8px; }
+  .progress-bar { height: 100%; background: var(--accent); border-radius: 4px; width: 0%; transition: width 0.3s; }
+
+  .progress-log { font-size: 12px; color: var(--text3); font-family: monospace; max-height: 120px; overflow-y: auto; line-height: 1.8; }
+  .progress-log .log-ok { color: var(--green); }
+  .progress-log .log-err { color: #FF5C5C; }
+  .progress-log .log-info { color: var(--blue); }
+
+  .result-panel { display: none; background: var(--bg2); border: 1px solid rgba(46,204,113,0.3); border-radius: var(--radius); padding: 20px 24px; margin-bottom: 24px; }
+  .result-panel.show { display: block; }
+
+  .result-title { font-size: 15px; font-weight: 700; color: var(--green); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .result-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+  .result-item { background: var(--bg3); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 12px; }
+  .result-item .ri-folder { color: var(--text3); margin-bottom: 4px; font-family: monospace; font-size: 11px; word-break: break-all; }
+  .result-item .ri-count { color: var(--green); font-weight: 700; }
+
+  .divider { height: 1px; background: var(--border); margin: 8px 0 24px; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.2); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
+
+  .btn-reset { background: transparent; border: 1px solid var(--border2); color: var(--text2); padding: 10px 18px; border-radius: var(--radius-sm); font-size: 13px; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; transition: all 0.2s; }
   .btn-reset:hover { border-color: var(--text2); color: var(--text); }
 
-  /* RESPONSIVE */
+  /* STEP 5: Toast */
+  .toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 14px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    z-index: 9999;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    min-width: 280px;
+    max-width: 480px;
+    text-align: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  .toast.toast-success { border-color: rgba(46,204,113,0.5); color: var(--green); }
+  .toast.toast-error { border-color: rgba(255,90,90,0.5); color: #ff5c5c; }
+
   @media (max-width: 768px) {
     .upload-grid { grid-template-columns: 1fr; }
     .store-panel.active { grid-template-columns: 1fr; }
     .product-info { flex-direction: column; }
     .main { padding: 20px 16px 60px; }
+    .notice-dynamic-fields { grid-template-columns: 1fr; }
+    .options-section, .store-info-section { grid-column: 1; }
   }
 </style>
 </head>
@@ -634,6 +453,32 @@
     </div>
   </div>
 
+  <!-- STEP 4: 상세정보제공고시 -->
+  <div class="notice-section">
+    <div class="notice-section-header">
+      <div class="badge badge-individual">고시</div>
+      <div class="notice-section-title">상세정보제공고시</div>
+    </div>
+    <div class="notice-category-row">
+      <div class="field" style="max-width: 220px;">
+        <label>품목 선택</label>
+        <select id="noticeCategory" onchange="onNoticeCategoryChange()">
+          <option value="">-- 품목 선택 --</option>
+          <option value="food">식품</option>
+          <option value="clothing">의류</option>
+          <option value="electronics">전자제품</option>
+          <option value="daily">생활용품</option>
+          <option value="furniture">가구/인테리어</option>
+          <option value="cosmetics">화장품</option>
+          <option value="sports">스포츠/레저</option>
+        </select>
+      </div>
+    </div>
+    <div class="notice-dynamic-fields" id="noticeDynamicFields">
+      <div style="font-size: 13px; color: var(--text3); padding: 8px 0;">품목을 선택하면 필수 입력 항목이 표시됩니다.</div>
+    </div>
+  </div>
+
   <!-- 진행상태 -->
   <div class="upload-progress" id="progressPanel">
     <div class="progress-title">
@@ -660,13 +505,9 @@
   </div>
 
   <div class="upload-grid" id="commonGrid">
-    <!-- 상세페이지 -->
     <div class="upload-box" id="box-common-detail">
       <div class="upload-box-header">
-        <div class="upload-box-title">
-          <span class="dot" id="dot-common-detail"></span>
-          상세페이지
-        </div>
+        <div class="upload-box-title"><span class="dot" id="dot-common-detail"></span>상세페이지</div>
         <span class="upload-folder" id="folder-common-detail">공통/상품명_상세페이지/</span>
       </div>
       <div class="upload-area" id="area-common-detail" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,'common-detail')">
@@ -680,13 +521,9 @@
       <div class="thumb-grid" id="thumbs-common-detail"></div>
     </div>
 
-    <!-- 안내/주의사항 -->
     <div class="upload-box" id="box-common-notice">
       <div class="upload-box-header">
-        <div class="upload-box-title">
-          <span class="dot" id="dot-common-notice"></span>
-          안내 / 주의사항
-        </div>
+        <div class="upload-box-title"><span class="dot" id="dot-common-notice"></span>안내 / 주의사항</div>
         <span class="upload-folder" id="folder-common-notice">공통/상품명_안내주의사항/</span>
       </div>
       <div class="upload-area" id="area-common-notice" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,'common-notice')">
@@ -700,13 +537,9 @@
       <div class="thumb-grid" id="thumbs-common-notice"></div>
     </div>
 
-    <!-- 메인 추가이미지 -->
     <div class="upload-box" id="box-common-extra">
       <div class="upload-box-header">
-        <div class="upload-box-title">
-          <span class="dot" id="dot-common-extra"></span>
-          메인 추가이미지
-        </div>
+        <div class="upload-box-title"><span class="dot" id="dot-common-extra"></span>메인 추가이미지</div>
         <span class="upload-folder" id="folder-common-extra">공통/상품명_메인추가이미지/</span>
       </div>
       <div class="upload-area" id="area-common-extra" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,'common-extra')">
@@ -732,55 +565,51 @@
     </div>
 
     <div class="store-tabs">
-      <button class="store-tab active" onclick="switchTab('soul')" id="tab-soul">
-        소울스토어 <span class="tab-count" id="tc-soul">0</span>
-      </button>
-      <button class="store-tab" onclick="switchTab('j1')" id="tab-j1">
-        제이원투몰 <span class="tab-count" id="tc-j1">0</span>
-      </button>
-      <button class="store-tab" onclick="switchTab('happy')" id="tab-happy">
-        행복산업 <span class="tab-count" id="tc-happy">0</span>
-      </button>
-      <button class="store-tab" onclick="switchTab('tae')" id="tab-tae">
-        태실장픽앤샵 <span class="tab-count" id="tc-tae">0</span>
-      </button>
+      <button class="store-tab active" onclick="switchTab('soul')" id="tab-soul">소울스토어 <span class="tab-count" id="tc-soul">0</span></button>
+      <button class="store-tab" onclick="switchTab('j1')" id="tab-j1">제이원투몰 <span class="tab-count" id="tc-j1">0</span></button>
+      <button class="store-tab" onclick="switchTab('happy')" id="tab-happy">행복산업 <span class="tab-count" id="tc-happy">0</span></button>
+      <button class="store-tab" onclick="switchTab('tae')" id="tab-tae">태실장픽앤샵 <span class="tab-count" id="tc-tae">0</span></button>
     </div>
 
     <!-- 소울스토어 -->
     <div class="store-panel active" id="panel-soul">
       <div class="upload-box">
         <div class="upload-box-header">
-          <div class="upload-box-title">
-            <span class="dot" id="dot-soul-main"></span>
-            대표 메인이미지
-          </div>
+          <div class="upload-box-title"><span class="dot" id="dot-soul-main"></span>대표 메인이미지</div>
           <span class="upload-folder" id="folder-soul-main">소울스토어/상품명_대표메인이미지/</span>
         </div>
         <div class="upload-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,'soul-main')">
           <input type="file" accept="image/*" multiple onchange="handleFiles(event,'soul-main')" />
-          <div class="upload-placeholder" id="ph-soul-main">
-            <div class="upload-icon">📦</div>
-            <p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택</p>
-          </div>
+          <div class="upload-placeholder" id="ph-soul-main"><div class="upload-icon">📦</div><p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택</p></div>
         </div>
         <div class="thumb-grid" id="thumbs-soul-main"></div>
       </div>
       <div class="upload-box">
         <div class="upload-box-header">
-          <div class="upload-box-title">
-            <span class="dot" id="dot-soul-spec"></span>
-            상세정보제공고시
-          </div>
+          <div class="upload-box-title"><span class="dot" id="dot-soul-spec"></span>상세정보제공고시</div>
           <span class="upload-folder" id="folder-soul-spec">소울스토어/상품명_상세정보제공고시/</span>
         </div>
         <div class="upload-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,'soul-spec')">
           <input type="file" accept="image/*" multiple onchange="handleFiles(event,'soul-spec')" />
-          <div class="upload-placeholder" id="ph-soul-spec">
-            <div class="upload-icon">📦</div>
-            <p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택</p>
-          </div>
+          <div class="upload-placeholder" id="ph-soul-spec"><div class="upload-icon">📦</div><p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택</p></div>
         </div>
         <div class="thumb-grid" id="thumbs-soul-spec"></div>
+      </div>
+      <div class="options-section">
+        <div class="options-header">
+          <div class="options-title">상품 옵션</div>
+          <button class="btn-add-option" onclick="addOptionRow('soul')">+ 옵션 추가</button>
+        </div>
+        <div class="option-rows" id="option-rows-soul">
+          <div class="options-empty" id="option-empty-soul">옵션이 없습니다. "옵션 추가" 버튼을 클릭하세요.</div>
+        </div>
+      </div>
+      <div class="store-info-section">
+        <div class="store-info-title">제조/공급 정보</div>
+        <div class="store-info-fields">
+          <div class="field"><label>제조사</label><input type="text" id="soul-manufacturer" placeholder="예: (주)행복식품" /></div>
+          <div class="field"><label>전화번호</label><input type="tel" id="soul-phone" placeholder="예: 02-1234-5678" /></div>
+        </div>
       </div>
     </div>
 
@@ -788,37 +617,41 @@
     <div class="store-panel" id="panel-j1">
       <div class="upload-box">
         <div class="upload-box-header">
-          <div class="upload-box-title">
-            <span class="dot" id="dot-j1-main"></span>
-            대표 메인이미지
-          </div>
+          <div class="upload-box-title"><span class="dot" id="dot-j1-main"></span>대표 메인이미지</div>
           <span class="upload-folder" id="folder-j1-main">제이원투몰/상품명_대표메인이미지/</span>
         </div>
         <div class="upload-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,'j1-main')">
           <input type="file" accept="image/*" multiple onchange="handleFiles(event,'j1-main')" />
-          <div class="upload-placeholder" id="ph-j1-main">
-            <div class="upload-icon">📦</div>
-            <p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택</p>
-          </div>
+          <div class="upload-placeholder" id="ph-j1-main"><div class="upload-icon">📦</div><p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택</p></div>
         </div>
         <div class="thumb-grid" id="thumbs-j1-main"></div>
       </div>
       <div class="upload-box">
         <div class="upload-box-header">
-          <div class="upload-box-title">
-            <span class="dot" id="dot-j1-spec"></span>
-            상세정보제공고시
-          </div>
+          <div class="upload-box-title"><span class="dot" id="dot-j1-spec"></span>상세정보제공고시</div>
           <span class="upload-folder" id="folder-j1-spec">제이원투몰/상품명_상세정보제공고시/</span>
         </div>
         <div class="upload-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,'j1-spec')">
           <input type="file" accept="image/*" multiple onchange="handleFiles(event,'j1-spec')" />
-          <div class="upload-placeholder" id="ph-j1-spec">
-            <div class="upload-icon">📦</div>
-            <p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택</p>
-          </div>
+          <div class="upload-placeholder" id="ph-j1-spec"><div class="upload-icon">📦</div><p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택</p></div>
         </div>
         <div class="thumb-grid" id="thumbs-j1-spec"></div>
+      </div>
+      <div class="options-section">
+        <div class="options-header">
+          <div class="options-title">상품 옵션</div>
+          <button class="btn-add-option" onclick="addOptionRow('j1')">+ 옵션 추가</button>
+        </div>
+        <div class="option-rows" id="option-rows-j1">
+          <div class="options-empty" id="option-empty-j1">옵션이 없습니다. "옵션 추가" 버튼을 클릭하세요.</div>
+        </div>
+      </div>
+      <div class="store-info-section">
+        <div class="store-info-title">제조/공급 정보</div>
+        <div class="store-info-fields">
+          <div class="field"><label>제조사</label><input type="text" id="j1-manufacturer" placeholder="예: (주)행복식품" /></div>
+          <div class="field"><label>전화번호</label><input type="tel" id="j1-phone" placeholder="예: 02-1234-5678" /></div>
+        </div>
       </div>
     </div>
 
@@ -826,37 +659,41 @@
     <div class="store-panel" id="panel-happy">
       <div class="upload-box">
         <div class="upload-box-header">
-          <div class="upload-box-title">
-            <span class="dot" id="dot-happy-main"></span>
-            대표 메인이미지
-          </div>
+          <div class="upload-box-title"><span class="dot" id="dot-happy-main"></span>대표 메인이미지</div>
           <span class="upload-folder" id="folder-happy-main">행복산업/상품명_대표메인이미지/</span>
         </div>
         <div class="upload-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,'happy-main')">
           <input type="file" accept="image/*" multiple onchange="handleFiles(event,'happy-main')" />
-          <div class="upload-placeholder" id="ph-happy-main">
-            <div class="upload-icon">📦</div>
-            <p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택</p>
-          </div>
+          <div class="upload-placeholder" id="ph-happy-main"><div class="upload-icon">📦</div><p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택</p></div>
         </div>
         <div class="thumb-grid" id="thumbs-happy-main"></div>
       </div>
       <div class="upload-box">
         <div class="upload-box-header">
-          <div class="upload-box-title">
-            <span class="dot" id="dot-happy-spec"></span>
-            상세정보제공고시
-          </div>
+          <div class="upload-box-title"><span class="dot" id="dot-happy-spec"></span>상세정보제공고시</div>
           <span class="upload-folder" id="folder-happy-spec">행복산업/상품명_상세정보제공고시/</span>
         </div>
         <div class="upload-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,'happy-spec')">
           <input type="file" accept="image/*" multiple onchange="handleFiles(event,'happy-spec')" />
-          <div class="upload-placeholder" id="ph-happy-spec">
-            <div class="upload-icon">📦</div>
-            <p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택</p>
-          </div>
+          <div class="upload-placeholder" id="ph-happy-spec"><div class="upload-icon">📦</div><p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택</p></div>
         </div>
         <div class="thumb-grid" id="thumbs-happy-spec"></div>
+      </div>
+      <div class="options-section">
+        <div class="options-header">
+          <div class="options-title">상품 옵션</div>
+          <button class="btn-add-option" onclick="addOptionRow('happy')">+ 옵션 추가</button>
+        </div>
+        <div class="option-rows" id="option-rows-happy">
+          <div class="options-empty" id="option-empty-happy">옵션이 없습니다. "옵션 추가" 버튼을 클릭하세요.</div>
+        </div>
+      </div>
+      <div class="store-info-section">
+        <div class="store-info-title">제조/공급 정보</div>
+        <div class="store-info-fields">
+          <div class="field"><label>제조사</label><input type="text" id="happy-manufacturer" placeholder="예: (주)행복식품" /></div>
+          <div class="field"><label>전화번호</label><input type="tel" id="happy-phone" placeholder="예: 02-1234-5678" /></div>
+        </div>
       </div>
     </div>
 
@@ -864,45 +701,53 @@
     <div class="store-panel" id="panel-tae">
       <div class="upload-box">
         <div class="upload-box-header">
-          <div class="upload-box-title">
-            <span class="dot" id="dot-tae-main"></span>
-            대표 메인이미지
-          </div>
+          <div class="upload-box-title"><span class="dot" id="dot-tae-main"></span>대표 메인이미지</div>
           <span class="upload-folder" id="folder-tae-main">태실장픽앤샵/상품명_대표메인이미지/</span>
         </div>
         <div class="upload-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,'tae-main')">
           <input type="file" accept="image/*" multiple onchange="handleFiles(event,'tae-main')" />
-          <div class="upload-placeholder" id="ph-tae-main">
-            <div class="upload-icon">📦</div>
-            <p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택</p>
-          </div>
+          <div class="upload-placeholder" id="ph-tae-main"><div class="upload-icon">📦</div><p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택</p></div>
         </div>
         <div class="thumb-grid" id="thumbs-tae-main"></div>
       </div>
       <div class="upload-box">
         <div class="upload-box-header">
-          <div class="upload-box-title">
-            <span class="dot" id="dot-tae-spec"></span>
-            상세정보제공고시
-          </div>
+          <div class="upload-box-title"><span class="dot" id="dot-tae-spec"></span>상세정보제공고시</div>
           <span class="upload-folder" id="folder-tae-spec">태실장픽앤샵/상품명_상세정보제공고시/</span>
         </div>
         <div class="upload-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,'tae-spec')">
           <input type="file" accept="image/*" multiple onchange="handleFiles(event,'tae-spec')" />
-          <div class="upload-placeholder" id="ph-tae-spec">
-            <div class="upload-icon">📦</div>
-            <p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택</p>
-          </div>
+          <div class="upload-placeholder" id="ph-tae-spec"><div class="upload-icon">📦</div><p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택</p></div>
         </div>
         <div class="thumb-grid" id="thumbs-tae-spec"></div>
+      </div>
+      <div class="options-section">
+        <div class="options-header">
+          <div class="options-title">상품 옵션</div>
+          <button class="btn-add-option" onclick="addOptionRow('tae')">+ 옵션 추가</button>
+        </div>
+        <div class="option-rows" id="option-rows-tae">
+          <div class="options-empty" id="option-empty-tae">옵션이 없습니다. "옵션 추가" 버튼을 클릭하세요.</div>
+        </div>
+      </div>
+      <div class="store-info-section">
+        <div class="store-info-title">제조/공급 정보</div>
+        <div class="store-info-fields">
+          <div class="field"><label>제조사</label><input type="text" id="tae-manufacturer" placeholder="예: (주)행복식품" /></div>
+          <div class="field"><label>전화번호</label><input type="tel" id="tae-phone" placeholder="예: 02-1234-5678" /></div>
+        </div>
       </div>
     </div>
 
   </div>
 </div>
 
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
 <script>
 const R2_WORKER = 'https://r2-uploader.joo11s11.workers.dev';
+const N8N_WEBHOOK = 'https://n8n.wonflowai.com/webhook/product-upload';
 
 const SLOTS = {
   'common-detail':  { folder: '공통', sub: '상세페이지' },
@@ -928,6 +773,141 @@ const TAB_SLOTS = {
 const files = {};
 Object.keys(SLOTS).forEach(k => files[k] = []);
 
+const uploadedUrls = {};
+Object.keys(SLOTS).forEach(k => uploadedUrls[k] = []);
+
+// STEP 3: Options
+const storeOptions = { soul: [], j1: [], happy: [], tae: [] };
+let optionCounter = 0;
+
+// STEP 4: 상세정보제공고시 필드 정의
+const NOTICE_FIELDS = {
+  food: [
+    { id: 'food_type', label: '식품의 유형', placeholder: '예: 건포류, 김치류' },
+    { id: 'manufacture_date', label: '제조연월일', placeholder: '예: 2025-01-01' },
+    { id: 'expiry_date', label: '유통기한', placeholder: '예: 제조일로부터 1년' },
+    { id: 'weight', label: '용량(중량)', placeholder: '예: 1kg' },
+    { id: 'ingredients', label: '원재료명 및 함량', placeholder: '예: 고등어 100%' },
+    { id: 'nutrition', label: '영양성분', placeholder: '예: 열량 200kcal' },
+    { id: 'origin', label: '원산지', placeholder: '예: 노르웨이산' },
+    { id: 'storage_method', label: '보관방법', placeholder: '예: 냉동보관' },
+  ],
+  clothing: [
+    { id: 'material', label: '소재', placeholder: '예: 면 100%' },
+    { id: 'color', label: '색상', placeholder: '예: 화이트, 블랙, 네이비' },
+    { id: 'size_info', label: '치수', placeholder: '예: S/M/L/XL' },
+    { id: 'wash_method', label: '세탁방법 및 취급시 주의사항', placeholder: '예: 손세탁 권장' },
+    { id: 'manufacture_country', label: '제조국', placeholder: '예: 대한민국' },
+    { id: 'quality_standard', label: '품질보증기준', placeholder: '예: 제조사 기준' },
+  ],
+  electronics: [
+    { id: 'model_name', label: '품명 및 모델명', placeholder: '예: 무선 이어폰 M100' },
+    { id: 'cert_info', label: '법에 의한 인증 취득사항', placeholder: '예: KC인증 번호' },
+    { id: 'manufacture_country', label: '제조국 / 수입자', placeholder: '예: 중국 / (주)행복전자' },
+    { id: 'energy_rating', label: '소비전력 / 에너지소비효율등급', placeholder: '예: 5W / 1등급' },
+    { id: 'as_contact', label: 'A/S 연락처', placeholder: '예: 02-1234-5678' },
+    { id: 'warranty', label: '품질보증기준', placeholder: '예: 구입일로부터 1년' },
+  ],
+  daily: [
+    { id: 'model_name', label: '품명 및 모델명', placeholder: '예: 스테인리스 텀블러 500ml' },
+    { id: 'material', label: '재질', placeholder: '예: 스테인리스 스틸 304' },
+    { id: 'size_info', label: '크기', placeholder: '예: 높이 20cm, 직경 8cm' },
+    { id: 'manufacture_country', label: '제조국 / 수입자', placeholder: '예: 대한민국' },
+    { id: 'quality_standard', label: '품질보증기준', placeholder: '예: 구입일로부터 6개월' },
+  ],
+  furniture: [
+    { id: 'material', label: '소재', placeholder: '예: 원목 (참나무)' },
+    { id: 'components', label: '구성품', placeholder: '예: 상판 1, 다리 4, 볼트 세트' },
+    { id: 'size_info', label: '크기', placeholder: '예: 가로 120 x 세로 60 x 높이 75cm' },
+    { id: 'assembly', label: '조립방법', placeholder: '예: 동봉된 설명서 참조' },
+    { id: 'as_contact', label: 'A/S 정보', placeholder: '예: 02-1234-5678 / 구입 후 1년' },
+    { id: 'manufacture_country', label: '제조국', placeholder: '예: 대한민국' },
+  ],
+  cosmetics: [
+    { id: 'volume', label: '용량 또는 중량', placeholder: '예: 50ml' },
+    { id: 'ingredients', label: '주요 성분', placeholder: '예: 히알루론산, 나이아신아마이드' },
+    { id: 'usage_method', label: '사용방법', placeholder: '예: 세안 후 적당량 얼굴에 펴 바름' },
+    { id: 'expiry_date', label: '제조연월일 / 유통기한', placeholder: '예: 별도 표기 / 3년' },
+    { id: 'usage_caution', label: '사용시 주의사항', placeholder: '예: 눈에 들어갔을 경우 즉시 세척' },
+    { id: 'manufacture_country', label: '제조사 / 수입자', placeholder: '예: (주)행복코스메틱' },
+  ],
+  sports: [
+    { id: 'model_name', label: '품명 및 모델명', placeholder: '예: 러닝화 SR-100' },
+    { id: 'material', label: '소재', placeholder: '예: 메쉬 + EVA 폼' },
+    { id: 'size_info', label: '치수 / 크기', placeholder: '예: 230~280mm' },
+    { id: 'color', label: '색상', placeholder: '예: 블랙, 화이트' },
+    { id: 'manufacture_country', label: '제조국', placeholder: '예: 베트남' },
+    { id: 'quality_standard', label: '품질보증기준', placeholder: '예: 구입일로부터 6개월' },
+  ],
+};
+
+function onNoticeCategoryChange() {
+  const cat = document.getElementById('noticeCategory').value;
+  const container = document.getElementById('noticeDynamicFields');
+  if (!cat || !NOTICE_FIELDS[cat]) {
+    container.innerHTML = '<div style="font-size: 13px; color: var(--text3); padding: 8px 0;">품목을 선택하면 필수 입력 항목이 표시됩니다.</div>';
+    return;
+  }
+  container.innerHTML = NOTICE_FIELDS[cat].map(f => `
+    <div class="field">
+      <label>${f.label}</label>
+      <input type="text" id="notice_${f.id}" placeholder="${f.placeholder}" />
+    </div>
+  `).join('');
+}
+
+function getNoticeData() {
+  const cat = document.getElementById('noticeCategory').value;
+  if (!cat || !NOTICE_FIELDS[cat]) return {};
+  const result = { category: cat };
+  NOTICE_FIELDS[cat].forEach(f => {
+    const el = document.getElementById('notice_' + f.id);
+    if (el) result[f.id] = el.value.trim();
+  });
+  return result;
+}
+
+// STEP 3: Option row management
+function addOptionRow(store) {
+  const id = ++optionCounter;
+  const empty = document.getElementById('option-empty-' + store);
+  if (empty) empty.style.display = 'none';
+  storeOptions[store].push({ id, name: '', value: '' });
+  const container = document.getElementById('option-rows-' + store);
+  const row = document.createElement('div');
+  row.className = 'option-row';
+  row.id = 'option-row-' + id;
+  row.innerHTML = `
+    <input type="text" class="option-name" placeholder="옵션명 (예: 색상)"
+      oninput="updateOption('${store}',${id},'name',this.value)" />
+    <input type="text" placeholder="옵션값 (예: 빨강, 파랑, 흰색)"
+      oninput="updateOption('${store}',${id},'value',this.value)" />
+    <button class="btn-del-option" onclick="removeOptionRow('${store}',${id})" title="삭제">✕</button>
+  `;
+  container.appendChild(row);
+}
+
+function updateOption(store, id, field, val) {
+  const opt = storeOptions[store].find(o => o.id === id);
+  if (opt) opt[field] = val;
+}
+
+function removeOptionRow(store, id) {
+  storeOptions[store] = storeOptions[store].filter(o => o.id !== id);
+  const row = document.getElementById('option-row-' + id);
+  if (row) row.remove();
+  if (storeOptions[store].length === 0) {
+    const empty = document.getElementById('option-empty-' + store);
+    if (empty) empty.style.display = '';
+  }
+}
+
+function getStoreOptions(store) {
+  return storeOptions[store]
+    .filter(o => o.name.trim())
+    .map(o => ({ name: o.name.trim(), value: o.value.trim() }));
+}
+
 function getProductName() {
   return document.getElementById('productName').value.trim() || '상품명';
 }
@@ -943,18 +923,10 @@ document.getElementById('productName').addEventListener('input', () => {
   Object.keys(SLOTS).forEach(updateFolderLabel);
 });
 
-function handleFiles(e, slot) {
-  addFiles(slot, Array.from(e.target.files));
-}
+function handleFiles(e, slot) { addFiles(slot, Array.from(e.target.files)); }
 
-function handleDragOver(e) {
-  e.preventDefault();
-  e.currentTarget.classList.add('dragover');
-}
-
-function handleDragLeave(e) {
-  e.currentTarget.classList.remove('dragover');
-}
+function handleDragOver(e) { e.preventDefault(); e.currentTarget.classList.add('dragover'); }
+function handleDragLeave(e) { e.currentTarget.classList.remove('dragover'); }
 
 function handleDrop(e, slot) {
   e.preventDefault();
@@ -980,17 +952,10 @@ function renderThumbs(slot) {
   const container = document.getElementById('thumbs-' + slot);
   const ph = document.getElementById('ph-' + slot);
   if (!container) return;
-
   const list = files[slot];
   container.innerHTML = '';
-
-  if (list.length === 0) {
-    if (ph) ph.style.display = 'flex';
-    return;
-  }
-
+  if (list.length === 0) { if (ph) ph.style.display = 'flex'; return; }
   if (ph) ph.style.display = 'none';
-
   list.forEach((file, idx) => {
     const url = URL.createObjectURL(file);
     const div = document.createElement('div');
@@ -998,9 +963,6 @@ function renderThumbs(slot) {
     div.innerHTML = `<img src="${url}" /><button class="remove-btn" onclick="removeFile('${slot}',${idx})">✕</button>`;
     container.appendChild(div);
   });
-
-  const countEl = document.querySelector(`#box-${slot} .count-badge`);
-  // add count badge to header
   const header = document.querySelector(`#box-${slot} .upload-box-header .upload-box-title`);
   if (header && !header.querySelector('.count-badge')) {
     const badge = document.createElement('span');
@@ -1046,6 +1008,16 @@ function setProgress(pct) {
   document.getElementById('progressBar').style.width = pct + '%';
 }
 
+// STEP 5: Toast
+let toastTimer = null;
+function showToast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (type ? ' toast-' + type : '');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.classList.remove('show'); }, 3500);
+}
+
 async function uploadFile(file, r2Key) {
   const form = new FormData();
   form.append('file', file);
@@ -1054,6 +1026,53 @@ async function uploadFile(file, r2Key) {
   if (!res.ok) throw new Error('HTTP ' + res.status);
   const data = await res.json();
   return data.url || data.key || r2Key;
+}
+
+// STEP 5: Send n8n webhook
+async function sendWebhook() {
+  const catSelect = document.getElementById('category');
+  const payload = {
+    product: {
+      name: document.getElementById('productName').value.trim(),
+      salePrice: Number(document.getElementById('salePrice').value) || 0,
+      supplyPrice: Number(document.getElementById('supplyPrice').value) || 0,
+      stock: Number(document.getElementById('stock').value) || 0,
+      displayStatus: document.getElementById('displayStatus').value,
+      saleStatus: document.getElementById('saleStatus').value,
+      categoryNo: catSelect.value,
+      categoryText: catSelect.options[catSelect.selectedIndex] ? catSelect.options[catSelect.selectedIndex].text : '',
+    },
+    noticeInfo: getNoticeData(),
+    stores: {
+      soul:  { manufacturer: document.getElementById('soul-manufacturer').value.trim(),  phone: document.getElementById('soul-phone').value.trim(),  options: getStoreOptions('soul'),  images: { main: uploadedUrls['soul-main'],  spec: uploadedUrls['soul-spec']  } },
+      j1:    { manufacturer: document.getElementById('j1-manufacturer').value.trim(),    phone: document.getElementById('j1-phone').value.trim(),    options: getStoreOptions('j1'),    images: { main: uploadedUrls['j1-main'],    spec: uploadedUrls['j1-spec']    } },
+      happy: { manufacturer: document.getElementById('happy-manufacturer').value.trim(), phone: document.getElementById('happy-phone').value.trim(), options: getStoreOptions('happy'), images: { main: uploadedUrls['happy-main'], spec: uploadedUrls['happy-spec'] } },
+      tae:   { manufacturer: document.getElementById('tae-manufacturer').value.trim(),   phone: document.getElementById('tae-phone').value.trim(),   options: getStoreOptions('tae'),   images: { main: uploadedUrls['tae-main'],   spec: uploadedUrls['tae-spec']   } },
+    },
+    commonImages: {
+      detail: uploadedUrls['common-detail'],
+      notice: uploadedUrls['common-notice'],
+      extra:  uploadedUrls['common-extra'],
+    },
+  };
+
+  try {
+    logMsg('→ n8n 웹훅 전송 중...', 'info');
+    const res = await fetch(N8N_WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (res.ok) {
+      logMsg('✓ n8n 웹훅 전송 성공', 'ok');
+      showToast('✓ 업로드 완료! n8n에 성공적으로 전송됐습니다.', 'success');
+    } else {
+      throw new Error('HTTP ' + res.status);
+    }
+  } catch (e) {
+    logMsg('✗ n8n 웹훅 전송 실패: ' + e.message, 'err');
+    showToast('⚠ 이미지 업로드는 완료됐으나 n8n 전송에 실패했습니다.', 'error');
+  }
 }
 
 async function startUpload() {
@@ -1090,6 +1109,8 @@ async function startUpload() {
   document.getElementById('progressLog').innerHTML = '';
   setProgress(0);
 
+  Object.keys(SLOTS).forEach(k => uploadedUrls[k] = []);
+
   const results = {};
   let done = 0;
 
@@ -1097,6 +1118,7 @@ async function startUpload() {
     try {
       logMsg(`↑ ${task.folder}${task.file.name}`, 'info');
       const url = await uploadFile(task.file, task.r2Key);
+      uploadedUrls[task.slot].push(url);
       if (!results[task.folder]) results[task.folder] = [];
       results[task.folder].push(url);
       logMsg(`✓ 완료`, 'ok');
@@ -1122,12 +1144,15 @@ async function startUpload() {
 
   btn.disabled = false;
   btn.innerHTML = '🚀 업로드';
+
+  await sendWebhook();
 }
 
 function resetAll() {
   if (!confirm('모든 이미지를 초기화할까요?')) return;
   Object.keys(SLOTS).forEach(slot => {
     files[slot] = [];
+    uploadedUrls[slot] = [];
     renderThumbs(slot);
     updateDot(slot);
   });
@@ -1138,6 +1163,20 @@ function resetAll() {
   document.getElementById('stock').value = '';
   document.getElementById('displayStatus').value = 'T';
   document.getElementById('saleStatus').value = 'T';
+
+  ['soul','j1','happy','tae'].forEach(store => {
+    storeOptions[store] = [];
+    const container = document.getElementById('option-rows-' + store);
+    if (container) container.innerHTML = `<div class="options-empty" id="option-empty-${store}">옵션이 없습니다. "옵션 추가" 버튼을 클릭하세요.</div>`;
+    const mf = document.getElementById(store + '-manufacturer');
+    const ph = document.getElementById(store + '-phone');
+    if (mf) mf.value = '';
+    if (ph) ph.value = '';
+  });
+
+  document.getElementById('noticeCategory').value = '';
+  onNoticeCategoryChange();
+
   updateCategorySelect(currentTab);
   document.getElementById('progressPanel').classList.remove('show');
   document.getElementById('resultPanel').classList.remove('show');
@@ -1146,7 +1185,7 @@ function resetAll() {
 
 Object.keys(SLOTS).forEach(updateFolderLabel);
 
-// --- 카테고리 동적 로딩 ---
+// 카테고리 동적 로딩
 const CATEGORY_URLS = {
   soul:  'https://cdn.wonflowai.com/cafe24/categories/소울스토어.json',
   j1:    'https://cdn.wonflowai.com/cafe24/categories/제이원투몰.json',
@@ -1164,9 +1203,7 @@ function buildCategoryOptions(categories, level) {
     const indent = '\u00a0\u00a0\u00a0\u00a0'.repeat(level);
     const prefix = level > 0 ? '└ ' : '';
     html += `<option value="${cat.category_no}">${indent}${prefix}${cat.category_name}</option>`;
-    if (cat.children && cat.children.length > 0) {
-      html += buildCategoryOptions(cat.children, level + 1);
-    }
+    if (cat.children && cat.children.length > 0) html += buildCategoryOptions(cat.children, level + 1);
   }
   return html;
 }
@@ -1175,10 +1212,7 @@ function updateCategorySelect(tab) {
   const select = document.getElementById('category');
   const prevVal = select.value;
   const data = categoryData[tab];
-  if (!data) {
-    select.innerHTML = '<option value="">로딩 중...</option>';
-    return;
-  }
+  if (!data) { select.innerHTML = '<option value="">로딩 중...</option>'; return; }
   select.innerHTML = '<option value="">선택</option>' + buildCategoryOptions(data, 0);
   if (prevVal) select.value = prevVal;
 }
