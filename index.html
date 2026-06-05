@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HAPPYBIZ 상품 이미지 업로더 v2</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap');
+
+  :root {
+    --bg: #0f0f0f;
+    --bg2: #1a1a1a;
+    --bg3: #222;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.15);
+    --text: #f0f0f0;
+    --text2: #999;
+    --text3: #666;
+    --accent: #c8a96e;
+    --accent2: #d9be8a;
+    --green: #2ECC71;
+    --blue: #4A9EFF;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+  }
+
+  .logo span { color: var(--text2); font-weight: 500; font-size: 14px; margin-left: 8px; }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .btn-upload-all {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 10px 24px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: background 0.2s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-upload-all:hover { background: var(--accent2); }
+  .btn-upload-all:active { transform: scale(0.97); }
+  .btn-upload-all:disabled { background: #444; cursor: not-allowed; }
+
+  /* MAIN */
+  .main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+  }
+
+  /* 상품 정보 */
+  .product-info {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 24px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-end;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+  }
+
+  .field label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  .field input, .field select {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    color: var(--text);
+    font-size: 15px;
+    font-family: 'Noto Sans KR', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+
+  .field input:focus, .field select:focus {
+    border-color: var(--accent);
+  }
+
+  .field select option { background: var(--bg3); }
+
+  .field input::placeholder { color: var(--text3); }
+
+  /* SECTION LABEL */
+  .section-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .section-label .badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  .badge-common {
+    background: rgba(74, 158, 255, 0.15);
+    color: var(--blue);
+    border: 1px solid rgba(74, 158, 255, 0.3);
+  }
+
+  .badge-individual {
+    background: rgba(200, 169, 110, 0.15);
+    color: var(--accent);
+    border: 1px solid rgba(200, 169, 110, 0.3);
+  }
+
+  .section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .section-desc {
+    font-size: 13px;
+    color: var(--text3);
+    margin-left: auto;
+  }
+
+  /* UPLOAD GRID */
+  .upload-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  /* UPLOAD BOX */
+  .upload-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .upload-box:hover { border-color: var(--border2); }
+
+  .upload-box-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .upload-box-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #a07828;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
+
+  .upload-box-title .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--border2);
+    flex-shrink: 0;
+  }
+
+  .upload-box-title .dot.active { background: var(--green); }
+
+  .upload-folder {
+    font-size: 11px;
+    color: var(--text3);
+    font-family: monospace;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding-left: 14px;
+  }
+
+  .upload-area {
+    padding: 20px 16px;
+    min-height: 160px;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.2s, border-color 0.2s;
+    border: 1.5px dashed var(--border2);
+    border-radius: var(--radius-sm);
+    margin: 10px;
+    background: transparent;
+  }
+
+  .upload-area:hover {
+    border-color: var(--accent);
+    background: rgba(200, 169, 110, 0.06);
+  }
+
+  .upload-area.dragover {
+    background: rgba(200, 169, 110, 0.12);
+    border-color: var(--accent);
+    border-style: dashed;
+  }
+
+  .upload-area input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+
+  .upload-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 120px;
+    gap: 10px;
+    pointer-events: none;
+  }
+
+  .upload-icon {
+    font-size: 36px;
+    line-height: 1;
+    filter: grayscale(0.3);
+    transition: transform 0.2s, filter 0.2s;
+  }
+
+  .upload-area:hover .upload-icon {
+    transform: scale(1.1);
+    filter: grayscale(0);
+  }
+
+  .upload-placeholder p {
+    font-size: 13px;
+    color: var(--text3);
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  .upload-placeholder p strong {
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  /* THUMBNAILS */
+  .thumb-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    padding: 0 16px 16px;
+  }
+
+  .thumb-item {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--bg3);
+  }
+
+  .thumb-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .thumb-item .remove-btn {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 18px;
+    height: 18px;
+    background: rgba(0,0,0,0.8);
+    border: none;
+    border-radius: 50%;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .thumb-item:hover .remove-btn { opacity: 1; }
+
+  .count-badge {
+    font-size: 11px;
+    color: var(--green);
+    font-weight: 700;
+    padding: 2px 8px;
+    background: rgba(46, 204, 113, 0.1);
+    border-radius: 10px;
+  }
+
+  /* INDIVIDUAL SECTION */
+  .individual-section {
+    margin-bottom: 32px;
+  }
+
+  .store-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 16px;
+    background: var(--bg2);
+    padding: 6px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+  }
+
+  .store-tab {
+    flex: 1;
+    padding: 10px 8px;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--text3);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: all 0.2s;
+    text-align: center;
+    position: relative;
+  }
+
+  .store-tab:hover { color: var(--text2); background: var(--bg3); }
+
+  .store-tab.active {
+    background: var(--accent);
+    color: #000;
+    font-weight: 700;
+  }
+
+  .store-tab .tab-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    font-size: 10px;
+    margin-left: 4px;
+    font-weight: 700;
+  }
+
+  .store-tab.active .tab-count { background: rgba(255,255,255,0.3); }
+
+  .store-panel {
+    display: none;
+  }
+
+  .store-panel.active {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  /* PROGRESS */
+  .upload-progress {
+    display: none;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 24px;
+  }
+
+  .upload-progress.show { display: block; }
+
+  .progress-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .progress-bar-wrap {
+    background: var(--bg3);
+    border-radius: 4px;
+    height: 6px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 4px;
+    width: 0%;
+    transition: width 0.3s;
+  }
+
+  .progress-log {
+    font-size: 12px;
+    color: var(--text3);
+    font-family: monospace;
+    max-height: 120px;
+    overflow-y: auto;
+    line-height: 1.8;
+  }
+
+  .progress-log .log-ok { color: var(--green); }
+  .progress-log .log-err { color: #FF5C5C; }
+  .progress-log .log-info { color: var(--blue); }
+
+  /* RESULT */
+  .result-panel {
+    display: none;
+    background: var(--bg2);
+    border: 1px solid rgba(46, 204, 113, 0.3);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 24px;
+  }
+
+  .result-panel.show { display: block; }
+
+  .result-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--green);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .result-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 8px;
+  }
+
+  .result-item {
+    background: var(--bg3);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  .result-item .ri-folder { color: var(--text3); margin-bottom: 4px; font-family: monospace; font-size: 11px; word-break: break-all; }
+  .result-item .ri-count { color: var(--green); font-weight: 700; }
+
+  /* DIVIDER */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 8px 0 24px;
+  }
+
+  /* SPINNER */
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255,255,255,0.2);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: inline-block;
+  }
+
+  /* RESET BTN */
+  .btn-reset {
+    background: transparent;
+    border: 1px solid var(--border2);
+    color: var(--text2);
+    padding: 10px 18px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: all 0.2s;
+  }
+  .btn-reset:hover { border-color: var(--text2); color: var(--text); }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .upload-grid { grid-template-columns: 1fr; }
+    .store-panel.active { grid-template-columns: 1fr; }
+    .product-info { flex-direction: column; }
+    .main { padding: 20px 16px 60px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">HAPPYBIZ <span>상품 이미지 업로더 v2</span></div>
+  <div class="header-right">
+    <button class="btn-reset" id="btnReset" onclick="resetAll()">초기화</button>
+    <button class="btn-upload-all" id="btnUpload" onclick="startUpload()">
+      <span id="btnText">🚀 업로드</span>
+    </button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- 상품 정보 -->
+  <div class="product-info">
+    <div class="field" style="flex: 2;">
+      <label>상품명</label>
+      <input type="text" id="productName" placeholder="예: 노르웨이 순살 고등어 1kg" />
+    </div>
+    <div class="field">
+      <label>카테고리</label>
+      <select id="category">
+        <option value="">선택</option>
+        <option>식품/신선식품</option>
+        <option>생활용품</option>
+        <option>패션/의류</option>
+        <option>뷰티/화장품</option>
+        <option>가전/디지털</option>
+        <option>스포츠/레저</option>
+        <option>홈/인테리어</option>
+        <option>완구/취미</option>
+        <option>반려동물</option>
+        <option>기타</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- 진행상태 -->
+  <div class="upload-progress" id="progressPanel">
+    <div class="progress-title">
+      <div class="spinner"></div>
+      <span id="progressTitle">업로드 중...</span>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div class="progress-log" id="progressLog"></div>
+  </div>
+
+  <!-- 완료 결과 -->
+  <div class="result-panel" id="resultPanel">
+    <div class="result-title">✓ 업로드 완료</div>
+    <div class="result-grid" id="resultGrid"></div>
+  </div>
+
+  <!-- 공통 섹션 -->
+  <div class="section-label">
+    <div class="badge badge-common">공통</div>
+    <div class="section-title">공통 이미지</div>
+    <div class="section-desc">4개 사업자 동일 적용</div>
+  </div>
+
+  <div class="upload-grid" id="commonGrid">
+    <!-- 상세페이지 -->
+    <div class="upload-box" id="box-common-detail">
+      <div class="upload-box-header">
+        <div class="upload-box-title">
+          <span class="dot" id="dot-common-detail"></span>
+          상세페이지
+        </div>
+        <span class="upload-folder" id="folder-common-detail">공통/상품명_상세페이지/</span>
+      </div>
+      <div class="upload-area" id="area-common-detail" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,'common-detail')">
+        <input type="file" accept="image/*" multiple onchange="handleFiles(event,'common-detail')" />
+        <div class="upload-placeholder" id="ph-common-detail">
+          <div class="upload-icon">📦</div>
+          <p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택</p>
+          <p style="font-size:11px; color: var(--text3);">JPG, PNG, WEBP</p>
+        </div>
+      </div>
+      <div class="thumb-grid" id="thumbs-common-detail"></div>
+    </div>
+
+    <!-- 안내/주의사항 -->
+    <div class="upload-box" id="box-common-notice">
+      <div class="upload-box-header">
+        <div class="upload-box-title">
+          <span class="dot" id="dot-common-notice"></span>
+          안내 / 주의사항
+        </div>
+        <span class="upload-folder" id="folder-common-notice">공통/상품명_안내주의사항/</span>
+      </div>
+      <div class="upload-area" id="area-common-notice" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,'common-notice')">
+        <input type="file" accept="image/*" multiple onchange="handleFiles(event,'common-notice')" />
+        <div class="upload-placeholder" id="ph-common-notice">
+          <div class="upload-icon">📦</div>
+          <p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택</p>
+          <p style="font-size:11px; color: var(--text3);">JPG, PNG, WEBP</p>
+        </div>
+      </div>
+      <div class="thumb-grid" id="thumbs-common-notice"></div>
+    </div>
+
+    <!-- 메인 추가이미지 -->
+    <div class="upload-box" id="box-common-extra">
+      <div class="upload-box-header">
+        <div class="upload-box-title">
+          <span class="dot" id="dot-common-extra"></span>
+          메인 추가이미지
+        </div>
+        <span class="upload-folder" id="folder-common-extra">공통/상품명_메인추가이미지/</span>
+      </div>
+      <div class="upload-area" id="area-common-extra" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,'common-extra')">
+        <input type="file" accept="image/*" multiple onchange="handleFiles(event,'common-extra')" />
+        <div class="upload-placeholder" id="ph-common-extra">
+          <div class="upload-icon">📦</div>
+          <p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택</p>
+          <p style="font-size:11px; color: var(--text3);">JPG, PNG, WEBP</p>
+        </div>
+      </div>
+      <div class="thumb-grid" id="thumbs-common-extra"></div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- 개별 섹션 -->
+  <div class="individual-section">
+    <div class="section-label">
+      <div class="badge badge-individual">개별</div>
+      <div class="section-title">사업자별 이미지</div>
+      <div class="section-desc">사업자마다 다르게 적용</div>
+    </div>
+
+    <div class="store-tabs">
+      <button class="store-tab active" onclick="switchTab('soul')" id="tab-soul">
+        소울스토어 <span class="tab-count" id="tc-soul">0</span>
+      </button>
+      <button class="store-tab" onclick="switchTab('j1')" id="tab-j1">
+        제이원투몰 <span class="tab-count" id="tc-j1">0</span>
+      </button>
+      <button class="store-tab" onclick="switchTab('happy')" id="tab-happy">
+        행복산업 <span class="tab-count" id="tc-happy">0</span>
+      </button>
+      <button class="store-tab" onclick="switchTab('tae')" id="tab-tae">
+        태실장픽앤샵 <span class="tab-count" id="tc-tae">0</span>
+      </button>
+    </div>
+
+    <!-- 소울스토어 -->
+    <div class="store-panel active" id="panel-soul">
+      <div class="upload-box">
+        <div class="upload-box-header">
+          <div class="upload-box-title">
+            <span class="dot" id="dot-soul-main"></span>
+            대표 메인이미지
+          </div>
+          <span class="upload-folder" id="folder-soul-main">소울스토어/상품명_대표메인이미지/</span>
+        </div>
+        <div class="upload-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,'soul-main')">
+          <input type="file" accept="image/*" multiple onchange="handleFiles(event,'soul-main')" />
+          <div class="upload-placeholder" id="ph-soul-main">
+            <div class="upload-icon">📦</div>
+            <p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택</p>
+          </div>
+        </div>
+        <div class="thumb-grid" id="thumbs-soul-main"></div>
+      </div>
+      <div class="upload-box">
+        <div class="upload-box-header">
+          <div class="upload-box-title">
+            <span class="dot" id="dot-soul-spec"></span>
+            상세정보제공고시
+          </div>
+          <span class="upload-folder" id="folder-soul-spec">소울스토어/상품명_상세정보제공고시/</span>
+        </div>
+        <div class="upload-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,'soul-spec')">
+          <input type="file" accept="image/*" multiple onchange="handleFiles(event,'soul-spec')" />
+          <div class="upload-placeholder" id="ph-soul-spec">
+            <div class="upload-icon">📦</div>
+            <p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택</p>
+          </div>
+        </div>
+        <div class="thumb-grid" id="thumbs-soul-spec"></div>
+      </div>
+    </div>
+
+    <!-- 제이원투몰 -->
+    <div class="store-panel" id="panel-j1">
+      <div class="upload-box">
+        <div class="upload-box-header">
+          <div class="upload-box-title">
+            <span class="dot" id="dot-j1-main"></span>
+            대표 메인이미지
+          </div>
+          <span class="upload-folder" id="folder-j1-main">제이원투몰/상품명_대표메인이미지/</span>
+        </div>
+        <div class="upload-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,'j1-main')">
+          <input type="file" accept="image/*" multiple onchange="handleFiles(event,'j1-main')" />
+          <div class="upload-placeholder" id="ph-j1-main">
+            <div class="upload-icon">📦</div>
+            <p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택</p>
+          </div>
+        </div>
+        <div class="thumb-grid" id="thumbs-j1-main"></div>
+      </div>
+      <div class="upload-box">
+        <div class="upload-box-header">
+          <div class="upload-box-title">
+            <span class="dot" id="dot-j1-spec"></span>
+            상세정보제공고시
+          </div>
+          <span class="upload-folder" id="folder-j1-spec">제이원투몰/상품명_상세정보제공고시/</span>
+        </div>
+        <div class="upload-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,'j1-spec')">
+          <input type="file" accept="image/*" multiple onchange="handleFiles(event,'j1-spec')" />
+          <div class="upload-placeholder" id="ph-j1-spec">
+            <div class="upload-icon">📦</div>
+            <p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택</p>
+          </div>
+        </div>
+        <div class="thumb-grid" id="thumbs-j1-spec"></div>
+      </div>
+    </div>
+
+    <!-- 행복산업 -->
+    <div class="store-panel" id="panel-happy">
+      <div class="upload-box">
+        <div class="upload-box-header">
+          <div class="upload-box-title">
+            <span class="dot" id="dot-happy-main"></span>
+            대표 메인이미지
+          </div>
+          <span class="upload-folder" id="folder-happy-main">행복산업/상품명_대표메인이미지/</span>
+        </div>
+        <div class="upload-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,'happy-main')">
+          <input type="file" accept="image/*" multiple onchange="handleFiles(event,'happy-main')" />
+          <div class="upload-placeholder" id="ph-happy-main">
+            <div class="upload-icon">📦</div>
+            <p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택</p>
+          </div>
+        </div>
+        <div class="thumb-grid" id="thumbs-happy-main"></div>
+      </div>
+      <div class="upload-box">
+        <div class="upload-box-header">
+          <div class="upload-box-title">
+            <span class="dot" id="dot-happy-spec"></span>
+            상세정보제공고시
+          </div>
+          <span class="upload-folder" id="folder-happy-spec">행복산업/상품명_상세정보제공고시/</span>
+        </div>
+        <div class="upload-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,'happy-spec')">
+          <input type="file" accept="image/*" multiple onchange="handleFiles(event,'happy-spec')" />
+          <div class="upload-placeholder" id="ph-happy-spec">
+            <div class="upload-icon">📦</div>
+            <p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택</p>
+          </div>
+        </div>
+        <div class="thumb-grid" id="thumbs-happy-spec"></div>
+      </div>
+    </div>
+
+    <!-- 태실장픽앤샵 -->
+    <div class="store-panel" id="panel-tae">
+      <div class="upload-box">
+        <div class="upload-box-header">
+          <div class="upload-box-title">
+            <span class="dot" id="dot-tae-main"></span>
+            대표 메인이미지
+          </div>
+          <span class="upload-folder" id="folder-tae-main">태실장픽앤샵/상품명_대표메인이미지/</span>
+        </div>
+        <div class="upload-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,'tae-main')">
+          <input type="file" accept="image/*" multiple onchange="handleFiles(event,'tae-main')" />
+          <div class="upload-placeholder" id="ph-tae-main">
+            <div class="upload-icon">📦</div>
+            <p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택</p>
+          </div>
+        </div>
+        <div class="thumb-grid" id="thumbs-tae-main"></div>
+      </div>
+      <div class="upload-box">
+        <div class="upload-box-header">
+          <div class="upload-box-title">
+            <span class="dot" id="dot-tae-spec"></span>
+            상세정보제공고시
+          </div>
+          <span class="upload-folder" id="folder-tae-spec">태실장픽앤샵/상품명_상세정보제공고시/</span>
+        </div>
+        <div class="upload-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,'tae-spec')">
+          <input type="file" accept="image/*" multiple onchange="handleFiles(event,'tae-spec')" />
+          <div class="upload-placeholder" id="ph-tae-spec">
+            <div class="upload-icon">📦</div>
+            <p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택</p>
+          </div>
+        </div>
+        <div class="thumb-grid" id="thumbs-tae-spec"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const R2_WORKER = 'https://r2-uploader.joo11s11.workers.dev';
+
+const SLOTS = {
+  'common-detail':  { folder: '공통', sub: '상세페이지' },
+  'common-notice':  { folder: '공통', sub: '안내주의사항' },
+  'common-extra':   { folder: '공통', sub: '메인추가이미지' },
+  'soul-main':      { folder: '소울스토어', sub: '대표메인이미지' },
+  'soul-spec':      { folder: '소울스토어', sub: '상세정보제공고시' },
+  'j1-main':        { folder: '제이원투몰', sub: '대표메인이미지' },
+  'j1-spec':        { folder: '제이원투몰', sub: '상세정보제공고시' },
+  'happy-main':     { folder: '행복산업', sub: '대표메인이미지' },
+  'happy-spec':     { folder: '행복산업', sub: '상세정보제공고시' },
+  'tae-main':       { folder: '태실장픽앤샵', sub: '대표메인이미지' },
+  'tae-spec':       { folder: '태실장픽앤샵', sub: '상세정보제공고시' },
+};
+
+const TAB_SLOTS = {
+  soul: ['soul-main','soul-spec'],
+  j1: ['j1-main','j1-spec'],
+  happy: ['happy-main','happy-spec'],
+  tae: ['tae-main','tae-spec'],
+};
+
+const files = {};
+Object.keys(SLOTS).forEach(k => files[k] = []);
+
+function getProductName() {
+  return document.getElementById('productName').value.trim() || '상품명';
+}
+
+function updateFolderLabel(slot) {
+  const pn = getProductName();
+  const s = SLOTS[slot];
+  const el = document.getElementById('folder-' + slot);
+  if (el) el.textContent = `${s.folder}/${pn}_${s.sub}/`;
+}
+
+document.getElementById('productName').addEventListener('input', () => {
+  Object.keys(SLOTS).forEach(updateFolderLabel);
+});
+
+function handleFiles(e, slot) {
+  addFiles(slot, Array.from(e.target.files));
+}
+
+function handleDragOver(e) {
+  e.preventDefault();
+  e.currentTarget.classList.add('dragover');
+}
+
+function handleDragLeave(e) {
+  e.currentTarget.classList.remove('dragover');
+}
+
+function handleDrop(e, slot) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('dragover');
+  addFiles(slot, Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/')));
+}
+
+function addFiles(slot, newFiles) {
+  files[slot] = [...files[slot], ...newFiles];
+  renderThumbs(slot);
+  updateDot(slot);
+  updateTabCount();
+}
+
+function removeFile(slot, idx) {
+  files[slot].splice(idx, 1);
+  renderThumbs(slot);
+  updateDot(slot);
+  updateTabCount();
+}
+
+function renderThumbs(slot) {
+  const container = document.getElementById('thumbs-' + slot);
+  const ph = document.getElementById('ph-' + slot);
+  if (!container) return;
+
+  const list = files[slot];
+  container.innerHTML = '';
+
+  if (list.length === 0) {
+    if (ph) ph.style.display = 'flex';
+    return;
+  }
+
+  if (ph) ph.style.display = 'none';
+
+  list.forEach((file, idx) => {
+    const url = URL.createObjectURL(file);
+    const div = document.createElement('div');
+    div.className = 'thumb-item';
+    div.innerHTML = `<img src="${url}" /><button class="remove-btn" onclick="removeFile('${slot}',${idx})">✕</button>`;
+    container.appendChild(div);
+  });
+
+  const countEl = document.querySelector(`#box-${slot} .count-badge`);
+  // add count badge to header
+  const header = document.querySelector(`#box-${slot} .upload-box-header .upload-box-title`);
+  if (header && !header.querySelector('.count-badge')) {
+    const badge = document.createElement('span');
+    badge.className = 'count-badge';
+    header.appendChild(badge);
+  }
+  const badge = header ? header.querySelector('.count-badge') : null;
+  if (badge) badge.textContent = list.length + '장';
+}
+
+function updateDot(slot) {
+  const dot = document.getElementById('dot-' + slot);
+  if (dot) dot.className = 'dot ' + (files[slot].length > 0 ? 'active' : '');
+}
+
+function updateTabCount() {
+  Object.entries(TAB_SLOTS).forEach(([tab, slots]) => {
+    const total = slots.reduce((s, sl) => s + files[sl].length, 0);
+    const el = document.getElementById('tc-' + tab);
+    if (el) el.textContent = total;
+  });
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.store-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.store-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('panel-' + tab).classList.add('active');
+}
+
+function logMsg(msg, type = 'info') {
+  const log = document.getElementById('progressLog');
+  const line = document.createElement('div');
+  line.className = 'log-' + type;
+  line.textContent = msg;
+  log.appendChild(line);
+  log.scrollTop = log.scrollHeight;
+}
+
+function setProgress(pct) {
+  document.getElementById('progressBar').style.width = pct + '%';
+}
+
+async function uploadFile(file, r2Key) {
+  const form = new FormData();
+  form.append('file', file);
+  form.append('key', r2Key);
+  const res = await fetch(R2_WORKER, { method: 'POST', body: form });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const data = await res.json();
+  return data.url || data.key || r2Key;
+}
+
+async function startUpload() {
+  const pn = document.getElementById('productName').value.trim();
+  if (!pn) {
+    alert('상품명을 먼저 입력해주세요.');
+    document.getElementById('productName').focus();
+    return;
+  }
+
+  const allSlots = Object.keys(SLOTS);
+  const tasks = [];
+
+  allSlots.forEach(slot => {
+    files[slot].forEach((file, idx) => {
+      const s = SLOTS[slot];
+      const ext = file.name.split('.').pop();
+      const r2Key = `products/${s.folder}/${pn}_${s.sub}/${String(idx + 1).padStart(2, '0')}_${Date.now()}.${ext}`;
+      tasks.push({ slot, file, r2Key, folder: `${s.folder}/${pn}_${s.sub}/` });
+    });
+  });
+
+  if (tasks.length === 0) {
+    alert('업로드할 이미지가 없습니다.');
+    return;
+  }
+
+  const btn = document.getElementById('btnUpload');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> <span>업로드 중...</span>';
+
+  document.getElementById('progressPanel').classList.add('show');
+  document.getElementById('resultPanel').classList.remove('show');
+  document.getElementById('progressLog').innerHTML = '';
+  setProgress(0);
+
+  const results = {};
+  let done = 0;
+
+  for (const task of tasks) {
+    try {
+      logMsg(`↑ ${task.folder}${task.file.name}`, 'info');
+      const url = await uploadFile(task.file, task.r2Key);
+      if (!results[task.folder]) results[task.folder] = [];
+      results[task.folder].push(url);
+      logMsg(`✓ 완료`, 'ok');
+    } catch (e) {
+      logMsg(`✗ 실패: ${e.message}`, 'err');
+    }
+    done++;
+    setProgress(Math.round((done / tasks.length) * 100));
+  }
+
+  document.getElementById('progressTitle').textContent = '업로드 완료!';
+
+  const grid = document.getElementById('resultGrid');
+  grid.innerHTML = '';
+  Object.entries(results).forEach(([folder, urls]) => {
+    const div = document.createElement('div');
+    div.className = 'result-item';
+    div.innerHTML = `<div class="ri-folder">${folder}</div><div class="ri-count">${urls.length}장 업로드 완료</div>`;
+    grid.appendChild(div);
+  });
+
+  document.getElementById('resultPanel').classList.add('show');
+
+  btn.disabled = false;
+  btn.innerHTML = '🚀 업로드';
+}
+
+function resetAll() {
+  if (!confirm('모든 이미지를 초기화할까요?')) return;
+  Object.keys(SLOTS).forEach(slot => {
+    files[slot] = [];
+    renderThumbs(slot);
+    updateDot(slot);
+  });
+  updateTabCount();
+  document.getElementById('productName').value = '';
+  document.getElementById('category').value = '';
+  document.getElementById('progressPanel').classList.remove('show');
+  document.getElementById('resultPanel').classList.remove('show');
+  Object.keys(SLOTS).forEach(updateFolderLabel);
+}
+
+Object.keys(SLOTS).forEach(updateFolderLabel);
+</script>
+</body>
+</html>
