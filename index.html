@@ -411,6 +411,13 @@
       <input type="text" id="productName" placeholder="예: 노르웨이 순살 고등어 1kg" />
     </div>
     <div class="field" style="flex: 1 0 130px;">
+      <label>소비자가</label>
+      <div class="field-unit-wrap">
+        <input type="number" id="consumerPrice" placeholder="예: 20000" min="0" />
+        <span class="unit-suffix">원</span>
+      </div>
+    </div>
+    <div class="field" style="flex: 1 0 130px;">
       <label>판매가</label>
       <div class="field-unit-wrap">
         <input type="number" id="salePrice" placeholder="예: 15000" min="0" />
@@ -455,6 +462,14 @@
       <label>소분류</label>
       <select id="categorySub">
         <option value="">선택</option>
+      </select>
+    </div>
+    <div class="field" style="flex: 1 0 150px;">
+      <label>과세구분</label>
+      <select id="taxType">
+        <option value="A">과세상품</option>
+        <option value="B">면세상품</option>
+        <option value="C">영세율</option>
       </select>
     </div>
   </div>
@@ -1072,6 +1087,7 @@ async function sendWebhook() {
   const payload = {
     product: {
       name: commonName,
+      consumerPrice: Number(document.getElementById('consumerPrice').value) || 0,
       salePrice: Number(document.getElementById('salePrice').value) || 0,
       supplyPrice: Number(document.getElementById('supplyPrice').value) || 0,
       stock: Number(document.getElementById('stock').value) || 0,
@@ -1079,6 +1095,7 @@ async function sendWebhook() {
       saleStatus: document.getElementById('saleStatus').value,
       categoryNo: categoryNo,
       categoryText: categoryText,
+      taxType: document.getElementById('taxType').value,
     },
     noticeInfo: getNoticeData(),
     stores: {
@@ -1196,11 +1213,13 @@ function resetAll() {
   });
   updateTabCount();
   document.getElementById('productName').value = '';
+  document.getElementById('consumerPrice').value = '';
   document.getElementById('salePrice').value = '';
   document.getElementById('supplyPrice').value = '';
   document.getElementById('stock').value = '';
   document.getElementById('displayStatus').value = 'T';
   document.getElementById('saleStatus').value = 'T';
+  document.getElementById('taxType').value = 'A';
 
   ['soul','j1','happy','tae'].forEach(store => {
     storeOptions[store] = [];
