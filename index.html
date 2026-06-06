@@ -1218,7 +1218,13 @@ async function startUpload() {
   btn.disabled = false;
   btn.innerHTML = '🚀 업로드';
 
-  await sendWebhook();
+  try {
+    await sendWebhook();
+  } finally {
+    const spinner = document.querySelector('#progressPanel .spinner');
+    if (spinner) spinner.style.display = 'none';
+    document.getElementById('progressTitle').textContent = '완료';
+  }
 }
 
 function resetAll() {
