@@ -85,6 +85,28 @@
     padding: 32px 24px 80px;
   }
 
+  /* Step label */
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    margin-top: 8px;
+  }
+  .step-num {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--text3);
+    text-transform: uppercase;
+  }
+  .step-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
   .product-info {
     background: var(--bg2);
     border: 1px solid var(--border);
@@ -127,6 +149,62 @@
   .field input:focus, .field select:focus { border-color: var(--accent); }
   .field select option { background: var(--bg3); }
   .field input::placeholder { color: var(--text3); }
+
+  /* STEP 2: 표준카테고리 검색 */
+  .cat-section {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 24px;
+  }
+  .cat-search-wrap { position: relative; }
+  .cat-search-input {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    color: var(--text);
+    font-size: 15px;
+    font-family: 'Noto Sans KR', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .cat-search-input:focus { border-color: var(--accent); }
+  .cat-search-input::placeholder { color: var(--text3); }
+  .cat-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0; right: 0;
+    max-height: 260px;
+    overflow-y: auto;
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    z-index: 300;
+    display: none;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  }
+  .cat-dropdown.show { display: block; }
+  .cat-option {
+    padding: 10px 16px;
+    font-size: 13px;
+    color: var(--text2);
+    cursor: pointer;
+    border-bottom: 1px solid var(--border);
+    line-height: 1.4;
+  }
+  .cat-option:last-child { border-bottom: none; }
+  .cat-option:hover, .cat-option.focused { background: rgba(200,169,110,0.12); color: var(--accent); }
+  .cat-option .cat-code { font-size: 11px; color: var(--text3); margin-left: 8px; font-family: monospace; }
+  .cat-selected-badge {
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--accent);
+    display: none;
+  }
+  .cat-selected-badge.show { display: block; }
 
   .section-label { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
 
@@ -229,7 +307,7 @@
   .store-panel { display: none; }
   .store-panel.active { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
-  /* STEP 3: Options Section */
+  /* Options Section */
   .options-section {
     grid-column: 1 / -1;
     background: var(--bg2);
@@ -288,7 +366,7 @@
 
   .options-empty { font-size: 13px; color: var(--text3); text-align: center; padding: 16px 0; }
 
-  /* STEP 4: 상세정보제공고시 */
+  /* STEP 5: 상세정보제공고시 */
   .notice-section {
     background: var(--bg2);
     border: 1px solid var(--border);
@@ -349,7 +427,7 @@
   .btn-reset { background: transparent; border: 1px solid var(--border2); color: var(--text2); padding: 10px 18px; border-radius: var(--radius-sm); font-size: 13px; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; transition: all 0.2s; }
   .btn-reset:hover { border-color: var(--text2); color: var(--text); }
 
-  /* STEP 5: Toast */
+  /* Toast */
   .toast {
     position: fixed;
     bottom: 32px;
@@ -404,23 +482,27 @@
 
 <div class="main">
 
-  <!-- 상품 정보 -->
+  <!-- STEP 1: 기본정보 -->
+  <div class="step-header">
+    <span class="step-num">STEP 1</span>
+    <span class="step-title">기본정보</span>
+  </div>
   <div class="product-info">
     <div class="field" style="flex: 2 0 200px;">
       <label>상품명</label>
       <input type="text" id="productName" placeholder="예: 노르웨이 순살 고등어 1kg" />
     </div>
     <div class="field" style="flex: 1 0 130px;">
-      <label>소비자가</label>
+      <label>판매가</label>
       <div class="field-unit-wrap">
-        <input type="number" id="consumerPrice" placeholder="예: 20000" min="0" />
+        <input type="number" id="salePrice" placeholder="예: 15000" min="0" />
         <span class="unit-suffix">원</span>
       </div>
     </div>
     <div class="field" style="flex: 1 0 130px;">
-      <label>판매가</label>
+      <label>소비자가</label>
       <div class="field-unit-wrap">
-        <input type="number" id="salePrice" placeholder="예: 15000" min="0" />
+        <input type="number" id="consumerPrice" placeholder="예: 20000" min="0" />
         <span class="unit-suffix">원</span>
       </div>
     </div>
@@ -438,6 +520,18 @@
         <span class="unit-suffix">개</span>
       </div>
     </div>
+    <div class="field" style="flex: 1 0 140px;">
+      <label>원산지</label>
+      <input type="text" id="origin" placeholder="예: 노르웨이산" />
+    </div>
+    <div class="field" style="flex: 1 0 130px;">
+      <label>과세구분</label>
+      <select id="taxType">
+        <option value="A">과세상품</option>
+        <option value="B">면세상품</option>
+        <option value="C">영세율</option>
+      </select>
+    </div>
     <div class="field" style="flex: 1 0 130px;">
       <label>진열</label>
       <select id="displayStatus">
@@ -452,52 +546,36 @@
         <option value="F">판매안함</option>
       </select>
     </div>
-    <div class="field" style="flex: 1 0 160px;">
-      <label>대분류</label>
-      <select id="categoryMain" onchange="onCategoryMainChange()">
-        <option value="">로딩 중...</option>
-      </select>
-    </div>
-    <div class="field" id="categorySub-wrap" style="flex: 1 0 160px; display: none;">
-      <label>소분류</label>
-      <select id="categorySub">
-        <option value="">선택</option>
-      </select>
-    </div>
-    <div class="field" style="flex: 1 0 150px;">
-      <label>과세구분</label>
-      <select id="taxType">
-        <option value="A">과세상품</option>
-        <option value="B">면세상품</option>
-        <option value="C">영세율</option>
-      </select>
+    <div class="field" style="flex: 1 0 110px;">
+      <label>최소구매수량</label>
+      <div class="field-unit-wrap">
+        <input type="number" id="minQty" placeholder="예: 1" min="1" value="1" />
+        <span class="unit-suffix">개</span>
+      </div>
     </div>
   </div>
 
-  <!-- STEP 4: 상세정보제공고시 -->
-  <div class="notice-section">
-    <div class="notice-section-header">
-      <div class="badge badge-individual">고시</div>
-      <div class="notice-section-title">상세정보제공고시</div>
+  <!-- STEP 2: 표준카테고리 -->
+  <div class="step-header">
+    <span class="step-num">STEP 2</span>
+    <span class="step-title">표준카테고리</span>
+  </div>
+  <div class="cat-section">
+    <div class="cat-search-wrap">
+      <input
+        type="text"
+        id="catSearchInput"
+        class="cat-search-input"
+        placeholder="카테고리 검색... (예: 고등어, 수산물, 냉동식품)"
+        autocomplete="off"
+        oninput="onCatSearch()"
+        onkeydown="onCatKeydown(event)"
+        onfocus="onCatFocus()"
+      />
+      <input type="hidden" id="categoryCode" />
+      <div class="cat-dropdown" id="catDropdown"></div>
     </div>
-    <div class="notice-category-row">
-      <div class="field" style="max-width: 220px;">
-        <label>품목 선택</label>
-        <select id="noticeCategory" onchange="onNoticeCategoryChange()">
-          <option value="">-- 품목 선택 --</option>
-          <option value="food">식품</option>
-          <option value="clothing">의류</option>
-          <option value="electronics">전자제품</option>
-          <option value="daily">생활용품</option>
-          <option value="furniture">가구/인테리어</option>
-          <option value="cosmetics">화장품</option>
-          <option value="sports">스포츠/레저</option>
-        </select>
-      </div>
-    </div>
-    <div class="notice-dynamic-fields" id="noticeDynamicFields">
-      <div style="font-size: 13px; color: var(--text3); padding: 8px 0;">품목을 선택하면 필수 입력 항목이 표시됩니다.</div>
-    </div>
+    <div class="cat-selected-badge" id="catSelectedBadge"></div>
   </div>
 
   <!-- 진행상태 -->
@@ -518,11 +596,15 @@
     <div class="result-grid" id="resultGrid"></div>
   </div>
 
-  <!-- 공통 섹션 -->
+  <!-- STEP 3: 공통 이미지 -->
+  <div class="step-header">
+    <span class="step-num">STEP 3</span>
+    <span class="step-title">공통 이미지</span>
+  </div>
   <div class="section-label">
     <div class="badge badge-common">공통</div>
     <div class="section-title">공통 이미지</div>
-    <div class="section-desc">4개 사업자 동일 적용</div>
+    <div class="section-desc">3개 사업자 동일 적용</div>
   </div>
 
   <div class="upload-grid" id="commonGrid">
@@ -577,7 +659,11 @@
 
   <div class="divider"></div>
 
-  <!-- 개별 섹션 -->
+  <!-- STEP 4: 사업자별 이미지 -->
+  <div class="step-header">
+    <span class="step-num">STEP 4</span>
+    <span class="step-title">사업자별 이미지</span>
+  </div>
   <div class="individual-section">
     <div class="section-label">
       <div class="badge badge-individual">개별</div>
@@ -589,7 +675,6 @@
       <button class="store-tab active" onclick="switchTab('soul')" id="tab-soul">소울스토어 <span class="tab-count" id="tc-soul">0</span></button>
       <button class="store-tab" onclick="switchTab('j1')" id="tab-j1">제이원투몰 <span class="tab-count" id="tc-j1">0</span></button>
       <button class="store-tab" onclick="switchTab('happy')" id="tab-happy">행복산업 <span class="tab-count" id="tc-happy">0</span></button>
-      <button class="store-tab" onclick="switchTab('tae')" id="tab-tae">태실장픽앤샵 <span class="tab-count" id="tc-tae">0</span></button>
     </div>
 
     <!-- 소울스토어 -->
@@ -611,7 +696,7 @@
       </div>
       <div class="upload-box">
         <div class="upload-box-header">
-          <div class="upload-box-title"><span class="dot" id="dot-soul-spec"></span>상세정보제공고시</div>
+          <div class="upload-box-title"><span class="dot" id="dot-soul-spec"></span>상세정보제공고시 이미지</div>
           <span class="upload-folder" id="folder-soul-spec">소울스토어/상품명_상세정보제공고시/</span>
         </div>
         <div class="upload-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,'soul-spec')">
@@ -630,7 +715,7 @@
         </div>
       </div>
       <div class="store-info-section">
-        <div class="store-info-title">제조/공급 정보</div>
+        <div class="store-info-title">제작 정보</div>
         <div class="store-info-fields">
           <div class="field"><label>제조사</label><input type="text" id="soul-manufacturer" placeholder="예: (주)행복식품" /></div>
           <div class="field"><label>전화번호</label><input type="tel" id="soul-phone" placeholder="예: 02-1234-5678" /></div>
@@ -657,7 +742,7 @@
       </div>
       <div class="upload-box">
         <div class="upload-box-header">
-          <div class="upload-box-title"><span class="dot" id="dot-j1-spec"></span>상세정보제공고시</div>
+          <div class="upload-box-title"><span class="dot" id="dot-j1-spec"></span>상세정보제공고시 이미지</div>
           <span class="upload-folder" id="folder-j1-spec">제이원투몰/상품명_상세정보제공고시/</span>
         </div>
         <div class="upload-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,'j1-spec')">
@@ -676,7 +761,7 @@
         </div>
       </div>
       <div class="store-info-section">
-        <div class="store-info-title">제조/공급 정보</div>
+        <div class="store-info-title">제작 정보</div>
         <div class="store-info-fields">
           <div class="field"><label>제조사</label><input type="text" id="j1-manufacturer" placeholder="예: (주)행복식품" /></div>
           <div class="field"><label>전화번호</label><input type="tel" id="j1-phone" placeholder="예: 02-1234-5678" /></div>
@@ -703,7 +788,7 @@
       </div>
       <div class="upload-box">
         <div class="upload-box-header">
-          <div class="upload-box-title"><span class="dot" id="dot-happy-spec"></span>상세정보제공고시</div>
+          <div class="upload-box-title"><span class="dot" id="dot-happy-spec"></span>상세정보제공고시 이미지</div>
           <span class="upload-folder" id="folder-happy-spec">행복산업/상품명_상세정보제공고시/</span>
         </div>
         <div class="upload-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,'happy-spec')">
@@ -722,7 +807,7 @@
         </div>
       </div>
       <div class="store-info-section">
-        <div class="store-info-title">제조/공급 정보</div>
+        <div class="store-info-title">제작 정보</div>
         <div class="store-info-fields">
           <div class="field"><label>제조사</label><input type="text" id="happy-manufacturer" placeholder="예: (주)행복식품" /></div>
           <div class="field"><label>전화번호</label><input type="tel" id="happy-phone" placeholder="예: 02-1234-5678" /></div>
@@ -730,53 +815,38 @@
       </div>
     </div>
 
-    <!-- 태실장픽앤샵 -->
-    <div class="store-panel" id="panel-tae">
-      <div class="field" style="grid-column: 1 / -1;">
-        <label>상품명 (태실장픽앤샵)</label>
-        <input type="text" id="tae-productName" placeholder="공통 상품명과 다를 경우 수정" />
-      </div>
-      <div class="upload-box">
-        <div class="upload-box-header">
-          <div class="upload-box-title"><span class="dot" id="dot-tae-main"></span>대표 메인이미지</div>
-          <span class="upload-folder" id="folder-tae-main">태실장픽앤샵/상품명_대표메인이미지/</span>
-        </div>
-        <div class="upload-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,'tae-main')">
-          <input type="file" accept="image/*" multiple onchange="handleFiles(event,'tae-main')" />
-          <div class="upload-placeholder" id="ph-tae-main"><div class="upload-icon">📦</div><p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택</p></div>
-        </div>
-        <div class="thumb-grid" id="thumbs-tae-main"></div>
-      </div>
-      <div class="upload-box">
-        <div class="upload-box-header">
-          <div class="upload-box-title"><span class="dot" id="dot-tae-spec"></span>상세정보제공고시</div>
-          <span class="upload-folder" id="folder-tae-spec">태실장픽앤샵/상품명_상세정보제공고시/</span>
-        </div>
-        <div class="upload-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,'tae-spec')">
-          <input type="file" accept="image/*" multiple onchange="handleFiles(event,'tae-spec')" />
-          <div class="upload-placeholder" id="ph-tae-spec"><div class="upload-icon">📦</div><p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택</p></div>
-        </div>
-        <div class="thumb-grid" id="thumbs-tae-spec"></div>
-      </div>
-      <div class="options-section">
-        <div class="options-header">
-          <div class="options-title">상품 옵션</div>
-          <button class="btn-add-option" onclick="addOptionRow('tae')">+ 옵션 추가</button>
-        </div>
-        <div class="option-rows" id="option-rows-tae">
-          <div class="options-empty" id="option-empty-tae">옵션이 없습니다. "옵션 추가" 버튼을 클릭하세요.</div>
-        </div>
-      </div>
-      <div class="store-info-section">
-        <div class="store-info-title">제조/공급 정보</div>
-        <div class="store-info-fields">
-          <div class="field"><label>제조사</label><input type="text" id="tae-manufacturer" placeholder="예: (주)행복식품" /></div>
-          <div class="field"><label>전화번호</label><input type="tel" id="tae-phone" placeholder="예: 02-1234-5678" /></div>
-        </div>
+  </div>
+
+  <!-- STEP 5: 상세정보제공고시 -->
+  <div class="step-header">
+    <span class="step-num">STEP 5</span>
+    <span class="step-title">상세정보제공고시</span>
+  </div>
+  <div class="notice-section">
+    <div class="notice-section-header">
+      <div class="badge badge-individual">고시</div>
+      <div class="notice-section-title">상세정보제공고시</div>
+    </div>
+    <div class="notice-category-row">
+      <div class="field" style="max-width: 220px;">
+        <label>품목 선택</label>
+        <select id="noticeCategory" onchange="onNoticeCategoryChange()">
+          <option value="">-- 품목 선택 --</option>
+          <option value="food">식품</option>
+          <option value="clothing">의류</option>
+          <option value="electronics">전자제품</option>
+          <option value="daily">생활용품</option>
+          <option value="furniture">가구/인테리어</option>
+          <option value="cosmetics">화장품</option>
+          <option value="sports">스포츠/레저</option>
+        </select>
       </div>
     </div>
-
+    <div class="notice-dynamic-fields" id="noticeDynamicFields">
+      <div style="font-size: 13px; color: var(--text3); padding: 8px 0;">품목을 선택하면 필수 입력 항목이 표시됩니다.</div>
+    </div>
   </div>
+
 </div>
 
 <!-- Toast -->
@@ -796,15 +866,12 @@ const SLOTS = {
   'j1-spec':        { folder: '제이원투몰', sub: '상세정보제공고시' },
   'happy-main':     { folder: '행복산업', sub: '대표메인이미지' },
   'happy-spec':     { folder: '행복산업', sub: '상세정보제공고시' },
-  'tae-main':       { folder: '태실장픽앤샵', sub: '대표메인이미지' },
-  'tae-spec':       { folder: '태실장픽앤샵', sub: '상세정보제공고시' },
 };
 
 const TAB_SLOTS = {
   soul: ['soul-main','soul-spec'],
   j1: ['j1-main','j1-spec'],
   happy: ['happy-main','happy-spec'],
-  tae: ['tae-main','tae-spec'],
 };
 
 const files = {};
@@ -813,11 +880,129 @@ Object.keys(SLOTS).forEach(k => files[k] = []);
 const uploadedUrls = {};
 Object.keys(SLOTS).forEach(k => uploadedUrls[k] = []);
 
-// STEP 3: Options
-const storeOptions = { soul: [], j1: [], happy: [], tae: [] };
+const storeOptions = { soul: [], j1: [], happy: [] };
 let optionCounter = 0;
+let currentTab = 'soul';
 
-// STEP 4: 상세정보제공고시 필드 정의
+// STEP 2: 표준카테고리 검색
+let stdCategories = [];
+let catDropdownFocusIdx = -1;
+let catSearchResults = [];
+
+async function loadStdCategories() {
+  try {
+    const res = await fetch('https://cdn.wonflowai.com/cafe24/categories/standard_categories.json');
+    if (res.ok) {
+      const data = await res.json();
+      stdCategories = extractLeafNodes(data);
+    }
+  } catch(e) {
+    console.warn('표준카테고리 로드 실패:', e);
+  }
+}
+
+function extractLeafNodes(data) {
+  const leaves = [];
+  function traverse(node) {
+    if (!node.children || node.children.length === 0) {
+      leaves.push(node);
+    } else {
+      node.children.forEach(traverse);
+    }
+  }
+  const root = Array.isArray(data) ? data : (data.categories || data.items || Object.values(data));
+  if (Array.isArray(root)) root.forEach(traverse);
+  return leaves;
+}
+
+function onCatSearch() {
+  const q = document.getElementById('catSearchInput').value.trim();
+  if (!q) {
+    closeCatDropdown();
+    return;
+  }
+  const lower = q.toLowerCase();
+  catSearchResults = stdCategories.filter(c => {
+    const name = (c.name || c.categoryName || '').toLowerCase();
+    const code = String(c.code || c.categoryCode || c.no || '');
+    return name.includes(lower) || code.includes(lower);
+  }).slice(0, 50);
+  renderCatDropdown();
+}
+
+function onCatFocus() {
+  const q = document.getElementById('catSearchInput').value.trim();
+  if (q) onCatSearch();
+}
+
+function renderCatDropdown() {
+  const dropdown = document.getElementById('catDropdown');
+  if (catSearchResults.length === 0) {
+    dropdown.innerHTML = '<div class="cat-option" style="color:var(--text3);">검색 결과 없음</div>';
+    dropdown.classList.add('show');
+    catDropdownFocusIdx = -1;
+    return;
+  }
+  dropdown.innerHTML = catSearchResults.map((c, i) => {
+    const name = c.name || c.categoryName || '';
+    const code = c.code || c.categoryCode || c.no || '';
+    return `<div class="cat-option" data-code="${code}" data-name="${name}" data-idx="${i}" onclick="selectCat('${code}','${name.replace(/'/g,"\\'")}')">
+      ${name}<span class="cat-code">${code}</span>
+    </div>`;
+  }).join('');
+  dropdown.classList.add('show');
+  catDropdownFocusIdx = -1;
+}
+
+function onCatKeydown(e) {
+  const dropdown = document.getElementById('catDropdown');
+  if (!dropdown.classList.contains('show')) return;
+  const items = dropdown.querySelectorAll('.cat-option[data-idx]');
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    catDropdownFocusIdx = Math.min(catDropdownFocusIdx + 1, items.length - 1);
+    updateCatFocus(items);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    catDropdownFocusIdx = Math.max(catDropdownFocusIdx - 1, 0);
+    updateCatFocus(items);
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (catDropdownFocusIdx >= 0 && items[catDropdownFocusIdx]) {
+      const el = items[catDropdownFocusIdx];
+      selectCat(el.dataset.code, el.dataset.name);
+    }
+  } else if (e.key === 'Escape') {
+    closeCatDropdown();
+  }
+}
+
+function updateCatFocus(items) {
+  items.forEach((el, i) => {
+    el.classList.toggle('focused', i === catDropdownFocusIdx);
+    if (i === catDropdownFocusIdx) el.scrollIntoView({ block: 'nearest' });
+  });
+}
+
+function selectCat(code, name) {
+  document.getElementById('categoryCode').value = code;
+  document.getElementById('catSearchInput').value = name;
+  const badge = document.getElementById('catSelectedBadge');
+  badge.textContent = `✓ 선택됨: ${name} (코드: ${code})`;
+  badge.classList.add('show');
+  closeCatDropdown();
+}
+
+function closeCatDropdown() {
+  document.getElementById('catDropdown').classList.remove('show');
+  catDropdownFocusIdx = -1;
+}
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.cat-search-wrap')) closeCatDropdown();
+});
+
+// STEP 5: 상세정보제공고시
 const NOTICE_FIELDS = {
   food: [
     { id: 'food_type', label: '식품의 유형', placeholder: '예: 건포류, 김치류' },
@@ -904,7 +1089,6 @@ function getNoticeData() {
   return result;
 }
 
-// STEP 3: Option row management
 function addOptionRow(store) {
   const id = ++optionCounter;
   const empty = document.getElementById('option-empty-' + store);
@@ -959,7 +1143,7 @@ function updateFolderLabel(slot) {
 let prevCommonName = '';
 document.getElementById('productName').addEventListener('input', () => {
   const newName = document.getElementById('productName').value;
-  ['soul', 'j1', 'happy', 'tae'].forEach(store => {
+  ['soul', 'j1', 'happy'].forEach(store => {
     const el = document.getElementById(store + '-productName');
     if (el && (el.value === '' || el.value === prevCommonName)) {
       el.value = newName;
@@ -1038,7 +1222,6 @@ function switchTab(tab) {
   document.querySelectorAll('.store-panel').forEach(p => p.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
   document.getElementById('panel-' + tab).classList.add('active');
-  updateCategorySelect(tab);
 }
 
 function logMsg(msg, type = 'info') {
@@ -1054,7 +1237,6 @@ function setProgress(pct) {
   document.getElementById('progressBar').style.width = pct + '%';
 }
 
-// STEP 5: Toast
 let toastTimer = null;
 function showToast(msg, type) {
   const el = document.getElementById('toast');
@@ -1074,16 +1256,11 @@ async function uploadFile(file, r2Key) {
   return data.url || data.key || r2Key;
 }
 
-// STEP 5: Send n8n webhook
 async function sendWebhook() {
-  const catMainEl = document.getElementById('categoryMain');
-  const catSubEl = document.getElementById('categorySub');
-  const hasSubVal = catSubEl.value && catSubEl.value !== '';
-  const categoryNo = hasSubVal ? catSubEl.value : catMainEl.value;
-  const categoryText = hasSubVal
-    ? (catSubEl.options[catSubEl.selectedIndex] ? catSubEl.options[catSubEl.selectedIndex].text : '')
-    : (catMainEl.options[catMainEl.selectedIndex] ? catMainEl.options[catMainEl.selectedIndex].text : '');
   const commonName = document.getElementById('productName').value.trim();
+  const categoryCode = document.getElementById('categoryCode').value;
+  const categoryText = document.getElementById('catSearchInput').value.trim();
+
   const payload = {
     product: {
       name: commonName,
@@ -1091,18 +1268,19 @@ async function sendWebhook() {
       salePrice: Number(document.getElementById('salePrice').value) || 0,
       supplyPrice: Number(document.getElementById('supplyPrice').value) || 0,
       stock: Number(document.getElementById('stock').value) || 0,
+      origin: document.getElementById('origin').value.trim(),
+      minQty: Number(document.getElementById('minQty').value) || 1,
       displayStatus: document.getElementById('displayStatus').value,
       saleStatus: document.getElementById('saleStatus').value,
-      categoryNo: categoryNo,
-      categoryText: categoryText,
       taxType: document.getElementById('taxType').value,
+      categoryCode: categoryCode,
+      categoryText: categoryText,
     },
     noticeInfo: getNoticeData(),
     stores: {
       soul:  { productName: document.getElementById('soul-productName').value.trim() || commonName,  manufacturer: document.getElementById('soul-manufacturer').value.trim(),  phone: document.getElementById('soul-phone').value.trim(),  options: getStoreOptions('soul'),  images: { main: uploadedUrls['soul-main'],  spec: uploadedUrls['soul-spec']  } },
       j1:    { productName: document.getElementById('j1-productName').value.trim() || commonName,    manufacturer: document.getElementById('j1-manufacturer').value.trim(),    phone: document.getElementById('j1-phone').value.trim(),    options: getStoreOptions('j1'),    images: { main: uploadedUrls['j1-main'],    spec: uploadedUrls['j1-spec']    } },
       happy: { productName: document.getElementById('happy-productName').value.trim() || commonName, manufacturer: document.getElementById('happy-manufacturer').value.trim(), phone: document.getElementById('happy-phone').value.trim(), options: getStoreOptions('happy'), images: { main: uploadedUrls['happy-main'], spec: uploadedUrls['happy-spec'] } },
-      tae:   { productName: document.getElementById('tae-productName').value.trim() || commonName,   manufacturer: document.getElementById('tae-manufacturer').value.trim(),   phone: document.getElementById('tae-phone').value.trim(),   options: getStoreOptions('tae'),   images: { main: uploadedUrls['tae-main'],   spec: uploadedUrls['tae-spec']   } },
     },
     commonImages: {
       detail: uploadedUrls['common-detail'],
@@ -1217,11 +1395,17 @@ function resetAll() {
   document.getElementById('salePrice').value = '';
   document.getElementById('supplyPrice').value = '';
   document.getElementById('stock').value = '';
+  document.getElementById('origin').value = '';
+  document.getElementById('minQty').value = '1';
   document.getElementById('displayStatus').value = 'T';
   document.getElementById('saleStatus').value = 'T';
   document.getElementById('taxType').value = 'A';
+  document.getElementById('catSearchInput').value = '';
+  document.getElementById('categoryCode').value = '';
+  document.getElementById('catSelectedBadge').classList.remove('show');
+  closeCatDropdown();
 
-  ['soul','j1','happy','tae'].forEach(store => {
+  ['soul','j1','happy'].forEach(store => {
     storeOptions[store] = [];
     const container = document.getElementById('option-rows-' + store);
     if (container) container.innerHTML = `<div class="options-empty" id="option-empty-${store}">옵션이 없습니다. "옵션 추가" 버튼을 클릭하세요.</div>`;
@@ -1233,81 +1417,16 @@ function resetAll() {
     if (sn) sn.value = '';
   });
   prevCommonName = '';
-  document.getElementById('categoryMain').innerHTML = '<option value="">로딩 중...</option>';
-  document.getElementById('categorySub').innerHTML = '<option value="">선택</option>';
-  document.getElementById('categorySub-wrap').style.display = 'none';
   document.getElementById('noticeCategory').value = '';
   onNoticeCategoryChange();
 
-  updateCategorySelect(currentTab);
   document.getElementById('progressPanel').classList.remove('show');
   document.getElementById('resultPanel').classList.remove('show');
   Object.keys(SLOTS).forEach(updateFolderLabel);
 }
 
 Object.keys(SLOTS).forEach(updateFolderLabel);
-
-// 카테고리 동적 로딩
-const CATEGORY_URLS = {
-  soul:  'https://cdn.wonflowai.com/cafe24/categories/소울스토어.json',
-  j1:    'https://cdn.wonflowai.com/cafe24/categories/제이원투몰.json',
-  happy: 'https://cdn.wonflowai.com/cafe24/categories/행복산업.json',
-  tae:   'https://cdn.wonflowai.com/cafe24/categories/태실장픽앤샵.json',
-};
-
-const categoryData = {};
-let currentTab = 'soul';
-
-function updateCategorySelect(tab) {
-  const mainSelect = document.getElementById('categoryMain');
-  const subWrap = document.getElementById('categorySub-wrap');
-  const subSelect = document.getElementById('categorySub');
-  const data = categoryData[tab];
-  if (!data) {
-    mainSelect.innerHTML = '<option value="">로딩 중...</option>';
-    subWrap.style.display = 'none';
-    return;
-  }
-  mainSelect.innerHTML = '<option value="">-- 대분류 선택 --</option>' +
-    data.map(cat => `<option value="${cat.no}">${cat.name}</option>`).join('');
-  subWrap.style.display = 'none';
-  subSelect.innerHTML = '<option value="">선택</option>';
-}
-
-function onCategoryMainChange() {
-  const mainSelect = document.getElementById('categoryMain');
-  const subWrap = document.getElementById('categorySub-wrap');
-  const subSelect = document.getElementById('categorySub');
-  const selectedNo = Number(mainSelect.value);
-  const data = categoryData[currentTab] || [];
-  const parent = data.find(c => c.no === selectedNo);
-  subSelect.innerHTML = '<option value="">선택</option>';
-  if (parent && parent.children && parent.children.length > 0) {
-    subSelect.innerHTML += parent.children.map(c => `<option value="${c.no}">${c.name}</option>`).join('');
-    subWrap.style.display = '';
-  } else {
-    subWrap.style.display = 'none';
-  }
-}
-
-async function loadCategories() {
-  await Promise.allSettled(
-    Object.entries(CATEGORY_URLS).map(async ([tab, url]) => {
-      try {
-        const res = await fetch(url);
-        if (res.ok) {
-          const d = await res.json();
-          categoryData[tab] = d.categories || [];
-        }
-      } catch (e) {
-        console.warn('카테고리 로드 실패 (' + tab + '):', e);
-      }
-    })
-  );
-  updateCategorySelect(currentTab);
-}
-
-loadCategories();
+loadStdCategories();
 </script>
 </body>
 </html>
