@@ -601,12 +601,6 @@
     <span class="step-num">STEP 3</span>
     <span class="step-title">공통 이미지</span>
   </div>
-  <div class="section-label">
-    <div class="badge badge-common">공통</div>
-    <div class="section-title">공통 이미지</div>
-    <div class="section-desc">3개 사업자 동일 적용</div>
-  </div>
-
   <div class="upload-grid" id="commonGrid">
     <div class="upload-box" id="box-common-detail">
       <div class="upload-box-header">
@@ -665,12 +659,6 @@
     <span class="step-title">사업자별 이미지</span>
   </div>
   <div class="individual-section">
-    <div class="section-label">
-      <div class="badge badge-individual">개별</div>
-      <div class="section-title">사업자별 이미지</div>
-      <div class="section-desc">사업자마다 다르게 적용</div>
-    </div>
-
     <div class="store-tabs">
       <button class="store-tab active" onclick="switchTab('soul')" id="tab-soul">소울스토어 <span class="tab-count" id="tc-soul">0</span></button>
       <button class="store-tab" onclick="switchTab('j1')" id="tab-j1">제이원투몰 <span class="tab-count" id="tc-j1">0</span></button>
@@ -897,10 +885,12 @@ let catSearchResults = [];
 
 async function loadStdCategories() {
   try {
-    const res = await fetch('https://cdn.wonflowai.com/cafe24/categories/standard_categories.json');
+    const res = await fetch('https://cdn.wonflowai.com/cafe24/categories/standard_categories.json', { mode: 'cors' });
     if (res.ok) {
       const data = await res.json();
-      stdCategories = extractLeafNodes(data);
+      window.categoryLeafs = extractLeafNodes(data);
+      stdCategories = window.categoryLeafs;
+      console.log('leafNodes count:', window.categoryLeafs.length);
     }
   } catch(e) {
     console.warn('표준카테고리 로드 실패:', e);
