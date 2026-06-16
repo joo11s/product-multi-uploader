@@ -717,8 +717,10 @@
       <div class="store-info-section">
         <div class="store-info-title">제작 정보</div>
         <div class="store-info-fields">
-          <div class="field"><label>제조사</label><input type="text" id="soul-manufacturer" placeholder="예: (주)행복식품" /></div>
-          <div class="field"><label>전화번호</label><input type="tel" id="soul-phone" placeholder="예: 02-1234-5678" /></div>
+          <div class="field"><label>제조사</label><input type="text" id="soul-manufacturer" /></div>
+          <div class="field"><label>공급사</label><input type="text" id="soul-supplier" /></div>
+          <div class="field"><label>브랜드</label><input type="text" id="soul-brand" /></div>
+          <div class="field"><label>연락처</label><input type="text" id="soul-contact" /></div>
         </div>
       </div>
     </div>
@@ -763,8 +765,10 @@
       <div class="store-info-section">
         <div class="store-info-title">제작 정보</div>
         <div class="store-info-fields">
-          <div class="field"><label>제조사</label><input type="text" id="j1-manufacturer" placeholder="예: (주)행복식품" /></div>
-          <div class="field"><label>전화번호</label><input type="tel" id="j1-phone" placeholder="예: 02-1234-5678" /></div>
+          <div class="field"><label>제조사</label><input type="text" id="j1-manufacturer" /></div>
+          <div class="field"><label>공급사</label><input type="text" id="j1-supplier" /></div>
+          <div class="field"><label>브랜드</label><input type="text" id="j1-brand" /></div>
+          <div class="field"><label>연락처</label><input type="text" id="j1-contact" /></div>
         </div>
       </div>
     </div>
@@ -809,8 +813,10 @@
       <div class="store-info-section">
         <div class="store-info-title">제작 정보</div>
         <div class="store-info-fields">
-          <div class="field"><label>제조사</label><input type="text" id="happy-manufacturer" placeholder="예: (주)행복식품" /></div>
-          <div class="field"><label>전화번호</label><input type="tel" id="happy-phone" placeholder="예: 02-1234-5678" /></div>
+          <div class="field"><label>제조사</label><input type="text" id="happy-manufacturer" /></div>
+          <div class="field"><label>공급사</label><input type="text" id="happy-supplier" /></div>
+          <div class="field"><label>브랜드</label><input type="text" id="happy-brand" /></div>
+          <div class="field"><label>연락처</label><input type="text" id="happy-contact" /></div>
         </div>
       </div>
     </div>
@@ -1126,7 +1132,10 @@ function removeOptionRow(store, id) {
 function getStoreOptions(store) {
   return storeOptions[store]
     .filter(o => o.name.trim())
-    .map(o => ({ name: o.name.trim(), value: o.value.trim() }));
+    .map(o => ({
+      name: o.name.trim(),
+      values: o.value.trim() ? o.value.split(',').map(v => v.trim()).filter(v => v) : []
+    }));
 }
 
 function getProductName() {
@@ -1378,7 +1387,13 @@ async function startUpload() {
   btn.disabled = false;
   btn.innerHTML = '🚀 업로드';
 
-  await sendWebhook();
+  try {
+    await sendWebhook();
+  } finally {
+    const spinner = document.querySelector('#progressPanel .spinner');
+    if (spinner) spinner.style.display = 'none';
+    document.getElementById('progressTitle').textContent = '완료';
+  }
 }
 
 function resetAll() {
@@ -1408,13 +1423,13 @@ function resetAll() {
   ['soul','j1','happy'].forEach(store => {
     storeOptions[store] = [];
     const container = document.getElementById('option-rows-' + store);
-    if (container) container.innerHTML = `<div class="options-empty" id="option-empty-${store}">옵션이 없습니다. "옵션 추가" 버튼을 클릭하세요.</div>`;
+    if (container) container.innerHTML = '<div class="options-empty" id="option-empty-' + store + '">옵션이 없습니다. "옵션 추가" 버튼을 클릭하세요.</div>';
+    const sn = document.getElementById(store + '-productName');
+    if (sn) sn.value = '';
     const mf = document.getElementById(store + '-manufacturer');
     const ph = document.getElementById(store + '-phone');
-    const sn = document.getElementById(store + '-productName');
     if (mf) mf.value = '';
     if (ph) ph.value = '';
-    if (sn) sn.value = '';
   });
   prevCommonName = '';
   document.getElementById('noticeCategory').value = '';
