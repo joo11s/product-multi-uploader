@@ -942,8 +942,9 @@ function renderCatDropdown() {
   dropdown.innerHTML = catSearchResults.map((c, i) => {
     const name = c.name || c.categoryName || '';
     const code = c.code || c.categoryCode || c.no || '';
-    return `<div class="cat-option" data-code="${code}" data-name="${name}" data-idx="${i}" onclick="selectCat('${code}','${name.replace(/'/g,"\\'")}')">
-      ${name}<span class="cat-code">${code}</span>
+    const displayPath = c.path ? c.path.replace(/>/g, ' > ') : name;
+    return `<div class="cat-option" data-code="${code}" data-name="${displayPath}" data-idx="${i}" onclick="selectCat('${code}','${displayPath.replace(/'/g,"\\'")}')">
+      ${displayPath}<span class="cat-code">${code}</span>
     </div>`;
   }).join('');
   dropdown.classList.add('show');
