@@ -906,7 +906,7 @@ function extractLeafNodes(data) {
       node.children.forEach(traverse);
     }
   }
-  const root = Array.isArray(data) ? data : (data.categories || data.items || Object.values(data));
+  const root = Array.isArray(data) ? data : (data.fullTree || data.categories || data.items || Object.values(data));
   if (Array.isArray(root)) root.forEach(traverse);
   return leaves;
 }
