@@ -527,32 +527,55 @@
     <div class="result-grid" id="resultGrid"></div>
   </div>
 
-  <!-- STEP 4: 공통 이미지 -->
-  <div class="step-header"><span class="step-num">STEP 4</span><span class="step-title">공통 이미지</span></div>
-  <div class="upload-grid" style="margin-bottom:24px;" id="commonGrid">
-    <div class="upload-box" id="box-common-detail">
-      <div class="upload-box-header">
-        <div class="upload-box-title"><span class="dot" id="dot-common-detail"></span>상세페이지</div>
-        <span class="upload-folder" id="folder-common-detail">공통/상품명_상세페이지/</span>
-      </div>
-      <div class="upload-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,'common-detail')">
-        <input type="file" accept="image/*" multiple onchange="handleFiles(event,'common-detail')" />
-        <div class="upload-placeholder" id="ph-common-detail"><div class="upload-icon">📦</div><p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택</p><p style="font-size:11px; color: var(--text3);">JPG, PNG, WEBP</p></div>
-      </div>
-      <div class="thumb-grid" id="thumbs-common-detail"></div>
+  <!-- STEP 4: 상세페이지 -->
+  <div class="step-header"><span class="step-num">STEP 4</span><span class="step-title">상세페이지</span></div>
+  <div class="panel" style="margin-bottom:24px;">
+    <div class="radio-row" style="margin-bottom:16px;">
+      <label class="radio-item"><input type="radio" name="detailMode" value="image" checked onchange="onDetailModeChange()" /> 이미지로 작업</label>
+      <label class="radio-item"><input type="radio" name="detailMode" value="html" onchange="onDetailModeChange()" /> 클디 HTML로 작업</label>
     </div>
-    <div class="upload-box" id="box-common-notice">
-      <div class="upload-box-header">
-        <div class="upload-box-title"><span class="dot" id="dot-common-notice"></span>안내 / 주의사항</div>
-        <span class="upload-folder" id="folder-common-notice">공통/상품명_안내주의사항/</span>
+
+    <div id="detailHtmlSection" style="display:none;">
+      <div class="field" style="margin-bottom:12px;">
+        <label>클디 인라인 HTML 붙여넣기</label>
+        <textarea id="detailHtmlInput" style="min-height:160px; font-family:monospace; font-size:12px;" placeholder="클디에서 인라인화 완료한 HTML 코드를 그대로 붙여넣으세요"></textarea>
       </div>
-      <div class="upload-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,'common-notice')">
-        <input type="file" accept="image/*" multiple onchange="handleFiles(event,'common-notice')" />
-        <div class="upload-placeholder" id="ph-common-notice"><div class="upload-icon">📦</div><p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택</p><p style="font-size:11px; color: var(--text3);">JPG, PNG, WEBP</p></div>
-      </div>
-      <div class="thumb-grid" id="thumbs-common-notice"></div>
+      <button class="btn-add-option" id="btnUploadHtml" onclick="uploadDetailHtml()">R2에 업로드</button>
+      <span id="detailHtmlStatus" style="margin-left:12px; font-size:13px; color: var(--text3);"></span>
     </div>
-    <div class="upload-box" id="box-common-extra">
+
+    <div id="detailImageSection">
+      <div class="upload-grid" id="commonGrid">
+        <div class="upload-box" id="box-common-detail">
+          <div class="upload-box-header">
+            <div class="upload-box-title"><span class="dot" id="dot-common-detail"></span>상세페이지</div>
+            <span class="upload-folder" id="folder-common-detail">공통/상품명_상세페이지/</span>
+          </div>
+          <div class="upload-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,'common-detail')">
+            <input type="file" accept="image/*" multiple onchange="handleFiles(event,'common-detail')" />
+            <div class="upload-placeholder" id="ph-common-detail"><div class="upload-icon">📦</div><p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택</p><p style="font-size:11px; color: var(--text3);">JPG, PNG, WEBP</p></div>
+          </div>
+          <div class="thumb-grid" id="thumbs-common-detail"></div>
+        </div>
+        <div class="upload-box" id="box-common-notice">
+          <div class="upload-box-header">
+            <div class="upload-box-title"><span class="dot" id="dot-common-notice"></span>안내 / 주의사항</div>
+            <span class="upload-folder" id="folder-common-notice">공통/상품명_안내주의사항/</span>
+          </div>
+          <div class="upload-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,'common-notice')">
+            <input type="file" accept="image/*" multiple onchange="handleFiles(event,'common-notice')" />
+            <div class="upload-placeholder" id="ph-common-notice"><div class="upload-icon">📦</div><p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택</p><p style="font-size:11px; color: var(--text3);">JPG, PNG, WEBP</p></div>
+          </div>
+          <div class="thumb-grid" id="thumbs-common-notice"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 4-2: 메인 추가이미지 (HTML 모드와 무관하게 항상 노출) -->
+  <div class="step-header"><span class="step-num">STEP 4-2</span><span class="step-title">메인 추가이미지</span></div>
+  <div class="upload-grid" style="margin-bottom:24px; grid-template-columns: 1fr;" id="extraGrid">
+    <div class="upload-box" id="box-common-extra" style="max-width:400px;">
       <div class="upload-box-header">
         <div class="upload-box-title"><span class="dot" id="dot-common-extra"></span>메인 추가이미지</div>
         <span class="upload-folder" id="folder-common-extra">공통/상품명_메인추가이미지/</span>
@@ -703,7 +726,7 @@ function buildStorePanel(store, name) {
       <div class="thumb-grid" id="thumbs-${store}-main"></div>
     </div>
 
-    <div class="upload-box">
+    <div class="upload-box" id="box-${store}-spec">
       <div class="upload-box-header">
         <div class="upload-box-title"><span class="dot" id="dot-${store}-spec"></span>상세정보제공고시 이미지</div>
         <span class="upload-folder" id="folder-${store}-spec">${name}/상품명_상세정보제공고시/</span>
@@ -937,6 +960,42 @@ function onOverseasToggle() {
   document.getElementById('overseasFields').style.display = enabled ? '' : 'none';
 }
 
+// ===== 상세페이지 모드 (이미지 vs 클디 HTML) =====
+let detailHtmlUrl = '';
+
+function onDetailModeChange() {
+  const mode = document.querySelector('input[name="detailMode"]:checked').value;
+  const isHtml = mode === 'html';
+  document.getElementById('detailHtmlSection').style.display = isHtml ? '' : 'none';
+  document.getElementById('detailImageSection').style.display = isHtml ? 'none' : '';
+  STORES.forEach(s => {
+    const specBox = document.getElementById('box-' + s.key + '-spec');
+    if (specBox) specBox.style.display = isHtml ? 'none' : '';
+  });
+}
+
+async function uploadDetailHtml() {
+  const html = document.getElementById('detailHtmlInput').value.trim();
+  const statusEl = document.getElementById('detailHtmlStatus');
+  if (!html) { statusEl.textContent = 'HTML을 먼저 붙여넣어주세요.'; return; }
+  const pn = getProductName();
+  const btn = document.getElementById('btnUploadHtml');
+  btn.disabled = true;
+  statusEl.textContent = '업로드 중...';
+  try {
+    const blob = new Blob([html], { type: 'text/html' });
+    const file = new File([blob], `${pn}_상세페이지.html`, { type: 'text/html' });
+    const r2Key = `products/상세HTML/${pn}_상세페이지_${Date.now()}.html`;
+    const url = await uploadFile(file, r2Key);
+    detailHtmlUrl = url;
+    statusEl.textContent = `✓ 업로드 완료: ${url}`;
+  } catch (e) {
+    statusEl.textContent = '✗ 업로드 실패: ' + e.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
 function addOptionRow(store) {
   const id = ++optionCounter;
   const empty = document.getElementById('option-empty-' + store);
@@ -1151,6 +1210,7 @@ async function sendWebhook() {
       visibilityLimit: document.querySelector('input[name="visibilityLimit"]:checked').value,
       mobileDescSameAsDesc: true,
       seo: { title: commonName, description: summaryDesc, keywords: searchKeywords, imageAlt: commonName },
+      detailHtmlUrl: detailHtmlUrl || '',
     },
     overseas: getOverseasData(),
     stores: { soul: buildStorePayload('soul'), j1: buildStorePayload('j1'), happy: buildStorePayload('happy') },
@@ -1273,6 +1333,11 @@ function resetAll() {
   prevCommonName = '';
   document.querySelector('input[name="overseasSale"][value="F"]').checked = true;
   onOverseasToggle();
+  document.querySelector('input[name="detailMode"][value="image"]').checked = true;
+  onDetailModeChange();
+  document.getElementById('detailHtmlInput').value = '';
+  document.getElementById('detailHtmlStatus').textContent = '';
+  detailHtmlUrl = '';
   ['overseasProductNameEn','overseasHsCode','overseasProductClass','overseasMaterial','overseasMaterialEn'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   document.getElementById('overseasFabric').value = '';
 
