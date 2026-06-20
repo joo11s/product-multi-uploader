@@ -257,6 +257,8 @@
   .upload-placeholder p strong { color: var(--accent); font-weight: 700; }
 
   .thumb-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 0 16px 16px; }
+  .thumb-grid-row { display: flex; grid-template-columns: none; gap: 8px; flex-wrap: nowrap; overflow-x: auto; }
+  .thumb-grid-row .thumb-item { flex: 0 0 calc((100% - 64px) / 9); min-width: 70px; }
   .thumb-item { position: relative; aspect-ratio: 1; border-radius: 6px; overflow: hidden; background: var(--bg); }
   .thumb-item img { width: 100%; height: 100%; object-fit: cover; }
   .thumb-item .remove-btn {
@@ -545,13 +547,13 @@
     </div>
 
     <div id="detailImageSection">
-      <div class="upload-grid" id="commonGrid">
+      <div class="upload-grid" id="commonGrid" style="grid-template-columns: repeat(2, 1fr);">
         <div class="upload-box" id="box-common-detail">
           <div class="upload-box-header">
             <div class="upload-box-title"><span class="dot" id="dot-common-detail"></span>상세페이지</div>
             <span class="upload-folder" id="folder-common-detail">공통/상품명_상세페이지/</span>
           </div>
-          <div class="upload-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,'common-detail')">
+          <div class="upload-area" style="min-height:320px;" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,'common-detail')">
             <input type="file" accept="image/*" multiple onchange="handleFiles(event,'common-detail')" />
             <div class="upload-placeholder" id="ph-common-detail"><div class="upload-icon">📦</div><p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택</p><p style="font-size:11px; color: var(--text3);">JPG, PNG, WEBP</p></div>
           </div>
@@ -562,7 +564,7 @@
             <div class="upload-box-title"><span class="dot" id="dot-common-notice"></span>안내 / 주의사항</div>
             <span class="upload-folder" id="folder-common-notice">공통/상품명_안내주의사항/</span>
           </div>
-          <div class="upload-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,'common-notice')">
+          <div class="upload-area" style="min-height:320px;" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,'common-notice')">
             <input type="file" accept="image/*" multiple onchange="handleFiles(event,'common-notice')" />
             <div class="upload-placeholder" id="ph-common-notice"><div class="upload-icon">📦</div><p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택</p><p style="font-size:11px; color: var(--text3);">JPG, PNG, WEBP</p></div>
           </div>
@@ -573,18 +575,18 @@
   </div>
 
   <!-- STEP 4-2: 메인 추가이미지 (HTML 모드와 무관하게 항상 노출) -->
-  <div class="step-header"><span class="step-num">STEP 4-2</span><span class="step-title">메인 추가이미지</span></div>
+  <div class="step-header"><span class="step-num">STEP 4-2</span><span class="step-title">메인 추가이미지</span><span class="step-sub">최대 9개</span></div>
   <div class="upload-grid" style="margin-bottom:24px; grid-template-columns: 1fr;" id="extraGrid">
-    <div class="upload-box" id="box-common-extra" style="max-width:400px;">
+    <div class="upload-box" id="box-common-extra">
       <div class="upload-box-header">
         <div class="upload-box-title"><span class="dot" id="dot-common-extra"></span>메인 추가이미지</div>
         <span class="upload-folder" id="folder-common-extra">공통/상품명_메인추가이미지/</span>
       </div>
       <div class="upload-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,'common-extra')">
         <input type="file" accept="image/*" multiple onchange="handleFiles(event,'common-extra')" />
-        <div class="upload-placeholder" id="ph-common-extra"><div class="upload-icon">📦</div><p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택</p><p style="font-size:11px; color: var(--text3);">JPG, PNG, WEBP</p></div>
+        <div class="upload-placeholder" id="ph-common-extra"><div class="upload-icon">📦</div><p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택 (최대 9개)</p></div>
       </div>
-      <div class="thumb-grid" id="thumbs-common-extra"></div>
+      <div class="thumb-grid thumb-grid-row" id="thumbs-common-extra"></div>
     </div>
   </div>
 
@@ -1081,7 +1083,16 @@ function handleDragOver(e) { e.preventDefault(); e.currentTarget.classList.add('
 function handleDragLeave(e) { e.currentTarget.classList.remove('dragover'); }
 function handleDrop(e, slot) { e.preventDefault(); e.currentTarget.classList.remove('dragover'); addFiles(slot, Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'))); }
 
-function addFiles(slot, newFiles) { files[slot] = [...files[slot], ...newFiles]; renderThumbs(slot); updateDot(slot); updateTabCount(); }
+function addFiles(slot, newFiles) {
+  files[slot] = [...files[slot], ...newFiles];
+  if (slot === 'common-extra' && files[slot].length > 9) {
+    files[slot] = files[slot].slice(0, 9);
+    showToast('메인 추가이미지는 최대 9개까지만 등록 가능합니다.', 'error');
+  }
+  renderThumbs(slot);
+  updateDot(slot);
+  updateTabCount();
+}
 function removeFile(slot, idx) { files[slot].splice(idx, 1); renderThumbs(slot); updateDot(slot); updateTabCount(); }
 
 function renderThumbs(slot) {
@@ -1106,7 +1117,7 @@ function renderThumbs(slot) {
     header.appendChild(badge);
   }
   const badge = header ? header.querySelector('.count-badge') : null;
-  if (badge) badge.textContent = list.length + '장';
+  if (badge) badge.textContent = slot === 'common-extra' ? `${list.length}/9` : list.length + '장';
 }
 
 function updateDot(slot) { const dot = document.getElementById('dot-' + slot); if (dot) dot.className = 'dot ' + (files[slot].length > 0 ? 'active' : ''); }
