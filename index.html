@@ -16,8 +16,8 @@
     --text: #f0f0f0;
     --text2: #999;
     --text3: #666;
-    --accent: #c8a96e;
-    --accent2: #d9be8a;
+    --accent: #f5e6c8;
+    --accent2: #f0d9a8;
     --green: #2ECC71;
     --blue: #4A9EFF;
     --radius: 12px;
@@ -214,7 +214,7 @@
     line-height: 1.4;
   }
   .cat-option:last-child { border-bottom: none; }
-  .cat-option:hover, .cat-option.focused { background: rgba(200,169,110,0.12); color: var(--accent); }
+  .cat-option:hover, .cat-option.focused { background: rgba(245,230,200,0.12); color: var(--accent); }
   .cat-option .cat-code { font-size: 11px; color: var(--text3); margin-left: 8px; font-family: monospace; }
   .cat-selected-badge { margin-top: 8px; font-size: 12px; color: var(--accent); display: none; }
   .cat-selected-badge.show { display: block; }
@@ -230,7 +230,7 @@
   }
   .upload-box:hover { border-color: var(--border2); }
   .upload-box-header { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 4px; }
-  .upload-box-title { font-size: 13px; font-weight: 700; color: #a07828; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+  .upload-box-title { font-size: 13px; font-weight: 700; color: #d4b896; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
   .upload-box-title .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border2); flex-shrink: 0; }
   .upload-box-title .dot.active { background: var(--green); }
   .upload-folder { font-size: 11px; color: var(--text3); font-family: monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-left: 14px; }
@@ -246,8 +246,8 @@
     margin: 10px;
     background: transparent;
   }
-  .upload-area:hover { border-color: var(--accent); background: rgba(200,169,110,0.06); }
-  .upload-area.dragover { background: rgba(200,169,110,0.12); border-color: var(--accent); border-style: dashed; }
+  .upload-area:hover { border-color: var(--accent); background: rgba(245,230,200,0.06); }
+  .upload-area.dragover { background: rgba(245,230,200,0.12); border-color: var(--accent); border-style: dashed; }
   .upload-area input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
 
   .upload-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 120px; gap: 10px; pointer-events: none; }
