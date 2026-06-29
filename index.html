@@ -350,6 +350,19 @@
   .result-item .ri-folder { color: var(--text3); margin-bottom: 4px; font-family: monospace; font-size: 11px; word-break: break-all; }
   .result-item .ri-count { color: var(--green); font-weight: 700; }
 
+  .history-drawer {
+    position: fixed; top: 0; right: 0; width: 380px; max-width: 92vw; height: 100vh;
+    background: var(--bg2); border-left: 1px solid var(--border2); box-shadow: -8px 0 32px rgba(0,0,0,0.5);
+    transform: translateX(100%); transition: transform 0.25s ease; z-index: 500;
+    display: flex; flex-direction: column; padding: 20px;
+  }
+  .history-drawer.show { transform: translateX(0); }
+  .history-drawer-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+  .history-drawer-title { font-size:15px; font-weight:700; color: var(--accent); }
+  .history-drawer-close { background:transparent; border:none; color:var(--text2); font-size:18px; cursor:pointer; }
+  .history-drawer-list { overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:10px; }
+  .history-drawer-note { font-size:11px; color:var(--text3); margin-bottom:12px; }
+
   @keyframes spin { to { transform: rotate(360deg); } }
   .spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.2); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
 
@@ -382,6 +395,8 @@
   <div class="logo">Happy Soul J1 <span style="color:var(--accent);">[BIZ]</span> <span>카페24 전용 상품 업로더</span></div>
   <div class="header-quote" id="headerQuote"></div>
   <div class="header-right">
+    <button class="btn-reset" id="btnHistory" onclick="toggleHistoryDrawer()">📋 전송 이력 <span id="historyCount">0</span></button>
+    <button class="btn-reset" id="btnRetryBadge" style="display:none; border-color:#e74c3c; color:#e74c3c;" onclick="document.getElementById('retryPanel').scrollIntoView({behavior:'smooth'})">⚠ 재전송 대기 <span id="retryBadgeCount">0</span></button>
     <button class="btn-reset" id="btnReset" onclick="resetAll()">초기화</button>
     <button class="btn-upload-all" id="btnUpload" onclick="startUpload()">
       <span id="btnText">🚀 업로드</span>
@@ -529,6 +544,12 @@
     <div class="result-grid" id="resultGrid"></div>
   </div>
 
+  <!-- n8n 전송 실패 시 재시도 대기열 -->
+  <div class="result-panel" id="retryPanel" style="display:none; border-color: rgba(231,76,60,0.4);">
+    <div class="result-title" style="color:#e74c3c;">⚠ n8n 전송 실패 — 이미지는 R2에 저장됨, 재전송 대기 중</div>
+    <div id="retryList" style="display:flex; flex-direction:column; gap:8px; margin-top:10px;"></div>
+  </div>
+
   <!-- STEP 4: 상세페이지 -->
   <div class="step-header"><span class="step-num">STEP 4</span><span class="step-title">상세페이지</span></div>
   <div class="panel" style="margin-bottom:24px;">
@@ -654,9 +675,154 @@
 
 <div class="toast" id="toast"></div>
 
+<div class="history-drawer" id="historyDrawer">
+  <div class="history-drawer-header">
+    <div class="history-drawer-title">📋 전송 이력</div>
+    <button class="history-drawer-close" onclick="toggleHistoryDrawer()">✕</button>
+  </div>
+  <div class="history-drawer-note">최근 30일간의 전송 기록 (성공/실패 모두). "불러오기"를 누르면 해당 데이터가 폼에 그대로 채워집니다. 이미지는 재업로드 없이 기존 R2 URL을 재사용합니다.</div>
+  <div class="history-drawer-list" id="historyList"></div>
+</div>
+
 <script>
 const R2_WORKER = 'https://r2-uploader.joo11s11.workers.dev';
 const N8N_WEBHOOK = 'https://n8n.wonflowai.com/webhook/product-upload';
+const HISTORY_KEY = 'soulkit_upload_history';
+const HISTORY_RETENTION_DAYS = 30;
+
+function getHistory() {
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); }
+  catch (e) { return []; }
+}
+function setHistory(list) {
+  try { localStorage.setItem(HISTORY_KEY, JSON.stringify(list)); } catch (e) {}
+}
+function pruneHistory() {
+  const cutoff = Date.now() - HISTORY_RETENTION_DAYS * 24 * 60 * 60 * 1000;
+  const list = getHistory().filter(e => new Date(e.savedAt).getTime() >= cutoff);
+  setHistory(list);
+}
+function saveHistoryEntry(id, payload, status, errorMsg) {
+  const list = getHistory();
+  const existing = list.find(p => p.id === id);
+  const entry = { id, payload, productName: payload.product.name, status, error: errorMsg || '', savedAt: new Date().toISOString() };
+  if (existing) Object.assign(existing, entry);
+  else list.unshift(entry);
+  setHistory(list);
+  renderRetryPanel();
+  renderHistoryDrawer();
+}
+function removeHistoryEntry(id) {
+  setHistory(getHistory().filter(p => p.id !== id));
+  renderRetryPanel();
+  renderHistoryDrawer();
+}
+
+// 헤더의 "재전송 대기" 빨간 배지/패널은 실패건만 모아서 보여줌 (history의 부분집합)
+function renderRetryPanel() {
+  const list = getHistory().filter(e => e.status === 'failed');
+  const panel = document.getElementById('retryPanel');
+  const listEl = document.getElementById('retryList');
+  const badge = document.getElementById('btnRetryBadge');
+  const count = document.getElementById('retryBadgeCount');
+  if (!panel || !listEl) return;
+  if (list.length === 0) {
+    panel.style.display = 'none';
+    if (badge) badge.style.display = 'none';
+    return;
+  }
+  panel.style.display = '';
+  if (badge) { badge.style.display = ''; count.textContent = list.length; }
+  listEl.innerHTML = '';
+  list.forEach(entry => {
+    const row = document.createElement('div');
+    row.className = 'result-item';
+    row.style.display = 'flex';
+    row.style.justifyContent = 'space-between';
+    row.style.alignItems = 'center';
+    const when = new Date(entry.savedAt).toLocaleString('ko-KR');
+    row.innerHTML = `
+      <div>
+        <div style="font-weight:600;">${entry.productName || '(상품명 없음)'}</div>
+        <div style="color:var(--text3); font-size:11px;">${when} · ${entry.error || ''}</div>
+      </div>
+      <div style="display:flex; gap:6px;">
+        <button class="btn-add-option" style="padding:6px 12px;" onclick="retrySend('${entry.id}')">재전송</button>
+        <button class="btn-reset" style="padding:6px 12px;" onclick="removeHistoryEntry('${entry.id}')">삭제</button>
+      </div>`;
+    listEl.appendChild(row);
+  });
+}
+
+async function retrySend(id) {
+  const list = getHistory();
+  const entry = list.find(p => p.id === id);
+  if (!entry) return;
+  try {
+    logMsg('→ 재전송 중: ' + (entry.productName || ''), 'info');
+    const res = await fetch(N8N_WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(entry.payload) });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    logMsg('✓ 재전송 성공', 'ok');
+    showToast('✓ 재전송 성공! n8n에 전달됐습니다.', 'success');
+    saveHistoryEntry(id, entry.payload, 'success', '');
+  } catch (e) {
+    entry.error = 'HTTP 오류: ' + e.message;
+    entry.savedAt = new Date().toISOString();
+    setHistory(list);
+    renderRetryPanel();
+    renderHistoryDrawer();
+    showToast('⚠ 재전송 실패: ' + e.message, 'error');
+  }
+}
+
+// ===== 전송 이력 패널 (성공/실패 전체, 30일 보관) =====
+function toggleHistoryDrawer() {
+  const d = document.getElementById('historyDrawer');
+  d.classList.toggle('show');
+}
+function renderHistoryDrawer() {
+  const list = getHistory();
+  const listEl = document.getElementById('historyList');
+  const countEl = document.getElementById('historyCount');
+  if (!listEl) return;
+  if (countEl) countEl.textContent = list.length;
+  if (list.length === 0) {
+    listEl.innerHTML = '<div style="color:var(--text3); font-size:13px; text-align:center; padding:24px 0;">전송 이력이 없습니다.</div>';
+    return;
+  }
+  listEl.innerHTML = '';
+  list.forEach(entry => {
+    const when = new Date(entry.savedAt).toLocaleString('ko-KR');
+    const ok = entry.status === 'success';
+    const row = document.createElement('div');
+    row.className = 'result-item';
+    row.style.display = 'flex';
+    row.style.flexDirection = 'column';
+    row.style.gap = '6px';
+    row.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <div>
+          <div style="font-weight:600;">${ok ? '✓' : '✗'} ${entry.productName || '(상품명 없음)'}</div>
+          <div style="color:var(--text3); font-size:11px;">${when} ${entry.error ? '· ' + entry.error : ''}</div>
+        </div>
+      </div>
+      <div style="display:flex; gap:6px;">
+        <button class="btn-add-option" style="padding:5px 10px; font-size:11px;" onclick="loadFromHistory('${entry.id}')">불러오기</button>
+        ${!ok ? `<button class="btn-add-option" style="padding:5px 10px; font-size:11px;" onclick="retrySend('${entry.id}')">재전송</button>` : ''}
+        <button class="btn-reset" style="padding:5px 10px; font-size:11px;" onclick="removeHistoryEntry('${entry.id}')">삭제</button>
+      </div>`;
+    listEl.appendChild(row);
+  });
+}
+
+function loadFromHistory(id) {
+  const entry = getHistory().find(p => p.id === id);
+  if (!entry) return;
+  populateFormFromPayload(entry.payload);
+  toggleHistoryDrawer();
+  showToast('✓ "' + (entry.productName || '') + '" 데이터를 폼에 불러왔습니다. 확인 후 업로드하세요.', 'success');
+}
+
 
 const STORES = [
   { key: 'soul', name: '소울스토어' },
@@ -1024,6 +1190,23 @@ function removeOptionRow(store, id) {
   if (storeOptions[store].length === 0) { const empty = document.getElementById('option-empty-' + store); if (empty) empty.style.display = ''; }
 }
 
+// 이력 불러올 때: 기존 옵션 목록(payload.options)을 화면 옵션 행으로 재구성
+function rebuildOptionRows(store, options) {
+  storeOptions[store] = [];
+  const container = document.getElementById('option-rows-' + store);
+  if (container) container.innerHTML = `<div class="options-empty" id="option-empty-${store}">옵션이 없습니다. "옵션 추가" 버튼을 눌러 추가하세요.</div>`;
+  (options || []).forEach(o => {
+    addOptionRow(store);
+    const newId = optionCounter;
+    const row = document.getElementById('option-row-' + newId);
+    if (!row) return;
+    const nameInput = row.querySelector('.option-name');
+    const valueInput = row.querySelector('input:not(.option-name)');
+    if (nameInput) { nameInput.value = o.name || ''; updateOption(store, newId, 'name', o.name || ''); }
+    if (valueInput) { const v = (o.values || []).join(', '); valueInput.value = v; updateOption(store, newId, 'value', v); }
+  });
+}
+
 function getStoreOptions(store) {
   return storeOptions[store].filter(o => o.name.trim()).map(o => ({
     name: o.name.trim(),
@@ -1058,6 +1241,118 @@ function getShippingData(store) {
 
 function getProductName() { return document.getElementById('productName').value.trim() || '상품명'; }
 
+// 이력에서 불러오기: payload(n8n으로 보냈던 데이터) -> 폼 전체에 역으로 채워넣기
+function populateFormFromPayload(payload) {
+  const p = payload.product || {};
+  const setVal = (id, val) => { const el = document.getElementById(id); if (el != null && val !== undefined) el.value = val; };
+  const setChecked = (id, val) => { const el = document.getElementById(id); if (el) el.checked = !!val; };
+
+  setVal('productName', p.name);
+  setVal('productNameManage', p.nameManage);
+  setVal('supplierProductName', p.supplierProductName);
+  setVal('modelName', p.modelName);
+  setVal('customProductCode', p.customProductCode);
+  setVal('productState', p.productState);
+  setVal('productSummaryDesc', p.summaryDesc);
+  setVal('productSimpleDesc', p.simpleDesc);
+  setVal('searchKeywords', p.searchKeywords);
+  setVal('consumerPrice', p.consumerPrice);
+  setVal('salePrice', p.salePrice);
+  setVal('supplyPrice', p.supplyPrice);
+  setVal('stock', p.stock);
+  setVal('minQty', p.minQty);
+  setVal('displayStatus', p.displayStatus);
+  setVal('saleStatus', p.saleStatus);
+  setVal('taxType', p.taxType);
+
+  setVal('catSearchInput', p.categoryText);
+  setVal('categoryCode', p.categoryCode);
+  const badge = document.getElementById('catSelectedBadge');
+  if (p.categoryCode) { badge.textContent = `✓ 선택됨: ${p.categoryText} (코드: ${p.categoryCode})`; badge.classList.add('show'); }
+
+  if (p.mainDisplay) {
+    setChecked('mainDisplayRecommend', p.mainDisplay.recommend);
+    setChecked('mainDisplayNew', p.mainDisplay.new);
+    setChecked('mainDisplayExtra1', p.mainDisplay.extra1);
+    setChecked('mainDisplayExtra2', p.mainDisplay.extra2);
+  }
+  if (p.visibilityLimit) {
+    const r = document.querySelector(`input[name="visibilityLimit"][value="${p.visibilityLimit}"]`);
+    if (r) r.checked = true;
+  }
+
+  // 상세페이지 모드 (이미지 vs 클디 HTML)
+  if (p.detailHtmlUrl) {
+    document.querySelector('input[name="detailMode"][value="html"]').checked = true;
+    detailHtmlUrl = p.detailHtmlUrl;
+    document.getElementById('detailHtmlStatus').textContent = `✓ 기존 업로드 사용: ${p.detailHtmlUrl} (원본 HTML 텍스트는 보관되지 않아 재입력 시에만 textarea에 표시됩니다)`;
+  } else {
+    document.querySelector('input[name="detailMode"][value="image"]').checked = true;
+  }
+  onDetailModeChange();
+
+  // 공통 이미지 (상세페이지/안내/메인추가이미지) - 기존 R2 URL 재사용
+  const ci = payload.commonImages || {};
+  uploadedUrls['common-detail'] = [...(ci.detail || [])];
+  uploadedUrls['common-notice'] = [...(ci.notice || [])];
+  uploadedUrls['common-extra'] = [...(ci.extra || [])];
+  renderUrlThumbs('common-detail'); updateDot('common-detail');
+  renderUrlThumbs('common-notice'); updateDot('common-notice');
+  renderUrlThumbs('common-extra'); updateDot('common-extra');
+
+  // 해외판매
+  const ov = payload.overseas || {};
+  document.querySelector(`input[name="overseasSale"][value="${ov.enabled ? 'T' : 'F'}"]`).checked = true;
+  if (ov.enabled) {
+    setVal('overseasProductNameEn', ov.productNameEn);
+    setVal('overseasHsCode', ov.hsCode);
+    setVal('overseasProductClass', ov.productClass);
+    setVal('overseasMaterial', ov.material);
+    setVal('overseasMaterialEn', ov.materialEn);
+    setVal('overseasFabric', ov.fabric);
+  }
+  onOverseasToggle();
+
+  // 스토어별(소울/제이원/행복산업) 데이터
+  const stores = payload.stores || {};
+  STORES.forEach(s => {
+    const sd = stores[s.key] || {};
+    setVal(s.key + '-productName', sd.productName);
+    setVal(s.key + '-manufacturer', sd.manufacturer);
+    setVal(s.key + '-supplier', sd.supplier);
+    setVal(s.key + '-brand', sd.brand);
+    setVal(s.key + '-contact', sd.contact);
+
+    const origin = sd.origin || {};
+    setVal(s.key + '-originType', origin.type === 'foreign' ? 'foreign' : 'domestic');
+    onOriginTypeChange(s.key);
+    if (origin.type === 'foreign') {
+      setVal(s.key + '-originForeign', origin.country);
+    } else {
+      setVal(s.key + '-originSido', origin.sido);
+      onOriginSidoChange(s.key);
+      setVal(s.key + '-originGu', origin.gu);
+    }
+
+    const shipping = sd.shipping || { type: 'free' };
+    setVal(s.key + '-shippingType', shipping.type === 'tiered' ? 'tiered' : (shipping.type === 'fixed' ? 'fixed' : 'free'));
+    onShippingTypeChange(s.key);
+    if (shipping.type === 'fixed') setVal(s.key + '-shippingFee', shipping.fee);
+    if (shipping.type === 'tiered') { setVal(s.key + '-shippingThreshold', shipping.freeThreshold); setVal(s.key + '-shippingFeeTiered', shipping.feeBelowThreshold); }
+
+    rebuildOptionRows(s.key, sd.options || []);
+
+    const imgs = sd.images || {};
+    uploadedUrls[s.key + '-main'] = [...(imgs.main || [])];
+    uploadedUrls[s.key + '-spec'] = [...(imgs.spec || [])];
+    renderUrlThumbs(s.key + '-main'); updateDot(s.key + '-main');
+    renderUrlThumbs(s.key + '-spec'); updateDot(s.key + '-spec');
+  });
+
+  Object.keys(SLOTS).forEach(updateFolderLabel);
+  updateTabCount();
+}
+
 function updateFolderLabel(slot) {
   const pn = getProductName();
   const s = SLOTS[slot];
@@ -1067,6 +1362,9 @@ function updateFolderLabel(slot) {
 
 let prevCommonName = '';
 document.addEventListener('DOMContentLoaded', () => {
+  pruneHistory();
+  renderRetryPanel();
+  renderHistoryDrawer();
   document.getElementById('productName').addEventListener('input', () => {
     const newName = document.getElementById('productName').value;
     STORES.forEach(s => {
@@ -1120,7 +1418,37 @@ function renderThumbs(slot) {
   if (badge) badge.textContent = slot === 'common-extra' ? `${list.length}/9` : list.length + '장';
 }
 
-function updateDot(slot) { const dot = document.getElementById('dot-' + slot); if (dot) dot.className = 'dot ' + (files[slot].length > 0 ? 'active' : ''); }
+function updateDot(slot) { const dot = document.getElementById('dot-' + slot); if (dot) dot.className = 'dot ' + (files[slot].length > 0 || (uploadedUrls[slot] && uploadedUrls[slot].length > 0) ? 'active' : ''); }
+
+// 이력에서 불러올 때: 이미 R2에 있는 URL을 썸네일로 표시 (재업로드 없이 그대로 재사용)
+function renderUrlThumbs(slot) {
+  const container = document.getElementById('thumbs-' + slot);
+  const ph = document.getElementById('ph-' + slot);
+  if (!container) return;
+  const urls = uploadedUrls[slot] || [];
+  container.innerHTML = '';
+  if (urls.length === 0 && files[slot].length === 0) { if (ph) ph.style.display = 'flex'; return; }
+  if (ph) ph.style.display = 'none';
+  urls.forEach((url, idx) => {
+    const div = document.createElement('div');
+    div.className = 'thumb-item';
+    div.innerHTML = `<img src="${url}" /><button class="remove-btn" title="기존 이미지 제거" onclick="removeLoadedUrl('${slot}',${idx})">✕</button>`;
+    container.appendChild(div);
+  });
+  const header = document.querySelector(`#box-${slot} .upload-box-header .upload-box-title`) || document.querySelector(`[id="dot-${slot}"]`)?.closest('.upload-box-title');
+  if (header && !header.querySelector('.count-badge')) {
+    const badge = document.createElement('span');
+    badge.className = 'count-badge';
+    header.appendChild(badge);
+  }
+  const badge = header ? header.querySelector('.count-badge') : null;
+  if (badge) badge.textContent = slot === 'common-extra' ? `${urls.length}/9` : urls.length + '장(기존)';
+}
+function removeLoadedUrl(slot, idx) {
+  uploadedUrls[slot].splice(idx, 1);
+  renderUrlThumbs(slot);
+  updateDot(slot);
+}
 
 function updateTabCount() {
   Object.entries(TAB_SLOTS).forEach(([tab, slots]) => {
@@ -1228,14 +1556,20 @@ async function sendWebhook() {
     commonImages: { detail: uploadedUrls['common-detail'], notice: uploadedUrls['common-notice'], extra: uploadedUrls['common-extra'] },
   };
 
+  const uploadId = 'up_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
   try {
     logMsg('→ n8n 웹훅 전송 중...', 'info');
     const res = await fetch(N8N_WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-    if (res.ok) { logMsg('✓ n8n 웹훅 전송 성공', 'ok'); showToast('✓ 업로드 완료! n8n에 성공적으로 전송됐습니다.', 'success'); }
+    if (res.ok) {
+      logMsg('✓ n8n 웹훅 전송 성공', 'ok');
+      showToast('✓ 업로드 완료! n8n에 성공적으로 전송됐습니다.', 'success');
+      saveHistoryEntry(uploadId, payload, 'success', '');
+    }
     else throw new Error('HTTP ' + res.status);
   } catch (e) {
     logMsg('✗ n8n 웹훅 전송 실패: ' + e.message, 'err');
-    showToast('⚠ 이미지 업로드는 완료됐으나 n8n 전송에 실패했습니다.', 'error');
+    showToast('⚠ 이미지 업로드는 완료됐으나 n8n 전송에 실패했습니다. 재전송 패널/전송 이력에서 다시 시도하세요.', 'error');
+    saveHistoryEntry(uploadId, payload, 'failed', 'HTTP 오류: ' + e.message);
   }
 }
 
