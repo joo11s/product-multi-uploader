@@ -175,7 +175,7 @@
 
   .sub-label { font-size: 12px; color: var(--accent); font-weight: 700; letter-spacing: 0.5px; margin-bottom: 10px; margin-top: 4px; }
 
-  /* STEP: 표준카테고리 검색 */
+  /* 사업자별 카테고리 검색 */
   .cat-search-wrap { position: relative; }
   .cat-search-input {
     background: var(--bg3);
@@ -419,15 +419,6 @@
         <select id="saleStatus"><option value="T">판매함</option><option value="F">판매안함</option></select>
       </div>
     </div>
-
-    <div class="sub-label">표준카테고리</div>
-    <div class="cat-search-wrap">
-      <input type="text" id="catSearchInput" class="cat-search-input" placeholder="카테고리 검색... (예: 고등어, 수산물, 냉동식품)"
-        autocomplete="off" oninput="onCatSearch()" onkeydown="onCatKeydown(event)" onfocus="onCatFocus()" />
-      <input type="hidden" id="categoryCode" />
-      <div class="cat-dropdown" id="catDropdown"></div>
-    </div>
-    <div class="cat-selected-badge" id="catSelectedBadge"></div>
 
     <div class="divider"></div>
 
@@ -882,6 +873,17 @@ function buildStorePanel(store, name) {
       <input type="text" id="${store}-productName" placeholder="공통 상품명과 다를 경우 수정" />
     </div>
 
+    <div class="full-width">
+      <div class="sub-label">카테고리 (${name})</div>
+      <div class="cat-search-wrap">
+        <input type="text" id="catSearchInput-${store}" class="cat-search-input" placeholder="카테고리 검색... (예: 고등어, 수산물, 냉동식품)"
+          autocomplete="off" oninput="onStoreCatSearch('${store}')" onkeydown="onStoreCatKeydown(event,'${store}')" onfocus="onStoreCatFocus('${store}')" />
+        <input type="hidden" id="categoryCode-${store}" />
+        <div class="cat-dropdown" id="catDropdown-${store}"></div>
+      </div>
+      <div class="cat-selected-badge" id="catSelectedBadge-${store}"></div>
+    </div>
+
     <div class="upload-box">
       <div class="upload-box-header">
         <div class="upload-box-title"><span class="dot" id="dot-${store}-main"></span>대표 메인이미지</div>
@@ -1027,87 +1029,90 @@ function applyStoreDefaults(store, name, force) {
   });
 }
 
-// STEP 2: 표준카테고리 검색
-let stdCategories = [];
-let catDropdownFocusIdx = -1;
-let catSearchResults = [];
+// 사업자별 카테고리 검색
+const STORE_CAT_URLS = {
+  soul:  'https://cdn.wonflowai.com/cafe24/categories/%EC%86%8C%EC%9A%B8%EC%8A%A4%ED%86%A0%EC%96%B4.json',
+  j1:    'https://cdn.wonflowai.com/cafe24/categories/%EC%A0%9C%EC%9D%B4%EC%9B%90%ED%88%AC%EB%AA%B0.json',
+  happy: 'https://cdn.wonflowai.com/cafe24/categories/%ED%96%89%EB%B3%B5%EC%82%B0%EC%97%85.json',
+};
 
-async function loadStdCategories() {
+const storeCatData    = { soul: [], j1: [], happy: [] };
+const storeCatResults = { soul: [], j1: [], happy: [] };
+const storeCatFocusIdx = { soul: -1, j1: -1, happy: -1 };
+
+async function loadStoreCats(store) {
+  if (storeCatData[store].length > 0) return;
   try {
-    const res = await fetch('https://cdn.wonflowai.com/cafe24/categories/standard_categories.json', { mode: 'cors' });
+    const res = await fetch(STORE_CAT_URLS[store], { mode: 'cors' });
     if (res.ok) {
       const data = await res.json();
-      window.categoryLeafs = extractLeafNodes(data);
-      stdCategories = window.categoryLeafs;
+      const flat = [];
+      function traverse(node, parentPath) {
+        const path = parentPath ? parentPath + '>' + node.name : node.name;
+        flat.push({ no: node.no, name: node.name, path });
+        if (node.children && node.children.length > 0) node.children.forEach(c => traverse(c, path));
+      }
+      (data.categories || []).forEach(c => traverse(c, ''));
+      storeCatData[store] = flat;
     }
-  } catch(e) { console.warn('표준카테고리 로드 실패:', e); }
+  } catch(e) { console.warn('카테고리 로드 실패 (' + store + '):', e); }
 }
 
-function extractLeafNodes(data) {
-  const leaves = [];
-  function traverse(node) {
-    if (!node.children || node.children.length === 0) leaves.push(node);
-    else node.children.forEach(traverse);
-  }
-  const root = Array.isArray(data) ? data : (data.fullTree || data.categories || data.items || Object.values(data));
-  if (Array.isArray(root)) root.forEach(traverse);
-  return leaves;
-}
-
-function onCatSearch() {
-  const q = document.getElementById('catSearchInput').value.trim();
-  if (!q) { closeCatDropdown(); return; }
+function onStoreCatSearch(store) {
+  const q = document.getElementById('catSearchInput-' + store).value.trim();
+  if (!q) { closeStoreCatDropdown(store); return; }
   const lower = q.toLowerCase();
-  catSearchResults = stdCategories.filter(c => {
-    const name = (c.name || c.categoryName || '').toLowerCase();
-    const code = String(c.code || c.categoryCode || c.no || '');
-    return name.includes(lower) || code.includes(lower);
-  }).slice(0, 50);
-  renderCatDropdown();
+  storeCatResults[store] = storeCatData[store].filter(c =>
+    c.name.toLowerCase().includes(lower) || c.path.toLowerCase().includes(lower)
+  ).slice(0, 50);
+  renderStoreCatDropdown(store);
 }
 
-function onCatFocus() { const q = document.getElementById('catSearchInput').value.trim(); if (q) onCatSearch(); }
+function onStoreCatFocus(store) {
+  loadStoreCats(store).then(() => {
+    const q = document.getElementById('catSearchInput-' + store).value.trim();
+    if (q) onStoreCatSearch(store);
+  });
+}
 
-function renderCatDropdown() {
-  const dropdown = document.getElementById('catDropdown');
-  if (catSearchResults.length === 0) {
+function renderStoreCatDropdown(store) {
+  const dropdown = document.getElementById('catDropdown-' + store);
+  if (storeCatResults[store].length === 0) {
     dropdown.innerHTML = '<div class="cat-option" style="color:var(--text3);">검색 결과 없음</div>';
-    dropdown.classList.add('show'); catDropdownFocusIdx = -1; return;
+    dropdown.classList.add('show'); storeCatFocusIdx[store] = -1; return;
   }
-  dropdown.innerHTML = catSearchResults.map((c, i) => {
-    const name = c.name || c.categoryName || '';
-    const code = c.code || c.categoryCode || c.no || '';
-    const displayPath = c.path ? c.path.replace(/>/g, ' > ') : name;
-    return `<div class="cat-option" data-code="${code}" data-name="${displayPath}" data-idx="${i}" onclick="selectCat('${code}','${displayPath.replace(/'/g,"\\'")}')">${displayPath}<span class="cat-code">${code}</span></div>`;
+  dropdown.innerHTML = storeCatResults[store].map((c, i) => {
+    const displayPath = c.path.replace(/>/g, ' > ');
+    return `<div class="cat-option" data-no="${c.no}" data-path="${displayPath.replace(/"/g,'&quot;')}" data-idx="${i}" onclick="selectStoreCat('${store}',${c.no},'${displayPath.replace(/'/g,"\\'")}')">${displayPath}<span class="cat-code">${c.no}</span></div>`;
   }).join('');
-  dropdown.classList.add('show'); catDropdownFocusIdx = -1;
+  dropdown.classList.add('show'); storeCatFocusIdx[store] = -1;
 }
 
-function onCatKeydown(e) {
-  const dropdown = document.getElementById('catDropdown');
+function onStoreCatKeydown(e, store) {
+  const dropdown = document.getElementById('catDropdown-' + store);
   if (!dropdown.classList.contains('show')) return;
   const items = dropdown.querySelectorAll('.cat-option[data-idx]');
-  if (e.key === 'ArrowDown') { e.preventDefault(); catDropdownFocusIdx = Math.min(catDropdownFocusIdx + 1, items.length - 1); updateCatFocus(items); }
-  else if (e.key === 'ArrowUp') { e.preventDefault(); catDropdownFocusIdx = Math.max(catDropdownFocusIdx - 1, 0); updateCatFocus(items); }
-  else if (e.key === 'Enter') { e.preventDefault(); if (catDropdownFocusIdx >= 0 && items[catDropdownFocusIdx]) { const el = items[catDropdownFocusIdx]; selectCat(el.dataset.code, el.dataset.name); } }
-  else if (e.key === 'Escape') closeCatDropdown();
+  if (e.key === 'ArrowDown') { e.preventDefault(); storeCatFocusIdx[store] = Math.min(storeCatFocusIdx[store] + 1, items.length - 1); updateStoreCatFocus(store, items); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); storeCatFocusIdx[store] = Math.max(storeCatFocusIdx[store] - 1, 0); updateStoreCatFocus(store, items); }
+  else if (e.key === 'Enter') { e.preventDefault(); if (storeCatFocusIdx[store] >= 0 && items[storeCatFocusIdx[store]]) { const el = items[storeCatFocusIdx[store]]; selectStoreCat(store, el.dataset.no, el.dataset.path); } }
+  else if (e.key === 'Escape') closeStoreCatDropdown(store);
 }
 
-function updateCatFocus(items) {
-  items.forEach((el, i) => { el.classList.toggle('focused', i === catDropdownFocusIdx); if (i === catDropdownFocusIdx) el.scrollIntoView({ block: 'nearest' }); });
+function updateStoreCatFocus(store, items) {
+  items.forEach((el, i) => { el.classList.toggle('focused', i === storeCatFocusIdx[store]); if (i === storeCatFocusIdx[store]) el.scrollIntoView({ block: 'nearest' }); });
 }
 
-function selectCat(code, name) {
-  document.getElementById('categoryCode').value = code;
-  document.getElementById('catSearchInput').value = name;
-  const badge = document.getElementById('catSelectedBadge');
-  badge.textContent = `✓ 선택됨: ${name} (코드: ${code})`;
+function selectStoreCat(store, no, path) {
+  document.getElementById('categoryCode-' + store).value = no;
+  document.getElementById('catSearchInput-' + store).value = path;
+  const badge = document.getElementById('catSelectedBadge-' + store);
+  badge.textContent = `✓ 선택됨: ${path} (코드: ${no})`;
   badge.classList.add('show');
-  closeCatDropdown();
+  closeStoreCatDropdown(store);
 }
 
-function closeCatDropdown() { document.getElementById('catDropdown').classList.remove('show'); catDropdownFocusIdx = -1; }
-document.addEventListener('click', (e) => { if (!e.target.closest('.cat-search-wrap')) closeCatDropdown(); });
+function closeStoreCatDropdown(store) { document.getElementById('catDropdown-' + store).classList.remove('show'); storeCatFocusIdx[store] = -1; }
+document.addEventListener('click', (e) => { if (!e.target.closest('.cat-search-wrap')) STORES.forEach(s => closeStoreCatDropdown(s.key)); });
 
 function getOverseasData() {
   const enabled = document.querySelector('input[name="overseasSale"]:checked').value === 'T';
@@ -1265,11 +1270,6 @@ function populateFormFromPayload(payload) {
   setVal('saleStatus', p.saleStatus);
   setVal('taxType', p.taxType);
 
-  setVal('catSearchInput', p.categoryText);
-  setVal('categoryCode', p.categoryCode);
-  const badge = document.getElementById('catSelectedBadge');
-  if (p.categoryCode) { badge.textContent = `✓ 선택됨: ${p.categoryText} (코드: ${p.categoryCode})`; badge.classList.add('show'); }
-
   if (p.mainDisplay) {
     setChecked('mainDisplayRecommend', p.mainDisplay.recommend);
     setChecked('mainDisplayNew', p.mainDisplay.new);
@@ -1318,6 +1318,18 @@ function populateFormFromPayload(payload) {
   STORES.forEach(s => {
     const sd = stores[s.key] || {};
     setVal(s.key + '-productName', sd.productName);
+    // 사업자별 카테고리 복원
+    if (sd.categoryCode) {
+      setVal('categoryCode-' + s.key, sd.categoryCode);
+      const catBadge = document.getElementById('catSelectedBadge-' + s.key);
+      if (catBadge) {
+        const catText = sd.categoryText || ('코드: ' + sd.categoryCode);
+        catBadge.textContent = `✓ 선택됨 (${catText})`;
+        catBadge.classList.add('show');
+        const inputEl = document.getElementById('catSearchInput-' + s.key);
+        if (inputEl && sd.categoryText) inputEl.value = sd.categoryText;
+      }
+    }
     setVal(s.key + '-manufacturer', sd.manufacturer);
     setVal(s.key + '-supplier', sd.supplier);
     setVal(s.key + '-brand', sd.brand);
@@ -1499,6 +1511,7 @@ async function uploadFile(file, r2Key) {
 function buildStorePayload(store) {
   return {
     productName: document.getElementById(store + '-productName').value.trim() || getProductName(),
+    categoryCode: document.getElementById('categoryCode-' + store).value || '',
     manufacturer: document.getElementById(store + '-manufacturer').value.trim(),
     supplier: document.getElementById(store + '-supplier').value.trim(),
     brand: document.getElementById(store + '-brand').value.trim(),
@@ -1514,8 +1527,6 @@ function buildStorePayload(store) {
 
 async function sendWebhook() {
   const commonName = document.getElementById('productName').value.trim();
-  const categoryCode = document.getElementById('categoryCode').value;
-  const categoryText = document.getElementById('catSearchInput').value.trim();
   const summaryDesc = document.getElementById('productSummaryDesc').value.trim();
   const searchKeywords = document.getElementById('searchKeywords').value.trim();
 
@@ -1543,8 +1554,6 @@ async function sendWebhook() {
       displayStatus: document.getElementById('displayStatus').value,
       saleStatus: document.getElementById('saleStatus').value,
       taxType: document.getElementById('taxType').value,
-      categoryCode: categoryCode,
-      categoryText: categoryText,
       mainDisplay: {
         recommend: document.getElementById('mainDisplayRecommend').checked,
         new: document.getElementById('mainDisplayNew').checked,
@@ -1659,10 +1668,12 @@ function resetAll() {
   document.getElementById('mainDisplayExtra2').checked = false;
   document.querySelector('input[name="visibilityLimit"][value="A"]').checked = true;
 
-  document.getElementById('catSearchInput').value = '';
-  document.getElementById('categoryCode').value = '';
-  document.getElementById('catSelectedBadge').classList.remove('show');
-  closeCatDropdown();
+  STORES.forEach(s => {
+    const ci = document.getElementById('catSearchInput-' + s.key); if (ci) ci.value = '';
+    const cc = document.getElementById('categoryCode-' + s.key); if (cc) cc.value = '';
+    const cb = document.getElementById('catSelectedBadge-' + s.key); if (cb) cb.classList.remove('show');
+    closeStoreCatDropdown(s.key);
+  });
 
   STORES.forEach(s => {
     storeOptions[s.key] = [];
@@ -1726,7 +1737,6 @@ setInterval(rotateQuote, 6000);
 initStorePanels();
 STORES.forEach(s => applyStoreDefaults(s.key, s.name, false));
 Object.keys(SLOTS).forEach(updateFolderLabel);
-loadStdCategories();
 </script>
 </body>
 </html>
