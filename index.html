@@ -1043,7 +1043,7 @@ const storeCatFocusIdx = { soul: -1, j1: -1, happy: -1 };
 async function loadStoreCats(store) {
   if (storeCatData[store].length > 0) return;
   try {
-    const res = await fetch(STORE_CAT_URLS[store], { mode: 'cors' });
+    const res = await fetch(STORE_CAT_URLS[store] + '?v=' + Date.now(), { mode: 'cors', cache: 'no-store' });
     if (res.ok) {
       const data = await res.json();
       const flat = [];
