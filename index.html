@@ -822,15 +822,15 @@ const STORES = [
 ];
 
 const SLOTS = {
-  'common-detail':  { folder: '공통', sub: '상세페이지' },
-  'common-notice':  { folder: '공통', sub: '안내주의사항' },
-  'common-extra':   { folder: '공통', sub: '메인추가이미지' },
-  'soul-main':      { folder: '소울스토어', sub: '대표메인이미지' },
-  'soul-spec':      { folder: '소울스토어', sub: '상세정보제공고시' },
-  'j1-main':        { folder: '제이원투몰', sub: '대표메인이미지' },
-  'j1-spec':        { folder: '제이원투몰', sub: '상세정보제공고시' },
-  'happy-main':     { folder: '행복산업', sub: '대표메인이미지' },
-  'happy-spec':     { folder: '행복산업', sub: '상세정보제공고시' },
+  'common-detail':  { folder: '공통', sub: '상세페이지', code: 'common/detail' },
+  'common-notice':  { folder: '공통', sub: '안내주의사항', code: 'common/notice' },
+  'common-extra':   { folder: '공통', sub: '메인추가이미지', code: 'common/extra' },
+  'soul-main':      { folder: '소울스토어', sub: '대표메인이미지', code: 'soul/main' },
+  'soul-spec':      { folder: '소울스토어', sub: '상세정보제공고시', code: 'soul/spec' },
+  'j1-main':        { folder: '제이원투몰', sub: '대표메인이미지', code: 'j1/main' },
+  'j1-spec':        { folder: '제이원투몰', sub: '상세정보제공고시', code: 'j1/spec' },
+  'happy-main':     { folder: '행복산업', sub: '대표메인이미지', code: 'happy/main' },
+  'happy-spec':     { folder: '행복산업', sub: '상세정보제공고시', code: 'happy/spec' },
 };
 
 const TAB_SLOTS = { soul: ['soul-main','soul-spec'], j1: ['j1-main','j1-spec'], happy: ['happy-main','happy-spec'] };
@@ -1157,8 +1157,8 @@ async function uploadDetailHtml() {
   statusEl.textContent = '업로드 중...';
   try {
     const blob = new Blob([html], { type: 'text/html' });
-    const file = new File([blob], `${pn}_상세페이지.html`, { type: 'text/html' });
-    const r2Key = `products/상세HTML/${pn}_상세페이지_${Date.now()}.html`;
+        const file = new File([blob], `detail_${Date.now()}.html`, { type: 'text/html' });
+        const r2Key = `products/detail-html/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.html`;
     const url = await uploadFile(file, r2Key);
     detailHtmlUrl = url;
     statusEl.textContent = `✓ 업로드 완료: ${url}`;
@@ -1595,8 +1595,8 @@ async function startUpload() {
   allSlots.forEach(slot => {
     files[slot].forEach((file, idx) => {
       const s = SLOTS[slot];
-      const ext = file.name.split('.').pop();
-      const r2Key = `products/${s.folder}/${pn}_${s.sub}/${String(idx + 1).padStart(2, '0')}_${Date.now()}.${ext}`;
+        const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+        const r2Key = `products/${s.code}/${Date.now()}_${String(idx + 1).padStart(2, '0')}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
       tasks.push({ slot, file, r2Key, folder: `${s.folder}/${pn}_${s.sub}/` });
     });
   });
