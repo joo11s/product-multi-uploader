@@ -943,9 +943,17 @@ function buildStorePanel(store, name) {
           <label>시/군/구</label>
           <select id="${store}-originGu"></select>
         </div>
-        <div class="field" id="${store}-originForeignWrap" style="display:none; max-width:200px;">
-          <label>국가명</label>
-          <input type="text" id="${store}-originForeign" placeholder="예: 노르웨이" />
+        <div class="field" id="${store}-originContinentWrap" style="display:none; max-width:200px;">
+          <label>대륙</label>
+          <select id="${store}-originContinent" onchange="onOriginContinentChange('${store}')">
+            <option value="">-- 대륙 선택 --</option>
+          </select>
+        </div>
+        <div class="field" id="${store}-originCountryWrap" style="display:none; max-width:200px;">
+          <label>국가</label>
+          <select id="${store}-originCountry" onchange="onOriginCountryChange('${store}')">
+            <option value="">-- 국가 선택 --</option>
+          </select>
         </div>
       </div>
     </div>
@@ -1007,7 +1015,69 @@ function onOriginTypeChange(store) {
   const isDomestic = type === 'domestic';
   document.getElementById(store + '-originSidoWrap').style.display = isDomestic ? '' : 'none';
   document.getElementById(store + '-originGuWrap').style.display = isDomestic ? '' : 'none';
-  document.getElementById(store + '-originForeignWrap').style.display = isDomestic ? 'none' : '';
+  document.getElementById(store + '-originContinentWrap').style.display = isDomestic ? 'none' : '';
+  document.getElementById(store + '-originCountryWrap').style.display = 'none';
+  if (!isDomestic) loadOverseasOrigins(store);
+}
+
+// 해외 원산지 데이터 (lazy load)
+const OVERSEAS_ORIGINS_URL = 'https://cdn.wonflowai.com/cafe24/origins_overseas.json';
+let overseasOriginsData = null;
+let overseasOriginsLoading = false;
+let overseasOriginsCallbacks = [];
+
+async function loadOverseasOrigins(store) {
+  if (overseasOriginsData) {
+    populateContinentDropdown(store);
+    return;
+  }
+  if (overseasOriginsLoading) {
+    overseasOriginsCallbacks.push(store);
+    return;
+  }
+  overseasOriginsLoading = true;
+  try {
+    const res = await fetch(OVERSEAS_ORIGINS_URL + '?v=' + Date.now(), { mode: 'cors', cache: 'no-store' });
+    if (res.ok) {
+      overseasOriginsData = await res.json();
+    }
+  } catch(e) {
+    console.warn('해외 원산지 로드 실패:', e);
+  }
+  overseasOriginsLoading = false;
+  populateContinentDropdown(store);
+  overseasOriginsCallbacks.forEach(s => populateContinentDropdown(s));
+  overseasOriginsCallbacks = [];
+}
+
+function populateContinentDropdown(store) {
+  if (!overseasOriginsData) return;
+  const sel = document.getElementById(store + '-originContinent');
+  const currentVal = sel.value;
+  sel.innerHTML = '<option value="">-- 대륙 선택 --</option>' +
+    Object.keys(overseasOriginsData).map(c => `<option value="${c}">${c}</option>`).join('');
+  if (currentVal && overseasOriginsData[currentVal]) sel.value = currentVal;
+  onOriginContinentChange(store);
+}
+
+function onOriginContinentChange(store) {
+  const continent = document.getElementById(store + '-originContinent').value;
+  const countryWrap = document.getElementById(store + '-originCountryWrap');
+  const countrySel = document.getElementById(store + '-originCountry');
+  if (!continent || !overseasOriginsData || !overseasOriginsData[continent]) {
+    countryWrap.style.display = 'none';
+    countrySel.innerHTML = '<option value="">-- 국가 선택 --</option>';
+    return;
+  }
+  const countries = overseasOriginsData[continent].countries || {};
+  countrySel.innerHTML = '<option value="">-- 국가 선택 --</option>' +
+    Object.keys(countries).map(name => `<option value="${name}">${name}</option>`).join('');
+  countryWrap.style.display = '';
+  onOriginCountryChange(store);
+}
+
+function onOriginCountryChange(store) {
+  // Country selection is captured at payload build time via getOriginData
 }
 
 function onShippingTypeChange(store) {
@@ -1224,7 +1294,15 @@ function getStoreOptions(store) {
 function getOriginData(store) {
   const type = document.getElementById(store + '-originType').value;
   if (type === 'foreign') {
-    return { type: 'foreign', country: document.getElementById(store + '-originForeign').value.trim() };
+    const continent = document.getElementById(store + '-originContinent').value;
+    const country = document.getElementById(store + '-originCountry').value;
+    let origin_place_no = null;
+    let made_in_code = null;
+    if (overseasOriginsData && continent && country && overseasOriginsData[continent]) {
+      const info = (overseasOriginsData[continent].countries || {})[country];
+      if (info) { origin_place_no = info.origin_place_no; made_in_code = info.made_in_code; }
+    }
+    return { type: 'foreign', country, continent, origin_place_no, made_in_code };
   }
   return {
     type: 'domestic',
@@ -1337,10 +1415,25 @@ function populateFormFromPayload(payload) {
 
     const origin = sd.origin || {};
     setVal(s.key + '-originType', origin.type === 'foreign' ? 'foreign' : 'domestic');
-    onOriginTypeChange(s.key);
     if (origin.type === 'foreign') {
-      setVal(s.key + '-originForeign', origin.country);
+      // Show foreign UI immediately, then load overseas data and restore dropdowns
+      document.getElementById(s.key + '-originSidoWrap').style.display = 'none';
+      document.getElementById(s.key + '-originGuWrap').style.display = 'none';
+      document.getElementById(s.key + '-originContinentWrap').style.display = '';
+      document.getElementById(s.key + '-originCountryWrap').style.display = 'none';
+      const storeKey = s.key;
+      const savedContinent = origin.continent;
+      const savedCountry = origin.country;
+      loadOverseasOrigins(storeKey).then(() => {
+        populateContinentDropdown(storeKey);
+        if (savedContinent) {
+          setVal(storeKey + '-originContinent', savedContinent);
+          onOriginContinentChange(storeKey);
+        }
+        if (savedCountry) setVal(storeKey + '-originCountry', savedCountry);
+      });
     } else {
+      onOriginTypeChange(s.key);
       setVal(s.key + '-originSido', origin.sido);
       onOriginSidoChange(s.key);
       setVal(s.key + '-originGu', origin.gu);
@@ -1687,7 +1780,11 @@ function resetAll() {
     document.getElementById(s.key + '-shippingFeeTiered').value = '';
     document.getElementById(s.key + '-originType').value = 'domestic';
     onOriginTypeChange(s.key);
-    document.getElementById(s.key + '-originForeign').value = '';
+    const contSel = document.getElementById(s.key + '-originContinent');
+    if (contSel) contSel.value = '';
+    const countrySel = document.getElementById(s.key + '-originCountry');
+    if (countrySel) { countrySel.innerHTML = '<option value="">-- 국가 선택 --</option>'; }
+    document.getElementById(s.key + '-originCountryWrap').style.display = 'none';
     applyStoreDefaults(s.key, s.name, true);
   });
   prevCommonName = '';
