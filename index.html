@@ -255,6 +255,8 @@
   .upload-area:hover .upload-icon { transform: scale(1.1); filter: grayscale(0); }
   .upload-placeholder p { font-size: 13px; color: var(--text3); text-align: center; line-height: 1.5; }
   .upload-placeholder p strong { color: var(--accent); font-weight: 700; }
+  .upload-area.has-files { min-height: 80px !important; padding: 6px 16px; }
+  .upload-area.has-files .upload-placeholder { min-height: 0; flex-direction: row; gap: 6px; justify-content: flex-start; padding: 2px 0; }
 
   .thumb-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 0 16px 16px; }
   .thumb-grid-row { display: flex; grid-template-columns: none; gap: 8px; flex-wrap: nowrap; overflow-x: auto; }
@@ -1536,10 +1538,20 @@ function renderThumbs(slot) {
   const container = document.getElementById('thumbs-' + slot);
   const ph = document.getElementById('ph-' + slot);
   if (!container) return;
+  const ua = ph ? ph.closest('.upload-area') : null;
   const list = files[slot];
   container.innerHTML = '';
-  if (list.length === 0) { if (ph) ph.style.display = 'flex'; return; }
-  if (ph) ph.style.display = 'none';
+  if (list.length === 0) {
+    if (ph) { if (ph.dataset.origHtml) ph.innerHTML = ph.dataset.origHtml; ph.style.display = 'flex'; }
+    if (ua) { ua.classList.remove('has-files'); ua.style.minHeight = ua.dataset.origMinH || ''; }
+    return;
+  }
+  if (ph) {
+    if (!ph.dataset.origHtml) ph.dataset.origHtml = ph.innerHTML;
+    ph.innerHTML = '<p style="font-size:12px;color:var(--text3);margin:0;pointer-events:none">+ 이미지 추가</p>';
+    ph.style.display = 'flex';
+  }
+  if (ua) { if (!ua.dataset.origMinH) ua.dataset.origMinH = ua.style.minHeight || ''; ua.classList.add('has-files'); }
   list.forEach((file, idx) => {
     const url = URL.createObjectURL(file);
     const div = document.createElement('div');
@@ -1564,10 +1576,20 @@ function renderUrlThumbs(slot) {
   const container = document.getElementById('thumbs-' + slot);
   const ph = document.getElementById('ph-' + slot);
   if (!container) return;
+  const ua = ph ? ph.closest('.upload-area') : null;
   const urls = uploadedUrls[slot] || [];
   container.innerHTML = '';
-  if (urls.length === 0 && files[slot].length === 0) { if (ph) ph.style.display = 'flex'; return; }
-  if (ph) ph.style.display = 'none';
+  if (urls.length === 0 && files[slot].length === 0) {
+    if (ph) { if (ph.dataset.origHtml) ph.innerHTML = ph.dataset.origHtml; ph.style.display = 'flex'; }
+    if (ua) { ua.classList.remove('has-files'); ua.style.minHeight = ua.dataset.origMinH || ''; }
+    return;
+  }
+  if (ph) {
+    if (!ph.dataset.origHtml) ph.dataset.origHtml = ph.innerHTML;
+    ph.innerHTML = '<p style="font-size:12px;color:var(--text3);margin:0;pointer-events:none">+ 이미지 추가</p>';
+    ph.style.display = 'flex';
+  }
+  if (ua) { if (!ua.dataset.origMinH) ua.dataset.origMinH = ua.style.minHeight || ''; ua.classList.add('has-files'); }
   urls.forEach((url, idx) => {
     const div = document.createElement('div');
     div.className = 'thumb-item';
@@ -1728,7 +1750,11 @@ async function startUpload() {
     });
   });
 
-  if (tasks.length === 0) { alert('업로드할 이미지가 없습니다.'); return; }
+  // 새 파일도 없고 기존 URL(이력 불러오기)도 없을 때만 중단
+  const hasAnyContent = Object.keys(SLOTS).some(slot =>
+    files[slot].length > 0 || (uploadedUrls[slot] && uploadedUrls[slot].length > 0)
+  );
+  if (!hasAnyContent) { alert('업로드할 이미지가 없습니다.'); return; }
 
   const btn = document.getElementById('btnUpload');
   btn.disabled = true;
@@ -1737,7 +1763,16 @@ async function startUpload() {
   document.getElementById('resultPanel').classList.remove('show');
   document.getElementById('progressLog').innerHTML = '';
   setProgress(0);
+  // 새 파일이 없는 슬롯의 기존 URL(이력)은 유지
+  const slotsWithNewFiles = new Set(tasks.map(t => t.slot));
+  const savedHistoryUrls = {};
+  Object.keys(SLOTS).forEach(k => {
+    if (!slotsWithNewFiles.has(k) && uploadedUrls[k] && uploadedUrls[k].length > 0) {
+      savedHistoryUrls[k] = [...uploadedUrls[k]];
+    }
+  });
   Object.keys(SLOTS).forEach(k => uploadedUrls[k] = []);
+  Object.keys(savedHistoryUrls).forEach(k => uploadedUrls[k] = savedHistoryUrls[k]);
 
   const results = {};
   let done = 0;
