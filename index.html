@@ -699,25 +699,45 @@
   .tag-input-row input::placeholder { color: var(--text3); }
   .tag-count { font-size: 11px; color: var(--text3); margin-top: 4px; }
 
-  /* 토스 등록 버튼 */
-  .btn-toss-register {
-    background: linear-gradient(135deg, #4A9EFF, #2d7dd9);
+  /* ===================================================
+   * 공통 플랫폼 등록 버튼 (SubmitButton 공통 컴포넌트)
+   * 사용법: <button class="btn-platform-submit btn-cafe24-register" ...>
+   * platformName별 색상 override는 각 플랫폼 클래스로 지정
+   * =================================================== */
+  .btn-platform-submit {
+    width: 100%;
     color: #fff;
     border: none;
-    padding: 14px 32px;
+    padding: 16px 32px;
     border-radius: var(--radius-sm);
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 700;
     cursor: pointer;
     font-family: 'Noto Sans KR', sans-serif;
     transition: opacity 0.2s, transform 0.1s;
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-top: 24px;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 32px;
+    letter-spacing: 0.3px;
   }
-  .btn-toss-register:hover { opacity: 0.88; }
-  .btn-toss-register:active { transform: scale(0.97); }
+  .btn-platform-submit:hover { opacity: 0.88; }
+  .btn-platform-submit:active { transform: scale(0.98); }
+  .btn-platform-submit:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+  /* 카페24 브랜드 컬러 */
+  .btn-cafe24-register {
+    background: #0067F6;
+  }
+  .btn-cafe24-register:hover { background: #0057D6; opacity: 1; }
+
+  /* 토스쇼핑 브랜드 컬러 */
+  .btn-toss-register {
+    background: linear-gradient(135deg, #4A9EFF, #2d7dd9);
+  }
+
+  /* 레거시 호환 — 헤더 업로드 버튼 */
 
   /* 토스 필수고시 */
   .notice-select-wrap { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
@@ -764,7 +784,8 @@
     <button class="btn-reset" id="btnHistory" onclick="toggleHistoryDrawer()">📋 전송 이력 <span id="historyCount">0</span></button>
     <button class="btn-reset" id="btnRetryBadge" style="display:none; border-color:#e74c3c; color:#e74c3c;" onclick="document.getElementById('retryPanel').scrollIntoView({behavior:'smooth'})">⚠ 재전송 대기 <span id="retryBadgeCount">0</span></button>
     <button class="btn-reset" id="btnReset" onclick="resetAll()">초기화</button>
-    <button class="btn-upload-all" id="btnUpload" onclick="startUpload()">
+    <!-- 헤더 업로드 버튼은 하단 플랫폼 버튼으로 대체됨 (하위 호환용 hidden 유지) -->
+    <button class="btn-upload-all" id="btnUpload" onclick="startUpload()" style="display:none;">
       <span id="btnText">🚀 업로드</span>
     </button>
   </div>
@@ -1040,6 +1061,11 @@
     </div>
   </div>
 
+  <!-- 카페24 등록 버튼 (하단 고정, 전체 너비) -->
+  <div style="padding: 8px 0 48px;">
+    <button class="btn-platform-submit btn-cafe24-register" onclick="startUpload()">🚀 카페24 상품 등록</button>
+  </div>
+
 </div> <!-- /cafe24-section -->
 
 <!-- ===================================================
@@ -1220,8 +1246,8 @@
   </div>
 
   <!-- 토스쇼핑 등록 버튼 -->
-  <div style="display:flex; justify-content:center; padding-bottom: 48px;">
-    <button class="btn-toss-register" onclick="submitTossProduct()">🚀 토스쇼핑 등록</button>
+  <div style="padding-bottom: 48px;">
+    <button class="btn-platform-submit btn-toss-register" onclick="submitTossProduct()">🚀 토스쇼핑 등록</button>
   </div>
 
 </div> <!-- /toss-section -->
@@ -2508,9 +2534,7 @@ function switchPlatform(platform) {
   currentPlatform = platform;
   document.getElementById('cafe24-section').style.display = platform === 'cafe24' ? '' : 'none';
   document.getElementById('toss-section').style.display = platform === 'toss' ? '' : 'none';
-  // 헤더 업로드 버튼 표시 제어
-  const btnUpload = document.getElementById('btnUpload');
-  if (btnUpload) btnUpload.style.display = platform === 'cafe24' ? '' : 'none';
+  // 헤더 업로드 버튼은 각 플랫폼 섹션 하단 btn-platform-submit으로 대체됨 — 별도 제어 불필요
   // 네비게이션 active 상태 업데이트
   document.querySelectorAll('.platform-nav-item').forEach(el => {
     el.classList.toggle('active', el.dataset.platform === platform);
