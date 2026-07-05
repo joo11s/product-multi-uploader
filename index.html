@@ -705,21 +705,18 @@
    * platformName별 색상 override는 각 플랫폼 클래스로 지정
    * =================================================== */
   .btn-platform-submit {
-    width: 100%;
+    width: auto;
+    display: block;
+    margin: 32px auto 0;
     color: #fff;
     border: none;
-    padding: 16px 32px;
+    padding: 16px 48px;
     border-radius: var(--radius-sm);
     font-size: 16px;
     font-weight: 700;
     cursor: pointer;
     font-family: 'Noto Sans KR', sans-serif;
     transition: opacity 0.2s, transform 0.1s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 32px;
     letter-spacing: 0.3px;
   }
   .btn-platform-submit:hover { opacity: 0.88; }
