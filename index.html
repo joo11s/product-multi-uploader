@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Happy Soul J1 [BIZ] - 카페24 전용 상품 업로더</title>
+<title>Happy Soul J1 [BIZ] - 통합 상품 업로더</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap');
 
@@ -389,12 +389,376 @@
     .main { padding: 20px 16px 60px; }
     .notice-dynamic-fields { grid-template-columns: 1fr; }
   }
+
+  /* ===== 플랫폼 네비게이션 ===== */
+  .platform-nav-bar {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    height: 48px;
+    position: sticky;
+    top: 64px;
+    z-index: 90;
+  }
+  .platform-nav-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-right: 16px;
+    white-space: nowrap;
+  }
+  .platform-nav {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+  .platform-nav-item {
+    background: transparent;
+    border: none;
+    padding: 6px 16px;
+    border-radius: var(--radius-sm);
+    color: var(--text3);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .platform-nav-item:hover { color: var(--text2); background: rgba(255,255,255,0.05); }
+  .platform-nav-item.active { color: var(--accent); font-weight: 700; background: rgba(245,230,200,0.08); }
+  .platform-nav-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 2px 2px 0 0;
+  }
+  .platform-nav-item .nav-badge {
+    display: inline-block;
+    background: rgba(245,230,200,0.2);
+    color: var(--accent2);
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 8px;
+    margin-left: 6px;
+    font-weight: 700;
+    vertical-align: middle;
+  }
+  .platform-nav-item .nav-soon {
+    display: inline-block;
+    background: rgba(255,255,255,0.05);
+    color: var(--text3);
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 8px;
+    margin-left: 6px;
+    font-weight: 400;
+    vertical-align: middle;
+  }
+
+  /* ===== 토스쇼핑 섹션 ===== */
+  .toss-section { }
+  .toss-step { margin-bottom: 0; }
+  .toss-section-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 8px;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .toss-section-subtitle {
+    font-size: 13px;
+    color: var(--text3);
+    margin-bottom: 28px;
+  }
+
+  /* 카테고리 드릴다운 */
+  .category-columns {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+  }
+  .category-column {
+    min-width: 180px;
+    max-height: 260px;
+    overflow-y: auto;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    flex-shrink: 0;
+  }
+  .category-column-header {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(255,255,255,0.03);
+  }
+  .category-col-item {
+    padding: 9px 12px;
+    font-size: 13px;
+    color: var(--text2);
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: all 0.15s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .category-col-item:last-child { border-bottom: none; }
+  .category-col-item:hover { background: rgba(245,230,200,0.08); color: var(--accent); }
+  .category-col-item.selected { background: rgba(245,230,200,0.12); color: var(--accent); font-weight: 600; }
+  .category-col-item .has-children { font-size: 10px; color: var(--text3); }
+  .category-breadcrumb {
+    font-size: 12px;
+    color: var(--text3);
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: var(--bg3);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    line-height: 1.6;
+    display: none;
+  }
+  .category-breadcrumb.show { display: block; }
+  .category-breadcrumb .crumb-path { color: var(--accent); font-weight: 500; }
+  .category-unconfirmed {
+    border-color: rgba(255,80,80,0.5) !important;
+    color: #ff6b6b !important;
+  }
+  .badge-unconfirmed {
+    display: inline-block;
+    background: rgba(255,80,80,0.15);
+    color: #ff6b6b;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 8px;
+    margin-left: 8px;
+    font-weight: 700;
+    border: 1px solid rgba(255,80,80,0.3);
+    vertical-align: middle;
+  }
+  .category-loading { font-size: 13px; color: var(--text3); padding: 16px 0; display: flex; align-items: center; gap: 8px; }
+
+  /* 이미지 크롭 UI */
+  .crop-preview-container {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 16px;
+    display: none;
+  }
+  .crop-preview-container.show { display: block; }
+  .crop-preview-title { font-size: 12px; font-weight: 700; color: var(--accent); letter-spacing: 0.5px; margin-bottom: 12px; }
+  .crop-canvas-wrap {
+    position: relative;
+    display: inline-block;
+    cursor: crosshair;
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+  }
+  #toss-crop-canvas { display: block; max-width: 100%; }
+  .crop-overlay {
+    position: absolute;
+    border: 2px solid var(--accent);
+    pointer-events: none;
+  }
+  .crop-controls { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; align-items: center; }
+
+  /* 이미지 슬롯 */
+  .toss-image-slots {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  @media (max-width: 768px) { .toss-image-slots { grid-template-columns: repeat(3, 1fr); } }
+  .toss-img-slot {
+    aspect-ratio: 1;
+    background: var(--bg3);
+    border: 1.5px dashed var(--border2);
+    border-radius: var(--radius-sm);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s, background 0.2s;
+    font-size: 12px;
+    color: var(--text3);
+  }
+  .toss-img-slot:hover { border-color: var(--accent); background: rgba(245,230,200,0.05); }
+  .toss-img-slot.has-img { border-style: solid; border-color: var(--border); }
+  .toss-img-slot img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
+  .toss-img-slot .slot-num {
+    position: absolute;
+    top: 4px; left: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.6);
+    background: rgba(0,0,0,0.5);
+    padding: 1px 5px;
+    border-radius: 4px;
+    z-index: 2;
+  }
+  .toss-img-slot .slot-remove {
+    position: absolute;
+    top: 4px; right: 4px;
+    width: 18px; height: 18px;
+    background: rgba(0,0,0,0.7);
+    border: none; border-radius: 50%;
+    color: #fff; cursor: pointer;
+    font-size: 10px; display: none;
+    align-items: center; justify-content: center;
+    z-index: 3;
+  }
+  .toss-img-slot.has-img:hover .slot-remove { display: flex; }
+  .toss-img-slot .slot-thumb-badge {
+    position: absolute;
+    bottom: 4px; left: 0; right: 0;
+    text-align: center;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--accent);
+    background: rgba(0,0,0,0.6);
+    padding: 2px 0;
+    z-index: 2;
+  }
+
+  /* 태그 칩 UI */
+  .tag-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 10px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    min-height: 48px;
+    align-items: flex-start;
+    align-content: flex-start;
+  }
+  .tag-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(245,230,200,0.1);
+    border: 1px solid rgba(245,230,200,0.2);
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .tag-chip .chip-remove {
+    background: none;
+    border: none;
+    color: var(--text3);
+    cursor: pointer;
+    font-size: 11px;
+    padding: 0;
+    line-height: 1;
+    transition: color 0.15s;
+  }
+  .tag-chip .chip-remove:hover { color: #ff5c5c; }
+  .tag-input-row { display: flex; gap: 8px; margin-top: 8px; }
+  .tag-input-row input {
+    flex: 1;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: 'Noto Sans KR', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .tag-input-row input:focus { border-color: var(--accent); }
+  .tag-input-row input::placeholder { color: var(--text3); }
+  .tag-count { font-size: 11px; color: var(--text3); margin-top: 4px; }
+
+  /* 토스 등록 버튼 */
+  .btn-toss-register {
+    background: linear-gradient(135deg, #4A9EFF, #2d7dd9);
+    color: #fff;
+    border: none;
+    padding: 14px 32px;
+    border-radius: var(--radius-sm);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: opacity 0.2s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 24px;
+  }
+  .btn-toss-register:hover { opacity: 0.88; }
+  .btn-toss-register:active { transform: scale(0.97); }
+
+  /* 토스 필수고시 */
+  .notice-select-wrap { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+  .notice-select-wrap .field { flex: 1; min-width: 180px; }
+  .notice-items-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+  .notice-items-grid .field input {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: 'Noto Sans KR', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .notice-items-grid .field input:focus { border-color: var(--accent); }
+
+  /* 토스 옵션 */
+  .toss-option-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .toss-option-row input, .toss-option-row select {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: 'Noto Sans KR', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+    flex: 1;
+  }
+  .toss-option-row input:focus, .toss-option-row select:focus { border-color: var(--accent); }
+  .toss-option-row select option { background: var(--bg3); }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <div class="logo">Happy Soul J1 <span style="color:var(--accent);">[BIZ]</span> <span>카페24 전용 상품 업로더</span></div>
+  <div class="logo">Happy Soul J1 <span style="color:var(--accent);">[BIZ]</span> <span>통합 상품 업로더</span></div>
   <div class="header-quote" id="headerQuote"></div>
   <div class="header-right">
     <button class="btn-reset" id="btnHistory" onclick="toggleHistoryDrawer()">📋 전송 이력 <span id="historyCount">0</span></button>
@@ -406,8 +770,20 @@
   </div>
 </div>
 
+<!-- 플랫폼 네비게이션 -->
+<div class="platform-nav-bar">
+  <span class="platform-nav-label">통합 업로더</span>
+  <nav class="platform-nav">
+    <button class="platform-nav-item active" data-platform="cafe24" onclick="switchPlatform('cafe24')">카페24 <span class="nav-badge">6STEP</span></button>
+    <button class="platform-nav-item" data-platform="toss" onclick="switchPlatform('toss')">토스쇼핑 <span class="nav-badge">NEW</span></button>
+    <!-- TODO: 스마트스토어 (준비중) -->
+    <!-- TODO: 쿠팡 (준비중) -->
+  </nav>
+</div>
+
 <div class="main">
 
+<div id="cafe24-section">
   <!-- STEP 1: 표시설정 -->
   <div class="step-header"><span class="step-num">STEP 1</span><span class="step-title">표시설정 / 분류</span></div>
   <div class="panel">
@@ -664,7 +1040,183 @@
     </div>
   </div>
 
-</div>
+</div> <!-- /cafe24-section -->
+
+<!-- ===================================================
+     토스쇼핑 섹션 (id="toss-section")
+     기본: display:none, switchPlatform('toss') 시 표시
+     =================================================== -->
+<div id="toss-section" class="toss-section" style="display:none;">
+
+  <div class="toss-section-title">🛒 토스쇼핑 상품 등록</div>
+  <div class="toss-section-subtitle">Toss Shopping POST /api/v3/shopping-fep/products/v2 스펙 기반 페이로드 조립</div>
+
+  <!-- STEP T1: 상품 기본정보 -->
+  <div class="step-header toss-step"><span class="step-num">STEP T1</span><span class="step-title">상품 기본정보</span></div>
+  <div class="panel">
+    <div class="field-row" style="margin-bottom:16px;">
+      <div class="field" style="flex:2 0 240px;">
+        <label>상품명</label>
+        <input type="text" id="toss-name" placeholder="예: 노르웨이 순살 고등어 1kg" />
+      </div>
+      <div class="field" style="flex:1 0 180px;">
+        <label>브랜드명</label>
+        <input type="text" id="toss-brand" placeholder="예: 소울스토어" />
+      </div>
+      <div class="field" style="flex:1 0 160px;">
+        <label>관리코드</label>
+        <input type="text" id="toss-mgmt-code" placeholder="예: SKU-001" />
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="sub-label">카테고리 선택 (1차~6차 드릴다운)</div>
+    <div id="toss-cat-loading" class="category-loading" style="display:none;"><div class="spinner"></div><span>카테고리 로딩 중...</span></div>
+    <div id="toss-cat-columns" class="category-columns"></div>
+    <div id="toss-cat-breadcrumb" class="category-breadcrumb">
+      선택된 카테고리: <span class="crumb-path" id="toss-cat-path">(없음)</span>
+      <span id="toss-cat-unconfirmed-badge" class="badge-unconfirmed" style="display:none;">미확정</span>
+    </div>
+    <div id="toss-cat-confirm-wrap" style="display:none; margin-top:8px;">
+      <button class="btn-add-option" onclick="tossConfirmCategory()" style="border-color: var(--green); color: var(--green);">✓ 카테고리 확정</button>
+      <span style="font-size:12px; color:var(--text3); margin-left:8px;">자동매칭 결과를 확인 후 확정해주세요</span>
+    </div>
+  </div>
+
+  <!-- STEP T2: 옵션 + 이미지 -->
+  <div class="step-header toss-step"><span class="step-num">STEP T2</span><span class="step-title">옵션 + 이미지</span><span class="step-sub">1:1 크롭 · 최대 10장</span></div>
+  <div class="panel">
+    <!-- 옵션 섹션 -->
+    <div class="options-section" style="margin-bottom:24px;">
+      <div class="options-header">
+        <div class="options-title">상품 옵션 <span id="toss-constraint-badge" style="font-size:11px; color:var(--text3); font-weight:400;">(constraint-template 미로드)</span></div>
+        <button class="btn-add-option" onclick="addTossOptionRow()">+ 옵션 추가</button>
+      </div>
+      <div id="toss-option-rows">
+        <div class="options-empty" id="toss-option-empty">옵션이 없습니다. "옵션 추가" 버튼을 클릭하세요.</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- 이미지 섹션 -->
+    <div class="sub-label" style="margin-bottom:12px;">이미지 (최대 10장, 1번이 대표이미지)</div>
+    <div class="toss-image-slots" id="toss-img-slots"></div>
+    <input type="file" id="toss-img-input" accept="image/*" style="display:none;" onchange="onTossImgSelect(event)" />
+
+    <!-- 1:1 크롭 UI -->
+    <div class="crop-preview-container" id="toss-crop-container">
+      <div class="crop-preview-title">1:1 크롭 미리보기</div>
+      <div class="crop-canvas-wrap" id="toss-crop-wrap">
+        <canvas id="toss-crop-canvas" width="320" height="320"></canvas>
+      </div>
+      <div class="crop-controls">
+        <button class="btn-add-option" onclick="tossConfirmCrop()">✓ 크롭 확정 & CDN 업로드</button>
+        <button class="btn-reset" style="padding:6px 14px; font-size:12px;" onclick="tossCancelCrop()">취소</button>
+        <span style="font-size:12px; color:var(--text3);">드래그로 위치 조정</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP T3: 상세설명 + 부가세 + 검색태그 -->
+  <div class="step-header toss-step"><span class="step-num">STEP T3</span><span class="step-title">상세설명 + 주요정보</span></div>
+  <div class="panel">
+    <div class="sub-label">상세설명</div>
+    <div class="radio-row" style="margin-bottom:16px;">
+      <label class="radio-item"><input type="radio" name="tossDetailMode" value="image" checked onchange="onTossDetailModeChange()" /> 이미지 URL</label>
+      <label class="radio-item"><input type="radio" name="tossDetailMode" value="html" onchange="onTossDetailModeChange()" /> HTML</label>
+    </div>
+    <div id="toss-detail-html-wrap" style="display:none; margin-bottom:16px;">
+      <div class="field">
+        <label>상세설명 HTML</label>
+        <textarea id="toss-detail-html" style="min-height:120px; font-family:monospace; font-size:12px;" placeholder="인라인화 완료된 HTML 코드"></textarea>
+      </div>
+    </div>
+    <div id="toss-detail-img-wrap" style="margin-bottom:16px;">
+      <div class="field">
+        <label>상세설명 이미지 URL</label>
+        <input type="text" id="toss-detail-img-url" placeholder="https://cdn.wonflowai.com/..." />
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="sub-label">부가세</div>
+    <div class="radio-row" style="margin-bottom:20px;">
+      <label class="radio-item"><input type="radio" name="tossTaxType" value="TAXABLE" checked /> 과세</label>
+      <label class="radio-item"><input type="radio" name="tossTaxType" value="TAX_FREE" /> 면세</label>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="sub-label">검색태그 <span style="color:var(--text3); font-weight:400; font-size:11px;">(최대 10개)</span></div>
+    <div class="tag-chips" id="toss-tag-chips"></div>
+    <div class="tag-input-row">
+      <input type="text" id="toss-tag-input" placeholder="태그 입력 후 Enter 또는 추가 버튼" onkeydown="onTossTagKeydown(event)" maxlength="20" />
+      <button class="btn-add-option" onclick="addTossTag()">+ 추가</button>
+    </div>
+    <div class="tag-count" id="toss-tag-count">0 / 10</div>
+  </div>
+
+  <!-- STEP T4: 배송 -->
+  <div class="step-header toss-step"><span class="step-num">STEP T4</span><span class="step-title">배송</span></div>
+  <div class="panel">
+    <div class="field" style="max-width:320px;">
+      <label>배송 템플릿</label>
+      <!-- TODO: 실제 배송템플릿 ID 주입 필요 -->
+      <select id="toss-shipping-template">
+        <option value="">-- 선택하세요 --</option>
+        <option value="j1_shipping_template_id">제이원 배송템플릿</option>
+        <option value="soul_shipping_template_id">소울 배송템플릿</option>
+        <option value="happy_shipping_template_id">행복산업 배송템플릿</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- STEP T5: 교환반품 + 필수고시 -->
+  <div class="step-header toss-step"><span class="step-num">STEP T5</span><span class="step-title">교환반품 + 필수고시</span></div>
+  <div class="panel">
+    <div class="field" style="max-width:320px; margin-bottom:24px;">
+      <label>교환반품 템플릿</label>
+      <!-- TODO: 실제 교환반품 템플릿 ID 주입 필요 -->
+      <select id="toss-exchange-template">
+        <option value="">-- 선택하세요 --</option>
+        <option value="j1_exchange_template_id">제이원 교환반품템플릿</option>
+        <option value="soul_exchange_template_id">소울 교환반품템플릿</option>
+        <option value="happy_exchange_template_id">행복산업 교환반품템플릿</option>
+      </select>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="sub-label">필수고시</div>
+    <div id="toss-notice-loading" style="display:none;" class="category-loading"><div class="spinner"></div><span>필수고시 카테고리 로딩 중...</span></div>
+    <div class="notice-select-wrap" id="toss-notice-selects">
+      <div class="field">
+        <label>1차 카테고리</label>
+        <select id="toss-notice-cat1" onchange="onTossNoticeCat1Change()">
+          <option value="">-- 로딩 중... --</option>
+        </select>
+      </div>
+      <div class="field" id="toss-notice-cat2-wrap" style="display:none;">
+        <label>2차 카테고리</label>
+        <select id="toss-notice-cat2" onchange="onTossNoticeCat2Change()">
+          <option value="">-- 선택하세요 --</option>
+        </select>
+      </div>
+    </div>
+    <div class="notice-items-grid" id="toss-notice-items"></div>
+  </div>
+
+  <!-- 토스쇼핑 등록 버튼 -->
+  <div style="display:flex; justify-content:center; padding-bottom: 48px;">
+    <button class="btn-toss-register" onclick="submitTossProduct()">🚀 토스쇼핑 등록</button>
+  </div>
+
+</div> <!-- /toss-section -->
+
+</div> <!-- /main -->
 
 <div class="toast" id="toast"></div>
 
@@ -1903,6 +2455,806 @@ setInterval(rotateQuote, 6000);
 initStorePanels();
 STORES.forEach(s => applyStoreDefaults(s.key, s.name, false));
 Object.keys(SLOTS).forEach(updateFolderLabel);
+
+// ============================================================
+// 공유 데이터 레이어 (sharedProduct)
+// ============================================================
+const sharedProduct = {
+  name: '',        // 상품명
+  brand: '',       // 브랜드명
+  costPrice: '',   // 원가
+  salePrice: '',   // 판매가
+  stock: '',       // 재고수량
+  detailHtml: '',  // 상세설명 HTML
+  detailImgUrl: '', // 상세설명 이미지 URL
+  mainImages: [],  // 대표/추가 이미지 CDN URLs (array)
+  tags: [],        // 검색태그 (array, max 10)
+};
+
+// 카페24 필드 변경 시 sharedProduct 동기화
+document.addEventListener('DOMContentLoaded', () => {
+  const syncFields = [
+    { id: 'productName',    key: 'name' },
+    { id: 'supplyPrice',    key: 'costPrice' },
+    { id: 'salePrice',      key: 'salePrice' },
+    { id: 'stock',          key: 'stock' },
+    { id: 'detailHtmlInput', key: 'detailHtml' },
+  ];
+  syncFields.forEach(({ id, key }) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', () => { sharedProduct[key] = el.value; });
+  });
+  // 소울스토어 브랜드 필드를 기본 공유 브랜드로 사용
+  const brandEl = document.getElementById('soul-brand');
+  if (brandEl) brandEl.addEventListener('input', () => { sharedProduct.brand = brandEl.value; });
+});
+
+// ============================================================
+// 플랫폼 전환 (카페24 ↔ 토스쇼핑)
+// ============================================================
+let currentPlatform = 'cafe24';
+
+function switchPlatform(platform) {
+  currentPlatform = platform;
+  document.getElementById('cafe24-section').style.display = platform === 'cafe24' ? '' : 'none';
+  document.getElementById('toss-section').style.display = platform === 'toss' ? '' : 'none';
+  // 헤더 업로드 버튼 표시 제어
+  const btnUpload = document.getElementById('btnUpload');
+  if (btnUpload) btnUpload.style.display = platform === 'cafe24' ? '' : 'none';
+  // 네비게이션 active 상태 업데이트
+  document.querySelectorAll('.platform-nav-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.platform === platform);
+  });
+  // 토스쇼핑으로 전환 시 sharedProduct에서 사전 채우기
+  if (platform === 'toss') {
+    prefillTossFromShared();
+    loadTossCategories();
+    loadTossNoticeCategories();
+    initTossImageSlots();
+  }
+}
+
+// ============================================================
+// 토스쇼핑 모듈 상태
+// ============================================================
+const tossState = {
+  name: '',
+  brand: '',
+  managementCode: '',
+  categoryLeafId: null,
+  categoryPath: '',
+  categoryConfirmed: false,
+  options: [],         // [{name, value}]
+  images: [],          // CDN URL array (max 10)
+  detailHtml: '',
+  detailImgUrl: '',
+  taxType: 'TAXABLE',
+  tags: [],
+  shippingTemplateId: '',
+  exchangeReturnTemplateId: '',
+  notices: [],         // [{code, items: [{key, value}]}]
+};
+
+let tossOptionCounter = 0;
+let tossConstraintData = null;
+
+// ============================================================
+// sharedProduct → 토스쇼핑 사전 채우기
+// ============================================================
+function prefillTossFromShared() {
+  // 카페24 필드에서 최신값 읽기
+  sharedProduct.name = (document.getElementById('productName') || {}).value || sharedProduct.name;
+  sharedProduct.salePrice = (document.getElementById('salePrice') || {}).value || sharedProduct.salePrice;
+  sharedProduct.costPrice = (document.getElementById('supplyPrice') || {}).value || sharedProduct.costPrice;
+  sharedProduct.stock = (document.getElementById('stock') || {}).value || sharedProduct.stock;
+  sharedProduct.brand = (document.getElementById('soul-brand') || {}).value || sharedProduct.brand;
+  sharedProduct.detailHtml = (document.getElementById('detailHtmlInput') || {}).value || sharedProduct.detailHtml;
+
+  // 메인 추가이미지 CDN URL 수집
+  if (uploadedUrls['common-extra'] && uploadedUrls['common-extra'].length > 0) {
+    sharedProduct.mainImages = [...uploadedUrls['common-extra']];
+  }
+
+  // 토스 필드에 채우기
+  const nameEl = document.getElementById('toss-name');
+  if (nameEl && !nameEl.value) nameEl.value = sharedProduct.name;
+  const brandEl = document.getElementById('toss-brand');
+  if (brandEl && !brandEl.value) brandEl.value = sharedProduct.brand;
+  const detailHtmlEl = document.getElementById('toss-detail-html');
+  if (detailHtmlEl && !detailHtmlEl.value) detailHtmlEl.value = sharedProduct.detailHtml;
+
+  // 태그: cafe24 searchKeywords → 토스 태그로 변환 (콤마 분리)
+  if (tossState.tags.length === 0) {
+    const kwEl = document.getElementById('searchKeywords');
+    if (kwEl && kwEl.value.trim()) {
+      const kwTags = kwEl.value.split(',').map(t => t.trim()).filter(Boolean).slice(0, 10);
+      tossState.tags = kwTags;
+      renderTossTags();
+    }
+  }
+
+  // sharedProduct.mainImages → 이미지 슬롯 사전 채우기
+  if (tossState.images.length === 0 && sharedProduct.mainImages.length > 0) {
+    tossState.images = sharedProduct.mainImages.slice(0, 10);
+    renderTossImageSlots();
+  }
+}
+
+// ============================================================
+// 토스쇼핑 카테고리 드릴다운
+// ============================================================
+const TOSS_CAT_URL = 'https://cdn.wonflowai.com/toss/categories.json';
+let tossCatData = null;
+let tossCatLoading = false;
+// 각 depth의 선택된 카테고리 ID를 추적
+let tossCatSelectedIds = [];
+
+async function loadTossCategories() {
+  if (tossCatData) { renderTossCategoryColumns(); return; }
+  if (tossCatLoading) return;
+  tossCatLoading = true;
+  const loadingEl = document.getElementById('toss-cat-loading');
+  if (loadingEl) loadingEl.style.display = 'flex';
+  try {
+    const res = await fetch(TOSS_CAT_URL + '?v=' + Date.now(), { mode: 'cors', cache: 'no-store' });
+    if (res.ok) {
+      tossCatData = await res.json();
+    } else {
+      throw new Error('HTTP ' + res.status);
+    }
+  } catch(e) {
+    console.warn('토스 카테고리 로드 실패:', e);
+    tossCatData = { categories: [] };
+    showToast('토스 카테고리 로드 실패: ' + e.message, 'error');
+  } finally {
+    tossCatLoading = false;
+    if (loadingEl) loadingEl.style.display = 'none';
+  }
+  renderTossCategoryColumns();
+  // 카페24에서 선택된 카테고리가 있으면 자동 매칭 시도
+  tryAutoMatchTossCategory();
+}
+
+function getTossCategoryRoot() {
+  if (!tossCatData) return [];
+  return tossCatData.categories || tossCatData || [];
+}
+
+function getTossCategoryChildren(parentId, depth) {
+  // 재귀적으로 parentId의 children을 찾음
+  function find(nodes, targetId) {
+    for (const node of nodes) {
+      if (String(node.id) === String(targetId)) return node.children || [];
+      if (node.children) {
+        const found = find(node.children, targetId);
+        if (found !== null) return found;
+      }
+    }
+    return null;
+  }
+  if (parentId === null) return getTossCategoryRoot();
+  return find(getTossCategoryRoot(), parentId) || [];
+}
+
+function getTossCategoryNode(id) {
+  function find(nodes) {
+    for (const node of nodes) {
+      if (String(node.id) === String(id)) return node;
+      if (node.children) {
+        const found = find(node.children);
+        if (found) return found;
+      }
+    }
+    return null;
+  }
+  return find(getTossCategoryRoot());
+}
+
+function renderTossCategoryColumns() {
+  const container = document.getElementById('toss-cat-columns');
+  if (!container) return;
+  container.innerHTML = '';
+
+  // depth 0: root
+  const depths = [null, ...tossCatSelectedIds];
+  depths.forEach((parentId, depth) => {
+    const children = getTossCategoryChildren(parentId, depth);
+    if (!children || children.length === 0) return;
+    const col = document.createElement('div');
+    col.className = 'category-column';
+    col.innerHTML = `<div class="category-column-header">${depth + 1}차</div>` +
+      children.map(node => {
+        const isSelected = tossCatSelectedIds[depth] !== undefined && String(tossCatSelectedIds[depth]) === String(node.id);
+        const hasChildren = node.children && node.children.length > 0;
+        return `<div class="category-col-item${isSelected ? ' selected' : ''}" onclick="selectTossCategory(${depth}, '${node.id}', '${(node.name || '').replace(/'/g, "\\'")}')">
+          <span>${node.name || node.id}</span>
+          ${hasChildren ? '<span class="has-children">▶</span>' : ''}
+        </div>`;
+      }).join('');
+    container.appendChild(col);
+  });
+
+  // 브레드크럼 업데이트
+  updateTossCategoryBreadcrumb();
+}
+
+function selectTossCategory(depth, id, name) {
+  // depth부터 이하 선택 초기화
+  tossCatSelectedIds = tossCatSelectedIds.slice(0, depth);
+  tossCatSelectedIds[depth] = id;
+
+  // 해당 노드가 leaf인지 확인
+  const node = getTossCategoryNode(id);
+  const isLeaf = !node || !node.children || node.children.length === 0;
+
+  if (isLeaf) {
+    // 리프 카테고리 선택됨
+    tossState.categoryLeafId = id;
+    tossState.categoryPath = buildTossCategoryPath();
+    tossState.categoryConfirmed = true;
+    document.getElementById('toss-cat-unconfirmed-badge').style.display = 'none';
+    document.getElementById('toss-cat-confirm-wrap').style.display = 'none';
+    // constraint template 로드
+    loadTossConstraintTemplate(id);
+  } else {
+    tossState.categoryLeafId = null;
+    tossState.categoryConfirmed = false;
+  }
+
+  renderTossCategoryColumns();
+}
+
+function buildTossCategoryPath() {
+  const names = tossCatSelectedIds.map(id => {
+    const node = getTossCategoryNode(id);
+    return node ? (node.name || id) : id;
+  });
+  return names.join(' > ');
+}
+
+function updateTossCategoryBreadcrumb() {
+  const bc = document.getElementById('toss-cat-breadcrumb');
+  const pathEl = document.getElementById('toss-cat-path');
+  if (!bc || !pathEl) return;
+  if (tossCatSelectedIds.length === 0) {
+    bc.classList.remove('show');
+    return;
+  }
+  const path = buildTossCategoryPath();
+  pathEl.textContent = path;
+  tossState.categoryPath = path;
+  bc.classList.add('show');
+}
+
+// 카페24 카테고리 → 토스 카테고리 자동 매칭 시도 (유사도 기반)
+function tryAutoMatchTossCategory() {
+  // cafe24에서 선택된 카테고리 텍스트 가져오기
+  let cafe24CatText = '';
+  for (const store of ['soul', 'j1', 'happy']) {
+    const inputEl = document.getElementById('catSearchInput-' + store);
+    if (inputEl && inputEl.value.trim()) {
+      cafe24CatText = inputEl.value.trim();
+      break;
+    }
+  }
+  if (!cafe24CatText || !tossCatData) return;
+
+  // 모든 리프 카테고리 수집 후 유사도 계산
+  const leaves = [];
+  function collectLeaves(nodes, path) {
+    nodes.forEach(node => {
+      const p = path ? path + ' > ' + (node.name || '') : (node.name || '');
+      if (!node.children || node.children.length === 0) {
+        leaves.push({ id: node.id, path: p, name: node.name || '' });
+      } else {
+        collectLeaves(node.children, p);
+      }
+    });
+  }
+  collectLeaves(getTossCategoryRoot(), '');
+
+  let bestMatch = null;
+  let bestScore = 0;
+  const lowerQuery = cafe24CatText.toLowerCase();
+  leaves.forEach(leaf => {
+    const lowerPath = leaf.path.toLowerCase();
+    const lowerName = leaf.name.toLowerCase();
+    // 간단한 부분 문자열 매칭 점수
+    let score = 0;
+    if (lowerName === lowerQuery) score = 100;
+    else if (lowerName.includes(lowerQuery) || lowerQuery.includes(lowerName)) score = 80;
+    else {
+      const words = lowerQuery.split(/[\s>]+/).filter(Boolean);
+      const matched = words.filter(w => lowerPath.includes(w));
+      score = Math.round((matched.length / words.length) * 60);
+    }
+    if (score > bestScore) { bestScore = score; bestMatch = leaf; }
+  });
+
+  if (bestMatch && bestScore >= 70) {
+    // 자동 매칭 성공 (신뢰도 >= 70%)
+    console.log('[토스 카테고리 자동매칭]', bestMatch.path, 'score:', bestScore);
+    // 경로를 역추적하여 선택
+    autoSelectTossPathByLeafId(bestMatch.id);
+    tossState.categoryConfirmed = true;
+  } else if (bestMatch && bestScore > 0) {
+    // 신뢰도 낮음 - 미확정 표시
+    console.log('[토스 카테고리 자동매칭 미확정]', bestMatch.path, 'score:', bestScore);
+    autoSelectTossPathByLeafId(bestMatch.id);
+    tossState.categoryConfirmed = false;
+    document.getElementById('toss-cat-unconfirmed-badge').style.display = '';
+    document.getElementById('toss-cat-confirm-wrap').style.display = '';
+    const pathEl = document.getElementById('toss-cat-path');
+    if (pathEl) pathEl.classList.add('category-unconfirmed');
+  }
+}
+
+function autoSelectTossPathByLeafId(leafId) {
+  // 리프 노드까지의 경로를 찾아 선택
+  function findPath(nodes, targetId, path) {
+    for (const node of nodes) {
+      if (String(node.id) === String(targetId)) return [...path, node.id];
+      if (node.children) {
+        const found = findPath(node.children, targetId, [...path, node.id]);
+        if (found) return found;
+      }
+    }
+    return null;
+  }
+  const path = findPath(getTossCategoryRoot(), leafId, []);
+  if (path) {
+    tossCatSelectedIds = path;
+    tossState.categoryLeafId = leafId;
+    tossState.categoryPath = buildTossCategoryPath();
+    renderTossCategoryColumns();
+  }
+}
+
+function tossConfirmCategory() {
+  tossState.categoryConfirmed = true;
+  document.getElementById('toss-cat-unconfirmed-badge').style.display = 'none';
+  document.getElementById('toss-cat-confirm-wrap').style.display = 'none';
+  const pathEl = document.getElementById('toss-cat-path');
+  if (pathEl) pathEl.classList.remove('category-unconfirmed');
+  showToast('✓ 카테고리가 확정되었습니다.', 'success');
+}
+
+// ============================================================
+// 토스쇼핑 Constraint Template 로드
+// ============================================================
+async function loadTossConstraintTemplate(categoryId) {
+  const badge = document.getElementById('toss-constraint-badge');
+  if (badge) badge.textContent = '(constraint-template 로딩 중...)';
+  try {
+    const url = `https://cdn.wonflowai.com/toss/constraint-templates/${categoryId}.json`;
+    const res = await fetch(url + '?v=' + Date.now(), { mode: 'cors', cache: 'no-store' });
+    if (res.ok) {
+      tossConstraintData = await res.json();
+      if (badge) badge.textContent = '(constraint-template 로드 완료)';
+      renderTossConstraintOptions();
+    } else {
+      tossConstraintData = null;
+      if (badge) badge.textContent = '(constraint-template 없음 — 자유 입력)';
+    }
+  } catch(e) {
+    tossConstraintData = null;
+    if (badge) badge.textContent = '(constraint-template 로드 실패 — 자유 입력)';
+    console.warn('constraint-template 로드 실패:', e);
+  }
+}
+
+function renderTossConstraintOptions() {
+  if (!tossConstraintData) return;
+  // constraint template이 있으면 옵션 행에 드롭다운으로 표시 가능
+  // 현재는 기존 자유 입력 방식 유지 + 안내 토스트
+  showToast('constraint-template 로드됨. 옵션 추가 시 적용됩니다.', 'info');
+}
+
+// ============================================================
+// 토스쇼핑 옵션 행
+// ============================================================
+function addTossOptionRow() {
+  const id = ++tossOptionCounter;
+  const empty = document.getElementById('toss-option-empty');
+  if (empty) empty.style.display = 'none';
+  tossState.options.push({ id, name: '', value: '' });
+  const container = document.getElementById('toss-option-rows');
+  const row = document.createElement('div');
+  row.className = 'toss-option-row';
+  row.id = 'toss-opt-row-' + id;
+
+  if (tossConstraintData && tossConstraintData.optionNames && tossConstraintData.optionNames.length > 0) {
+    // constraint template 기반 드롭다운
+    const nameOptions = tossConstraintData.optionNames.map(n => `<option value="${n}">${n}</option>`).join('');
+    row.innerHTML = `
+      <select onchange="updateTossOption(${id},'name',this.value)">
+        <option value="">-- 옵션명 선택 --</option>${nameOptions}
+      </select>
+      <input type="text" placeholder="옵션값 (예: 빨강, 파랑)" oninput="updateTossOption(${id},'value',this.value)" />
+      <button class="btn-del-option" onclick="removeTossOptionRow(${id})" title="삭제">✕</button>`;
+  } else {
+    // 자유 입력
+    row.innerHTML = `
+      <input type="text" placeholder="옵션명 (예: 색상)" oninput="updateTossOption(${id},'name',this.value)" style="max-width:180px;" />
+      <input type="text" placeholder="옵션값 (예: 빨강, 파랑)" oninput="updateTossOption(${id},'value',this.value)" />
+      <button class="btn-del-option" onclick="removeTossOptionRow(${id})" title="삭제">✕</button>`;
+  }
+  container.appendChild(row);
+}
+
+function updateTossOption(id, field, val) {
+  const opt = tossState.options.find(o => o.id === id);
+  if (opt) opt[field] = val;
+}
+
+function removeTossOptionRow(id) {
+  tossState.options = tossState.options.filter(o => o.id !== id);
+  const row = document.getElementById('toss-opt-row-' + id);
+  if (row) row.remove();
+  if (tossState.options.length === 0) {
+    const empty = document.getElementById('toss-option-empty');
+    if (empty) empty.style.display = '';
+  }
+}
+
+// ============================================================
+// 토스쇼핑 이미지 슬롯
+// ============================================================
+let tossCropFile = null;
+let tossCropImg = null;
+let tossCropSlotIdx = null;
+let tossCropX = 0, tossCropY = 0, tossCropDragging = false, tossCropDragStart = null;
+
+function initTossImageSlots() {
+  renderTossImageSlots();
+}
+
+function renderTossImageSlots() {
+  const container = document.getElementById('toss-img-slots');
+  if (!container) return;
+  container.innerHTML = '';
+  for (let i = 0; i < 10; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'toss-img-slot' + (tossState.images[i] ? ' has-img' : '');
+    slot.dataset.idx = i;
+    slot.innerHTML = `<span class="slot-num">${i + 1}</span>` +
+      (tossState.images[i]
+        ? `<img src="${tossState.images[i]}" />
+           <button class="slot-remove" onclick="removeTossImage(event,${i})">✕</button>
+           ${i === 0 ? '<span class="slot-thumb-badge">대표</span>' : ''}`
+        : `<span style="font-size:20px;">+</span>`);
+    if (!tossState.images[i]) {
+      slot.addEventListener('click', () => openTossImgPicker(i));
+    }
+    container.appendChild(slot);
+  }
+}
+
+function openTossImgPicker(idx) {
+  tossCropSlotIdx = idx;
+  const input = document.getElementById('toss-img-input');
+  if (input) input.click();
+}
+
+function removeTossImage(e, idx) {
+  e.stopPropagation();
+  tossState.images.splice(idx, 1);
+  renderTossImageSlots();
+}
+
+function onTossImgSelect(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  event.target.value = '';
+  tossCropFile = file;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    tossCropImg = new Image();
+    tossCropImg.onload = () => {
+      tossCropX = 0; tossCropY = 0;
+      document.getElementById('toss-crop-container').classList.add('show');
+      drawTossCrop();
+      setupTossCropDrag();
+    };
+    tossCropImg.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function drawTossCrop() {
+  const canvas = document.getElementById('toss-crop-canvas');
+  if (!canvas || !tossCropImg) return;
+  const ctx = canvas.getContext('2d');
+  const size = 320;
+  canvas.width = size; canvas.height = size;
+
+  // 1:1 크롭 — 짧은 쪽 기준
+  const srcSize = Math.min(tossCropImg.width, tossCropImg.height);
+  const maxOffsetX = tossCropImg.width - srcSize;
+  const maxOffsetY = tossCropImg.height - srcSize;
+  const ox = Math.max(0, Math.min(tossCropX, maxOffsetX));
+  const oy = Math.max(0, Math.min(tossCropY, maxOffsetY));
+
+  ctx.clearRect(0, 0, size, size);
+  ctx.drawImage(tossCropImg, ox, oy, srcSize, srcSize, 0, 0, size, size);
+}
+
+function setupTossCropDrag() {
+  const wrap = document.getElementById('toss-crop-wrap');
+  if (!wrap) return;
+  // 이전 리스너 제거
+  const newWrap = wrap.cloneNode(true);
+  wrap.parentNode.replaceChild(newWrap, wrap);
+
+  let startMouseX, startMouseY, startCropX, startCropY;
+  function onDown(e) {
+    tossCropDragging = true;
+    const pt = e.touches ? e.touches[0] : e;
+    startMouseX = pt.clientX; startMouseY = pt.clientY;
+    startCropX = tossCropX; startCropY = tossCropY;
+    e.preventDefault();
+  }
+  function onMove(e) {
+    if (!tossCropDragging || !tossCropImg) return;
+    const pt = e.touches ? e.touches[0] : e;
+    const dx = pt.clientX - startMouseX;
+    const dy = pt.clientY - startMouseY;
+    const canvas = document.getElementById('toss-crop-canvas');
+    const scaleX = tossCropImg.width / (canvas ? canvas.offsetWidth || 320 : 320);
+    const scaleY = tossCropImg.height / (canvas ? canvas.offsetHeight || 320 : 320);
+    tossCropX = startCropX - dx * scaleX;
+    tossCropY = startCropY - dy * scaleY;
+    drawTossCrop();
+    e.preventDefault();
+  }
+  function onUp() { tossCropDragging = false; }
+
+  newWrap.addEventListener('mousedown', onDown);
+  newWrap.addEventListener('touchstart', onDown, { passive: false });
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('touchmove', onMove, { passive: false });
+  document.addEventListener('mouseup', onUp);
+  document.addEventListener('touchend', onUp);
+}
+
+async function tossConfirmCrop() {
+  const canvas = document.getElementById('toss-crop-canvas');
+  if (!canvas) return;
+  const btn = document.querySelector('.crop-controls .btn-add-option');
+  if (btn) { btn.disabled = true; btn.textContent = '업로드 중...'; }
+  try {
+    // canvas → blob → R2 업로드
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.92));
+    const file = new File([blob], `toss_crop_${Date.now()}.jpg`, { type: 'image/jpeg' });
+    const r2Key = `products/toss/images/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.jpg`;
+    const url = await uploadFile(file, r2Key);
+    // 해당 슬롯에 저장
+    if (tossCropSlotIdx !== null) {
+      tossState.images[tossCropSlotIdx] = url;
+    } else {
+      tossState.images.push(url);
+    }
+    if (tossState.images.length > 10) tossState.images = tossState.images.slice(0, 10);
+    tossCancelCrop();
+    renderTossImageSlots();
+    showToast('✓ 이미지 크롭 & CDN 업로드 완료', 'success');
+  } catch(e) {
+    showToast('✗ 업로드 실패: ' + e.message, 'error');
+    console.error('toss crop upload error:', e);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '✓ 크롭 확정 & CDN 업로드'; }
+  }
+}
+
+function tossCancelCrop() {
+  document.getElementById('toss-crop-container').classList.remove('show');
+  tossCropFile = null; tossCropImg = null; tossCropSlotIdx = null;
+}
+
+// ============================================================
+// 토스쇼핑 상세설명 모드 전환
+// ============================================================
+function onTossDetailModeChange() {
+  const mode = document.querySelector('input[name="tossDetailMode"]:checked').value;
+  document.getElementById('toss-detail-html-wrap').style.display = mode === 'html' ? '' : 'none';
+  document.getElementById('toss-detail-img-wrap').style.display = mode === 'image' ? '' : 'none';
+}
+
+// ============================================================
+// 토스쇼핑 태그 칩 UI
+// ============================================================
+function renderTossTags() {
+  const container = document.getElementById('toss-tag-chips');
+  const countEl = document.getElementById('toss-tag-count');
+  if (!container) return;
+  container.innerHTML = tossState.tags.map((tag, idx) =>
+    `<span class="tag-chip">${tag}<button class="chip-remove" onclick="removeTossTag(${idx})">✕</button></span>`
+  ).join('');
+  if (countEl) countEl.textContent = `${tossState.tags.length} / 10`;
+}
+
+function addTossTag() {
+  const input = document.getElementById('toss-tag-input');
+  if (!input) return;
+  const tag = input.value.trim();
+  if (!tag) return;
+  if (tossState.tags.length >= 10) { showToast('태그는 최대 10개까지 추가 가능합니다.', 'error'); return; }
+  if (tossState.tags.includes(tag)) { showToast('이미 추가된 태그입니다.', 'error'); return; }
+  tossState.tags.push(tag);
+  renderTossTags();
+  input.value = '';
+}
+
+function removeTossTag(idx) {
+  tossState.tags.splice(idx, 1);
+  renderTossTags();
+}
+
+function onTossTagKeydown(e) {
+  if (e.key === 'Enter') { e.preventDefault(); addTossTag(); }
+}
+
+// ============================================================
+// 토스쇼핑 필수고시 (notice categories)
+// ============================================================
+const TOSS_NOTICE_CATS_URL = 'https://cdn.wonflowai.com/toss/notice-categories.json';
+let tossNoticeCatsData = null;
+
+async function loadTossNoticeCategories() {
+  const loadingEl = document.getElementById('toss-notice-loading');
+  const cat1El = document.getElementById('toss-notice-cat1');
+  if (!cat1El) return;
+  if (tossNoticeCatsData) { populateTossNoticeCat1(); return; }
+  if (loadingEl) loadingEl.style.display = 'flex';
+  try {
+    const res = await fetch(TOSS_NOTICE_CATS_URL + '?v=' + Date.now(), { mode: 'cors', cache: 'no-store' });
+    if (res.ok) {
+      tossNoticeCatsData = await res.json();
+    } else {
+      throw new Error('HTTP ' + res.status);
+    }
+  } catch(e) {
+    console.warn('토스 필수고시 카테고리 로드 실패:', e);
+    tossNoticeCatsData = null;
+  } finally {
+    if (loadingEl) loadingEl.style.display = 'none';
+  }
+  populateTossNoticeCat1();
+}
+
+function populateTossNoticeCat1() {
+  const cat1El = document.getElementById('toss-notice-cat1');
+  if (!cat1El) return;
+  if (!tossNoticeCatsData) {
+    cat1El.innerHTML = '<option value="">-- 로드 실패 --</option>';
+    return;
+  }
+  const cats = Array.isArray(tossNoticeCatsData) ? tossNoticeCatsData : (tossNoticeCatsData.categories || []);
+  cat1El.innerHTML = '<option value="">-- 1차 카테고리 선택 --</option>' +
+    cats.map(c => `<option value="${c.code || c.id || ''}">${c.name || c.code}</option>`).join('');
+}
+
+function onTossNoticeCat1Change() {
+  const cat1Val = document.getElementById('toss-notice-cat1').value;
+  const cat2Wrap = document.getElementById('toss-notice-cat2-wrap');
+  const cat2El = document.getElementById('toss-notice-cat2');
+  document.getElementById('toss-notice-items').innerHTML = '';
+  tossState.notices = [];
+
+  if (!cat1Val || !tossNoticeCatsData) { cat2Wrap.style.display = 'none'; return; }
+  const cats = Array.isArray(tossNoticeCatsData) ? tossNoticeCatsData : (tossNoticeCatsData.categories || []);
+  const cat1 = cats.find(c => String(c.code || c.id) === String(cat1Val));
+  const subCats = cat1 ? (cat1.subcategories || cat1.children || []) : [];
+
+  if (subCats.length > 0) {
+    cat2El.innerHTML = '<option value="">-- 2차 카테고리 선택 --</option>' +
+      subCats.map(c => `<option value="${c.code || c.id || ''}">${c.name || c.code}</option>`).join('');
+    cat2Wrap.style.display = '';
+  } else {
+    cat2Wrap.style.display = 'none';
+    // 1차에서 바로 items 로드
+    loadTossNoticeItems(cat1Val);
+  }
+}
+
+function onTossNoticeCat2Change() {
+  const cat2Val = document.getElementById('toss-notice-cat2').value;
+  document.getElementById('toss-notice-items').innerHTML = '';
+  tossState.notices = [];
+  if (!cat2Val) return;
+  loadTossNoticeItems(cat2Val);
+}
+
+async function loadTossNoticeItems(code) {
+  const container = document.getElementById('toss-notice-items');
+  if (!container) return;
+  container.innerHTML = '<div class="category-loading"><div class="spinner"></div><span>필수고시 항목 로딩 중...</span></div>';
+  try {
+    const url = `https://cdn.wonflowai.com/toss/notice-items/${code}.json`;
+    const res = await fetch(url + '?v=' + Date.now(), { mode: 'cors', cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const items = Array.isArray(data) ? data : (data.items || []);
+    container.innerHTML = '';
+    tossState.notices = [{ code, items: [] }];
+    items.forEach((item, idx) => {
+      const key = item.key || item.code || String(idx);
+      const label = item.label || item.name || key;
+      const fieldDiv = document.createElement('div');
+      fieldDiv.className = 'field';
+      fieldDiv.innerHTML = `<label>${label}</label>
+        <input type="text" placeholder="${item.placeholder || label + ' 입력'}"
+          oninput="updateTossNoticeItem('${code}', '${key}', this.value)" />`;
+      container.appendChild(fieldDiv);
+      tossState.notices[0].items.push({ key, value: '' });
+    });
+    if (items.length === 0) {
+      container.innerHTML = '<div style="font-size:13px; color:var(--text3);">이 카테고리의 고시 항목이 없습니다.</div>';
+    }
+  } catch(e) {
+    container.innerHTML = `<div style="font-size:13px; color:var(--text3);">필수고시 항목 로드 실패: ${e.message}</div>`;
+    console.warn('notice items 로드 실패:', e);
+  }
+}
+
+function updateTossNoticeItem(code, key, value) {
+  const notice = tossState.notices.find(n => n.code === code);
+  if (!notice) return;
+  const item = notice.items.find(i => i.key === key);
+  if (item) item.value = value;
+}
+
+// ============================================================
+// 토스쇼핑 등록 페이로드 조립 & 제출
+// ============================================================
+function submitTossProduct() {
+  // 최신값 수집
+  tossState.name = document.getElementById('toss-name').value.trim();
+  tossState.brand = document.getElementById('toss-brand').value.trim();
+  tossState.managementCode = document.getElementById('toss-mgmt-code').value.trim();
+  tossState.shippingTemplateId = document.getElementById('toss-shipping-template').value;
+  tossState.exchangeReturnTemplateId = document.getElementById('toss-exchange-template').value;
+  tossState.taxType = document.querySelector('input[name="tossTaxType"]:checked')?.value || 'TAXABLE';
+
+  const detailMode = document.querySelector('input[name="tossDetailMode"]:checked')?.value;
+  if (detailMode === 'html') {
+    tossState.detailHtml = document.getElementById('toss-detail-html').value.trim();
+    tossState.detailImgUrl = '';
+  } else {
+    tossState.detailImgUrl = document.getElementById('toss-detail-img-url').value.trim();
+    tossState.detailHtml = '';
+  }
+
+  const tossPayload = {
+    name: tossState.name,
+    brand: tossState.brand,
+    managementCode: tossState.managementCode,
+    categoryId: tossState.categoryLeafId,
+    options: tossState.options.filter(o => o.name.trim()).map(o => ({
+      name: o.name.trim(),
+      value: o.value.trim() ? o.value.split(',').map(v => v.trim()).filter(Boolean) : [],
+    })),
+    images: tossState.images.filter(Boolean),
+    detailContent: tossState.detailHtml || tossState.detailImgUrl,
+    taxType: tossState.taxType,
+    tags: tossState.tags,
+    shippingTemplateId: tossState.shippingTemplateId, // placeholder
+    exchangeReturnTemplateId: tossState.exchangeReturnTemplateId, // placeholder
+    notices: tossState.notices,
+    salePrice: Number(document.getElementById('salePrice')?.value) || Number(sharedProduct.salePrice) || 0,
+    costPrice: Number(document.getElementById('supplyPrice')?.value) || Number(sharedProduct.costPrice) || 0,
+    stock: Number(document.getElementById('stock')?.value) || Number(sharedProduct.stock) || 0,
+  };
+
+  console.log('[토스쇼핑 페이로드]', JSON.stringify(tossPayload, null, 2));
+  // TODO: POST to n8n webhook - endpoint TBD
+  showToast('페이로드가 콘솔에 출력되었습니다. (웹훅 엔드포인트 미설정)', 'info');
+}
+
+// ============================================================
+// 초기화 시 토스 이미지 슬롯 렌더링
+// ============================================================
+initTossImageSlots();
 </script>
 </body>
 </html>
