@@ -2622,6 +2622,26 @@ let tossCatLoading = false;
 // 각 depth의 선택된 카테고리 ID를 추적
 let tossCatSelectedIds = [];
 
+function buildTossCategoryTree(flatArr) {
+  const map = {};
+  flatArr.forEach(item => {
+    map[String(item.id)] = { id: String(item.id), name: item.name || String(item.id), isLeaf: !!item.isLeaf, children: [] };
+  });
+  const roots = [];
+  flatArr.forEach(item => {
+    const node = map[String(item.id)];
+    const pid = item.parentId;
+    if (pid == null || pid === '' || pid === 0 || pid === '0') {
+      roots.push(node);
+    } else {
+      const parent = map[String(pid)];
+      if (parent) parent.children.push(node);
+      else roots.push(node); // orphan → treat as root
+    }
+  });
+  return roots;
+}
+
 async function loadTossCategories() {
   if (tossCatData) { renderTossCategoryColumns(); return; }
   if (tossCatLoading) return;
@@ -2631,14 +2651,33 @@ async function loadTossCategories() {
   try {
     const res = await fetch(TOSS_CAT_URL + '?v=' + Date.now(), { mode: 'cors', cache: 'no-store' });
     if (res.ok) {
-      tossCatData = await res.json();
+      const raw = await res.json();
+      // flat array {id, name, level, parentId, isLeaf} → tree {id, name, isLeaf, children[]}
+      const flatArr = Array.isArray(raw) ? raw : (raw.categories || []);
+      if (flatArr.length === 0) {
+        throw new Error('EMPTY_CACHE');
+      }
+      tossCatData = buildTossCategoryTree(flatArr);
     } else {
       throw new Error('HTTP ' + res.status);
     }
   } catch(e) {
-    console.warn('토스 카테고리 로드 실패:', e);
-    tossCatData = { categories: [] };
-    showToast('토스 카테고리 로드 실패: ' + e.message, 'error');
+    const isMissing = e.message === 'EMPTY_CACHE' || (e.message && e.message.includes('404'));
+    const msg = isMissing
+      ? '카테고리 캐시가 아직 없습니다. n8n \'토스쇼핑 연동\' 워크플로우를 먼저 실행해주세요.'
+      : '토스 카테고리 로드 실패: ' + e.message;
+    console.error('[토스 카테고리]', msg, e);
+    tossCatData = [];
+    // 컬럼 영역에 에러 안내 표시
+    const container = document.getElementById('toss-cat-columns');
+    if (container) {
+      container.innerHTML = `<div style="padding:16px 12px; color:#ff6b6b; font-size:13px; line-height:1.6;">
+        ⚠️ ${msg}
+      </div>`;
+    }
+    tossCatLoading = false;
+    if (loadingEl) loadingEl.style.display = 'none';
+    return;
   } finally {
     tossCatLoading = false;
     if (loadingEl) loadingEl.style.display = 'none';
@@ -2650,7 +2689,8 @@ async function loadTossCategories() {
 
 function getTossCategoryRoot() {
   if (!tossCatData) return [];
-  return tossCatData.categories || tossCatData || [];
+  if (Array.isArray(tossCatData)) return tossCatData;
+  return tossCatData.categories || [];
 }
 
 function getTossCategoryChildren(parentId, depth) {
@@ -2716,9 +2756,9 @@ function selectTossCategory(depth, id, name) {
   tossCatSelectedIds = tossCatSelectedIds.slice(0, depth);
   tossCatSelectedIds[depth] = id;
 
-  // 해당 노드가 leaf인지 확인
+  // 해당 노드가 leaf인지 확인 (isLeaf 필드 우선, 없으면 children으로 판단)
   const node = getTossCategoryNode(id);
-  const isLeaf = !node || !node.children || node.children.length === 0;
+  const isLeaf = !node || node.isLeaf === true || !node.children || node.children.length === 0;
 
   if (isLeaf) {
     // 리프 카테고리 선택됨
@@ -2877,10 +2917,53 @@ async function loadTossConstraintTemplate(categoryId) {
 }
 
 function renderTossConstraintOptions() {
-  if (!tossConstraintData) return;
-  // constraint template이 있으면 옵션 행에 드롭다운으로 표시 가능
-  // 현재는 기존 자유 입력 방식 유지 + 안내 토스트
-  showToast('constraint-template 로드됨. 옵션 추가 시 적용됩니다.', 'info');
+  const container = document.getElementById('toss-option-rows');
+  const emptyEl = document.getElementById('toss-option-empty');
+  if (!container) return;
+
+  // 기존 옵션 행 초기화
+  container.querySelectorAll('.toss-option-row').forEach(el => el.remove());
+  tossState.options = [];
+  tossOptionCounter = 0;
+
+  const salesOptions = tossConstraintData && (tossConstraintData.categorySalesOptions || tossConstraintData.optionNames);
+  if (!salesOptions || (Array.isArray(salesOptions) && salesOptions.length === 0)) {
+    if (emptyEl) emptyEl.style.display = '';
+    return;
+  }
+  if (emptyEl) emptyEl.style.display = 'none';
+
+  // categorySalesOptions: [{name, values:[...]}, ...] 또는 optionNames: [string, ...]
+  const optionDefs = Array.isArray(salesOptions) && salesOptions.length > 0 && typeof salesOptions[0] === 'object'
+    ? salesOptions  // [{name, values:[]}]
+    : salesOptions.map(n => ({ name: n, values: [] }));  // string[] → normalize
+
+  optionDefs.forEach(optDef => {
+    const id = ++tossOptionCounter;
+    tossState.options.push({ id, name: optDef.name || '', value: '' });
+    const row = document.createElement('div');
+    row.className = 'toss-option-row';
+    row.id = 'toss-opt-row-' + id;
+    const nameEncoded = (optDef.name || '').replace(/'/g, "\\'");
+    if (optDef.values && optDef.values.length > 0) {
+      const valOpts = optDef.values.map(v => `<option value="${v.replace(/"/g, '&quot;')}">${v}</option>`).join('');
+      row.innerHTML = `
+        <span style="font-size:13px; color:var(--text2); min-width:100px; flex-shrink:0;">${optDef.name}</span>
+        <select onchange="updateTossOption(${id},'value',this.value)" style="flex:1;">
+          <option value="">-- 선택 --</option>${valOpts}
+        </select>
+        <button class="btn-del-option" onclick="removeTossOptionRow(${id})" title="삭제">✕</button>`;
+    } else {
+      row.innerHTML = `
+        <span style="font-size:13px; color:var(--text2); min-width:100px; flex-shrink:0;">${optDef.name}</span>
+        <input type="text" placeholder="값 입력" oninput="updateTossOption(${id},'value',this.value)" style="flex:1;" />
+        <button class="btn-del-option" onclick="removeTossOptionRow(${id})" title="삭제">✕</button>`;
+    }
+    // optionName을 state에 미리 세팅
+    const stateOpt = tossState.options.find(o => o.id === id);
+    if (stateOpt) stateOpt.name = optDef.name || '';
+    container.appendChild(row);
+  });
 }
 
 // ============================================================
@@ -2896,9 +2979,13 @@ function addTossOptionRow() {
   row.className = 'toss-option-row';
   row.id = 'toss-opt-row-' + id;
 
-  if (tossConstraintData && tossConstraintData.optionNames && tossConstraintData.optionNames.length > 0) {
+  const salesOpts = tossConstraintData && (tossConstraintData.categorySalesOptions || tossConstraintData.optionNames);
+  if (salesOpts && salesOpts.length > 0) {
     // constraint template 기반 드롭다운
-    const nameOptions = tossConstraintData.optionNames.map(n => `<option value="${n}">${n}</option>`).join('');
+    const isObjectArray = typeof salesOpts[0] === 'object';
+    const nameOptions = isObjectArray
+      ? salesOpts.map(o => `<option value="${o.name}">${o.name}</option>`).join('')
+      : salesOpts.map(n => `<option value="${n}">${n}</option>`).join('');
     row.innerHTML = `
       <select onchange="updateTossOption(${id},'name',this.value)">
         <option value="">-- 옵션명 선택 --</option>${nameOptions}
