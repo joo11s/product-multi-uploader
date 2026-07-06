@@ -2893,26 +2893,43 @@ function tossConfirmCategory() {
 }
 
 // ============================================================
-// 토스쇼핑 Constraint Template 로드
+// 토스쇼핑 Constraint Template 로드 (온디맨드 방식)
+// n8n 웹훅을 통해 on-demand로 조회 (R2 캐시 확인 → 없으면 토스 API 호출 → R2 저장)
 // ============================================================
+let _tossConstraintRetryId = null; // 재시도 버튼용 categoryId 저장
+
 async function loadTossConstraintTemplate(categoryId) {
   const badge = document.getElementById('toss-constraint-badge');
-  if (badge) badge.textContent = '(constraint-template 로딩 중...)';
+  // 재시도 버튼 제거 (이전 에러 상태 클리어)
+  const prevRetryBtn = document.getElementById('toss-constraint-retry-btn');
+  if (prevRetryBtn) prevRetryBtn.remove();
+
+  if (badge) badge.textContent = '(옵션 불러오는 중...)';
+  _tossConstraintRetryId = categoryId;
   try {
-    const url = `https://cdn.wonflowai.com/toss/constraint-templates/${categoryId}.json`;
-    const res = await fetch(url + '?v=' + Date.now(), { mode: 'cors', cache: 'no-store' });
-    if (res.ok) {
-      tossConstraintData = await res.json();
-      if (badge) badge.textContent = '(constraint-template 로드 완료)';
-      renderTossConstraintOptions();
-    } else {
-      tossConstraintData = null;
-      if (badge) badge.textContent = '(constraint-template 없음 — 자유 입력)';
-    }
+    const res = await fetch('https://n8n.wonflowai.com/webhook/toss-get-constraint-template', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ categoryId })
+    });
+    if (!res.ok) throw new Error('API 응답 오류: ' + res.status);
+    const data = await res.json();
+    tossConstraintData = data;
+    if (badge) badge.textContent = '(constraint-template 로드 완료)';
+    renderTossConstraintOptions();
   } catch(e) {
     tossConstraintData = null;
-    if (badge) badge.textContent = '(constraint-template 로드 실패 — 자유 입력)';
-    console.warn('constraint-template 로드 실패:', e);
+    if (badge) badge.textContent = '(옵션 조회 실패, 다시 시도해주세요)';
+    console.error('Constraint Template 조회 실패:', e);
+    // 재시도 버튼 추가
+    if (badge && badge.parentNode) {
+      const retryBtn = document.createElement('button');
+      retryBtn.id = 'toss-constraint-retry-btn';
+      retryBtn.textContent = '재시도';
+      retryBtn.style.cssText = 'margin-left:8px; padding:2px 8px; font-size:11px; cursor:pointer; border:1px solid var(--accent); border-radius:4px; background:transparent; color:var(--accent);';
+      retryBtn.onclick = () => loadTossConstraintTemplate(_tossConstraintRetryId);
+      badge.parentNode.insertBefore(retryBtn, badge.nextSibling);
+    }
   }
 }
 
