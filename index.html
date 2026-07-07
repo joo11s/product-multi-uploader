@@ -1094,7 +1094,12 @@
 
     <div class="divider"></div>
 
-    <div class="sub-label">카테고리 선택 (1차~6차 드릴다운)</div>
+    <div class="sub-label">카테고리 선택 (검색 또는 1차~6차 드릴다운)</div>
+    <div class="cat-search-wrap" id="tossCatSearchWrap" style="margin-bottom:10px;">
+      <input type="text" id="tossCatSearchInput" class="cat-search-input" placeholder="카테고리 검색... (예: 텀블러, 여성의류, 반려동물용품)"
+        oninput="onTossCatSearch()" onfocus="onTossCatSearchFocus()" onkeydown="onTossCatSearchKeydown(event)" autocomplete="off" />
+      <div id="tossCatDropdown" class="cat-dropdown"></div>
+    </div>
     <div id="toss-cat-loading" class="category-loading" style="display:none;"><div class="spinner"></div><span>카테고리 로딩 중...</span></div>
     <div id="toss-cat-columns" class="category-columns"></div>
     <div id="toss-cat-breadcrumb" class="category-breadcrumb">
@@ -2659,6 +2664,7 @@ async function loadTossCategories() {
         throw new Error('EMPTY_CACHE');
       }
       tossCatData = buildTossCategoryTree(flatArr);
+      tossCatFlatLeaves = [];
     } else {
       throw new Error('HTTP ' + res.status);
     }
@@ -2891,6 +2897,84 @@ function tossConfirmCategory() {
   const pathEl = document.getElementById('toss-cat-path');
   if (pathEl) pathEl.classList.remove('category-unconfirmed');
   showToast('✓ 카테고리가 확정되었습니다.', 'success');
+}
+
+// ============================================================
+// 토스쇼핑 카테고리 검색 (드릴다운 없이 바로 리프 선택)
+// ============================================================
+let tossCatFlatLeaves = [];
+let tossCatSearchResults = [];
+let tossCatSearchFocusIdx = -1;
+
+function buildTossCatFlatLeaves() {
+  tossCatFlatLeaves = [];
+  function traverse(node, parentPath) {
+    const path = parentPath ? parentPath + ' > ' + (node.name || node.id) : (node.name || node.id);
+    if (!node.children || node.children.length === 0) {
+      tossCatFlatLeaves.push({ id: node.id, name: node.name || node.id, path });
+    } else {
+      node.children.forEach(c => traverse(c, path));
+    }
+  }
+  getTossCategoryRoot().forEach(n => traverse(n, ''));
+}
+
+function onTossCatSearch() {
+  const q = document.getElementById('tossCatSearchInput').value.trim();
+  if (!q) { closeTossCatDropdown(); return; }
+  if (tossCatFlatLeaves.length === 0) buildTossCatFlatLeaves();
+  const lower = q.toLowerCase();
+  tossCatSearchResults = tossCatFlatLeaves.filter(c =>
+    c.name.toLowerCase().includes(lower) || c.path.toLowerCase().includes(lower)
+  ).slice(0, 50);
+  renderTossCatDropdown();
+}
+
+function onTossCatSearchFocus() {
+  if (!tossCatData) return;
+  if (tossCatFlatLeaves.length === 0) buildTossCatFlatLeaves();
+  const q = document.getElementById('tossCatSearchInput').value.trim();
+  if (q) onTossCatSearch();
+}
+
+function renderTossCatDropdown() {
+  const dropdown = document.getElementById('tossCatDropdown');
+  if (tossCatSearchResults.length === 0) {
+    dropdown.innerHTML = '<div class="cat-option" style="color:var(--text3);">검색 결과 없음</div>';
+    dropdown.classList.add('show'); tossCatSearchFocusIdx = -1; return;
+  }
+  dropdown.innerHTML = tossCatSearchResults.map((c, i) =>
+    `<div class="cat-option" data-idx="${i}" onclick="selectTossCatByLeafId('${c.id}')">${c.path}<span class="cat-code">${c.id}</span></div>`
+  ).join('');
+  dropdown.classList.add('show'); tossCatSearchFocusIdx = -1;
+}
+
+function onTossCatSearchKeydown(e) {
+  const dropdown = document.getElementById('tossCatDropdown');
+  if (!dropdown.classList.contains('show')) return;
+  const items = dropdown.querySelectorAll('.cat-option[data-idx]');
+  if (e.key === 'ArrowDown') { e.preventDefault(); tossCatSearchFocusIdx = Math.min(tossCatSearchFocusIdx + 1, items.length - 1); updateTossCatSearchFocus(items); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); tossCatSearchFocusIdx = Math.max(tossCatSearchFocusIdx - 1, 0); updateTossCatSearchFocus(items); }
+  else if (e.key === 'Enter') { e.preventDefault(); if (tossCatSearchFocusIdx >= 0 && items[tossCatSearchFocusIdx]) items[tossCatSearchFocusIdx].click(); }
+  else if (e.key === 'Escape') closeTossCatDropdown();
+}
+
+function updateTossCatSearchFocus(items) {
+  items.forEach((el, i) => { el.classList.toggle('focused', i === tossCatSearchFocusIdx); if (i === tossCatSearchFocusIdx) el.scrollIntoView({ block: 'nearest' }); });
+}
+
+function closeTossCatDropdown() { const d = document.getElementById('tossCatDropdown'); if (d) d.classList.remove('show'); tossCatSearchFocusIdx = -1; }
+document.addEventListener('click', (e) => { if (!e.target.closest('#tossCatSearchWrap')) closeTossCatDropdown(); });
+
+function selectTossCatByLeafId(leafId) {
+  autoSelectTossPathByLeafId(leafId);
+  tossState.categoryConfirmed = true;
+  const badge1 = document.getElementById('toss-cat-unconfirmed-badge'); if (badge1) badge1.style.display = 'none';
+  const badge2 = document.getElementById('toss-cat-confirm-wrap'); if (badge2) badge2.style.display = 'none';
+  const leaf = tossCatFlatLeaves.find(c => String(c.id) === String(leafId));
+  const input = document.getElementById('tossCatSearchInput'); if (input) input.value = leaf ? leaf.path : '';
+  closeTossCatDropdown();
+  loadTossConstraintTemplate(leafId);
 }
 
 // ============================================================
