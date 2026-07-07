@@ -2378,6 +2378,9 @@ async function startUpload() {
   });
   document.getElementById('resultPanel').classList.add('show');
 
+  // 업로드 완료된 슬롯은 대기 큐를 비워서 다음 전송 시 재업로드(중복)되지 않도록 함
+  slotsWithNewFiles.forEach(slot => { files[slot] = []; });
+
   btn.disabled = false;
   btn.innerHTML = '🚀 업로드';
 
