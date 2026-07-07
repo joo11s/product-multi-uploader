@@ -1426,31 +1426,27 @@ const TAB_SLOTS = { soul: ['soul-main','soul-spec'], j1: ['j1-main','j1-spec'], 
 // 국내 원산지 데이터 (lazy load)
 const DOMESTIC_ORIGINS_URL = 'https://cdn.wonflowai.com/cafe24/origins_domestic.json';
 let domesticOriginsData = null;
-let domesticOriginsLoading = false;
-let domesticOriginsCallbacks = [];
+let domesticOriginsPromise = null;
 
 async function loadDomesticOrigins(store) {
   if (domesticOriginsData) {
     populateSidoDropdown(store);
     return;
   }
-  if (domesticOriginsLoading) {
-    domesticOriginsCallbacks.push(store);
-    return;
+  if (!domesticOriginsPromise) {
+    domesticOriginsPromise = (async () => {
+      try {
+        const res = await fetch(DOMESTIC_ORIGINS_URL + '?v=' + Date.now(), { mode: 'cors', cache: 'no-store' });
+        if (res.ok) {
+          domesticOriginsData = await res.json();
+        }
+      } catch(e) {
+        console.warn('국내 원산지 로드 실패:', e);
+      }
+    })();
   }
-  domesticOriginsLoading = true;
-  try {
-    const res = await fetch(DOMESTIC_ORIGINS_URL + '?v=' + Date.now(), { mode: 'cors', cache: 'no-store' });
-    if (res.ok) {
-      domesticOriginsData = await res.json();
-    }
-  } catch(e) {
-    console.warn('국내 원산지 로드 실패:', e);
-  }
-  domesticOriginsLoading = false;
+  await domesticOriginsPromise;
   populateSidoDropdown(store);
-  domesticOriginsCallbacks.forEach(s => populateSidoDropdown(s));
-  domesticOriginsCallbacks = [];
 }
 
 function populateSidoDropdown(store) {
@@ -1632,31 +1628,27 @@ function onOriginTypeChange(store) {
 // 해외 원산지 데이터 (lazy load)
 const OVERSEAS_ORIGINS_URL = 'https://cdn.wonflowai.com/cafe24/origins_overseas.json';
 let overseasOriginsData = null;
-let overseasOriginsLoading = false;
-let overseasOriginsCallbacks = [];
+let overseasOriginsPromise = null;
 
 async function loadOverseasOrigins(store) {
   if (overseasOriginsData) {
     populateContinentDropdown(store);
     return;
   }
-  if (overseasOriginsLoading) {
-    overseasOriginsCallbacks.push(store);
-    return;
+  if (!overseasOriginsPromise) {
+    overseasOriginsPromise = (async () => {
+      try {
+        const res = await fetch(OVERSEAS_ORIGINS_URL + '?v=' + Date.now(), { mode: 'cors', cache: 'no-store' });
+        if (res.ok) {
+          overseasOriginsData = await res.json();
+        }
+      } catch(e) {
+        console.warn('해외 원산지 로드 실패:', e);
+      }
+    })();
   }
-  overseasOriginsLoading = true;
-  try {
-    const res = await fetch(OVERSEAS_ORIGINS_URL + '?v=' + Date.now(), { mode: 'cors', cache: 'no-store' });
-    if (res.ok) {
-      overseasOriginsData = await res.json();
-    }
-  } catch(e) {
-    console.warn('해외 원산지 로드 실패:', e);
-  }
-  overseasOriginsLoading = false;
+  await overseasOriginsPromise;
   populateContinentDropdown(store);
-  overseasOriginsCallbacks.forEach(s => populateContinentDropdown(s));
-  overseasOriginsCallbacks = [];
 }
 
 function populateContinentDropdown(store) {
