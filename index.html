@@ -3042,28 +3042,30 @@ function renderTossConstraintOptions() {
 
   optionDefs.forEach(optDef => {
     const id = ++tossOptionCounter;
-    tossState.options.push({ id, name: optDef.name || '', value: '' });
+    const optName = optDef.key || optDef.name || '';
+    const optValues = optDef.valueCandidates || optDef.values || [];
+    const optUnits = optDef.unitValues || [];
+    const optPlaceholder = optDef.placeholder || (optUnits.length > 0 ? optUnits[0] : '값 입력');
+    tossState.options.push({ id, name: optName, value: '' });
     const row = document.createElement('div');
     row.className = 'toss-option-row';
     row.id = 'toss-opt-row-' + id;
-    const nameEncoded = (optDef.name || '').replace(/'/g, "\\'");
-    if (optDef.values && optDef.values.length > 0) {
-      const valOpts = optDef.values.map(v => `<option value="${v.replace(/"/g, '&quot;')}">${v}</option>`).join('');
+    if (optValues.length > 0) {
+      const valOpts = optValues.map(v => `<option value="${String(v).replace(/"/g, '&quot;')}">${v}</option>`).join('');
       row.innerHTML = `
-        <span style="font-size:13px; color:var(--text2); min-width:100px; flex-shrink:0;">${optDef.name}</span>
+        <span style="font-size:13px; color:var(--text2); min-width:100px; flex-shrink:0;">${optName}</span>
         <select onchange="updateTossOption(${id},'value',this.value)" style="flex:1;">
           <option value="">-- 선택 --</option>${valOpts}
         </select>
         <button class="btn-del-option" onclick="removeTossOptionRow(${id})" title="삭제">✕</button>`;
     } else {
       row.innerHTML = `
-        <span style="font-size:13px; color:var(--text2); min-width:100px; flex-shrink:0;">${optDef.name}</span>
-        <input type="text" placeholder="값 입력" oninput="updateTossOption(${id},'value',this.value)" style="flex:1;" />
+        <span style="font-size:13px; color:var(--text2); min-width:100px; flex-shrink:0;">${optName}</span>
+        <input type="text" placeholder="${optPlaceholder.replace(/"/g,'&quot;')}" oninput="updateTossOption(${id},'value',this.value)" style="flex:1;" />
         <button class="btn-del-option" onclick="removeTossOptionRow(${id})" title="삭제">✕</button>`;
     }
-    // optionName을 state에 미리 세팅
     const stateOpt = tossState.options.find(o => o.id === id);
-    if (stateOpt) stateOpt.name = optDef.name || '';
+    if (stateOpt) stateOpt.name = optName;
     container.appendChild(row);
   });
 }
