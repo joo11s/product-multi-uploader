@@ -2001,17 +2001,22 @@ function populateFormFromPayload(payload) {
   STORES.forEach(s => {
     const sd = stores[s.key] || {};
     setVal(s.key + '-productName', sd.productName);
-    // 사업자별 카테고리 복원
+    // 사업자별 카테고리 복원 (없으면 이전 값이 남지 않도록 확실히 초기화)
+    const catCodeInput = document.getElementById('categoryCode-' + s.key);
+    const catBadge = document.getElementById('catSelectedBadge-' + s.key);
+    const catSearchInput = document.getElementById('catSearchInput-' + s.key);
     if (sd.categoryCode) {
-      setVal('categoryCode-' + s.key, sd.categoryCode);
-      const catBadge = document.getElementById('catSelectedBadge-' + s.key);
+      if (catCodeInput) catCodeInput.value = sd.categoryCode;
       if (catBadge) {
         const catText = sd.categoryText || ('코드: ' + sd.categoryCode);
         catBadge.textContent = `✓ 선택됨 (${catText})`;
         catBadge.classList.add('show');
-        const inputEl = document.getElementById('catSearchInput-' + s.key);
-        if (inputEl && sd.categoryText) inputEl.value = sd.categoryText;
+        if (catSearchInput) catSearchInput.value = sd.categoryText || '';
       }
+    } else {
+      if (catCodeInput) catCodeInput.value = '';
+      if (catBadge) { catBadge.textContent = ''; catBadge.classList.remove('show'); }
+      if (catSearchInput) catSearchInput.value = '';
     }
     setVal(s.key + '-manufacturer', sd.manufacturer);
     setVal(s.key + '-supplier', sd.supplier);
