@@ -2238,6 +2238,7 @@ function buildStorePayload(store) {
   return {
     productName: document.getElementById(store + '-productName').value.trim() || getProductName(),
     categoryCode: document.getElementById('categoryCode-' + store).value || '',
+    categoryText: document.getElementById('catSearchInput-' + store).value.trim() || '',
     manufacturer: document.getElementById(store + '-manufacturer').value.trim(),
     supplier: document.getElementById(store + '-supplier').value.trim(),
     brand: document.getElementById(store + '-brand').value.trim(),
