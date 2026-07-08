@@ -4163,6 +4163,7 @@ function renderModalBody(biz) {
 
   if (_templateModalMode === 'return') {
     body.innerHTML = renderReturnModalBody(biz, tpl);
+    populateReturnLocationDropdown(biz, tpl.returnLocationId || '');
   } else {
     body.innerHTML = renderDeliveryModalBody(biz, tpl, { todayDel, preparationDaysOptions, deadlineOptions, feeType, isJeju, courierOptions });
   }
@@ -4255,20 +4256,35 @@ function renderDeliveryModalBody(biz, tpl, opts) {
   `;
 }
 
+async function populateReturnLocationDropdown(biz, savedId) {
+  const select = document.getElementById('m-return-loc-id-' + biz);
+  if (!select) return;
+  try {
+    const res = await fetch('https://cdn.wonflowai.com/toss/exchange-refund-templates.json?v=' + Date.now(), { cache: 'no-store' });
+    if (!res.ok) throw new Error('fetch failed');
+    const data = await res.json();
+    const templates = data.exchangeTemplates || [];
+    select.innerHTML = '<option value="">-- 반품지 선택 --</option>' +
+      templates.map(t => {
+        const label = (t.address || '') + (t.detailAddress ? ' ' + t.detailAddress : '');
+        const selected = (String(t.id) === String(savedId)) ? ' selected' : '';
+        return `<option value="${t.id}"${selected}>${label}</option>`;
+      }).join('');
+  } catch(e) {
+    select.innerHTML = '<option value="">반품지 목록 로드 실패</option>';
+  }
+}
+
 function renderReturnModalBody(biz, tpl) {
   return `
     <!-- 교환·반품 설정 -->
     <div class="modal-section-title">교환·반품 설정</div>
     <div class="modal-field-row">
       <div class="modal-field" style="flex:0 0 100%;">
-        <label>반품지 주소 (표시용)</label>
-        <textarea id="m-return-addr-${biz}" placeholder="예: 전북특별자치도 전주시 덕진구 번영로 230-7 (성덕동) 1층">${tpl.returnAddress||''}</textarea>
-      </div>
-    </div>
-    <div class="modal-field-row">
-      <div class="modal-field">
-        <label>반품지 위치 ID (토스 API용)</label>
-        <input type="text" id="m-return-loc-id-${biz}" value="${tpl.returnLocationId||''}" placeholder="토스 파트너스에서 확인" />
+        <label>반품지 주소</label>
+        <select id="m-return-loc-id-${biz}" style="width:100%;">
+          <option value="">불러오는 중...</option>
+        </select>
       </div>
     </div>
     <div class="modal-field-row">
@@ -4284,7 +4300,7 @@ function renderReturnModalBody(biz, tpl) {
     <div class="modal-field-row">
       <div class="modal-field" style="flex:0 0 100%;">
         <label>신청방법 설명</label>
-        <textarea id="m-app-method-${biz}" placeholder="예: 고객센터 연락 또는 앱에서 신청">${tpl.applicationMethod||''}</textarea>
+        <textarea id="m-app-method-${biz}" placeholder="예: 고객센터 연락 또는 앱에서 신청">${tpl.applicationMethod||'고객센터 연락 후 교환/반품 신청'}</textarea>
       </div>
     </div>
     <div class="modal-field-row">
@@ -4349,7 +4365,6 @@ function getTemplateFromModal(biz) {
     jejuDeliveryFee: gn('m-jeju-fee-' + biz, 4000),
     islandsMountainsDeliveryFee: gn('m-island-fee-' + biz, 5000),
     courier: g('m-courier-' + biz) || 'CJ대한통운',
-    returnAddress: g('m-return-addr-' + biz),
     returnLocationId: g('m-return-loc-id-' + biz),
     refundDeliveryFee: gn('m-refund-fee-' + biz, 3000),
     exchangeDeliveryFee: gn('m-exchange-fee-' + biz, 6000),
