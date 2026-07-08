@@ -770,6 +770,330 @@
   }
   .toss-option-row input:focus, .toss-option-row select:focus { border-color: var(--accent); }
   .toss-option-row select option { background: var(--bg3); }
+
+  /* ===== 3개 사업자별 기본정보 행 ===== */
+  .toss-biz-row {
+    display: grid;
+    grid-template-columns: 100px 1fr 1fr 160px;
+    gap: 12px;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .toss-biz-row:last-child { border-bottom: none; }
+  .toss-biz-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+  .toss-biz-row input {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: 'Noto Sans KR', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .toss-biz-row input:focus { border-color: var(--accent); }
+  .toss-biz-row input::placeholder { color: var(--text3); }
+  .toss-biz-img-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .toss-biz-img-thumb {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+    border: 1px solid var(--border);
+    display: none;
+  }
+  .toss-biz-img-thumb.show { display: block; }
+  .btn-biz-img {
+    background: transparent;
+    border: 1px dashed var(--border2);
+    border-radius: var(--radius-sm);
+    color: var(--text3);
+    font-size: 12px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .btn-biz-img:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ===== 배송/교환반품 템플릿 안내 섹션 ===== */
+  .template-auto-notice {
+    background: rgba(74, 158, 255, 0.08);
+    border: 1px solid rgba(74, 158, 255, 0.3);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--blue);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .template-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .template-preview-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+  }
+  .template-preview-card-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+  .template-preview-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 6px;
+    font-size: 12px;
+  }
+  .template-preview-key {
+    color: var(--text3);
+    flex-shrink: 0;
+    min-width: 80px;
+  }
+  .template-preview-val {
+    color: var(--text2);
+    word-break: break-all;
+  }
+  .template-preview-empty {
+    font-size: 12px;
+    color: var(--text3);
+    font-style: italic;
+  }
+  .btn-template-manage {
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 10px 20px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: all 0.2s;
+  }
+  .btn-template-manage:hover { background: rgba(245,230,200,0.1); }
+
+  /* ===== 배송/교환반품 템플릿 관리 모달 ===== */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-box {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    width: min(780px, 96vw);
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.7);
+  }
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .modal-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .modal-close {
+    background: transparent;
+    border: none;
+    color: var(--text2);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px 8px;
+  }
+  .modal-close:hover { color: var(--text); }
+  .modal-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 12px 24px 0;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .modal-tab {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 8px 16px 10px;
+    color: var(--text3);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: all 0.2s;
+    margin-bottom: -1px;
+  }
+  .modal-tab:hover { color: var(--text2); }
+  .modal-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+  .modal-body {
+    overflow-y: auto;
+    flex: 1;
+    padding: 20px 24px;
+  }
+  .modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .modal-section-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.5px;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-field-row { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+  .modal-field { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 140px; }
+  .modal-field label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .modal-field input, .modal-field select, .modal-field textarea {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: 'Noto Sans KR', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .modal-field textarea { min-height: 60px; resize: vertical; }
+  .modal-field input:focus, .modal-field select:focus, .modal-field textarea:focus { border-color: var(--accent); }
+  .modal-field select option { background: var(--bg3); }
+  .modal-field input::placeholder, .modal-field textarea::placeholder { color: var(--text3); }
+  /* 배송비 유형 탭 */
+  .fee-type-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--bg3);
+    padding: 4px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+  .fee-type-tab {
+    flex: 1;
+    padding: 8px;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: var(--text3);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: all 0.2s;
+    text-align: center;
+  }
+  .fee-type-tab:hover { color: var(--text2); background: var(--bg2); }
+  .fee-type-tab.active { background: var(--accent); color: #000; font-weight: 700; }
+  /* 토글 스위치 */
+  .toggle-wrap { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .toggle-label { font-size: 13px; color: var(--text2); }
+  .toggle-switch {
+    position: relative;
+    width: 42px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 24px;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .toggle-slider:before {
+    content: '';
+    position: absolute;
+    height: 18px;
+    width: 18px;
+    left: 2px;
+    bottom: 2px;
+    background: var(--text3);
+    border-radius: 50%;
+    transition: 0.2s;
+  }
+  .toggle-switch input:checked + .toggle-slider { background: rgba(46,204,113,0.3); border-color: var(--green); }
+  .toggle-switch input:checked + .toggle-slider:before { transform: translateX(18px); background: var(--green); }
+
+  /* 토스 3사업자 동시등록 결과 */
+  .toss-result-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 16px;
+  }
+  .toss-result-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    font-size: 13px;
+  }
+  .toss-result-card.success { border-color: rgba(46,204,113,0.4); }
+  .toss-result-card.error { border-color: rgba(255,90,90,0.4); }
+  .toss-result-card-name { font-weight: 700; margin-bottom: 6px; }
+  .toss-result-card.success .toss-result-card-name { color: var(--green); }
+  .toss-result-card.error .toss-result-card-name { color: #ff5c5c; }
+  .toss-result-card-msg { color: var(--text3); font-size: 12px; }
+
+  @media (max-width: 768px) {
+    .toss-biz-row { grid-template-columns: 1fr; }
+    .template-preview-grid { grid-template-columns: 1fr; }
+    .toss-result-grid { grid-template-columns: 1fr; }
+    .modal-box { max-height: 96vh; }
+  }
 </style>
 </head>
 <body>
@@ -1077,18 +1401,56 @@
   <!-- STEP T1: 상품 기본정보 -->
   <div class="step-header toss-step"><span class="step-num">STEP T1</span><span class="step-title">상품 기본정보</span></div>
   <div class="panel">
-    <div class="field-row" style="margin-bottom:16px;">
-      <div class="field" style="flex:2 0 240px;">
-        <label>상품명</label>
-        <input type="text" id="toss-name" placeholder="예: 노르웨이 순살 고등어 1kg" />
-      </div>
-      <div class="field" style="flex:1 0 180px;">
-        <label>브랜드명</label>
-        <input type="text" id="toss-brand" placeholder="예: 소울스토어" />
-      </div>
-      <div class="field" style="flex:1 0 160px;">
-        <label>관리코드</label>
+    <!-- 관리코드: 공통 1개 -->
+    <div class="field-row" style="margin-bottom:20px;">
+      <div class="field" style="flex:0 0 220px;">
+        <label>관리코드 <span class="opt">(공통)</span></label>
         <input type="text" id="toss-mgmt-code" placeholder="예: SKU-001" />
+      </div>
+    </div>
+
+    <!-- 3개 사업자별 상품명/브랜드/대표이미지 -->
+    <div class="sub-label" style="margin-bottom:10px;">사업자별 상품명 / 브랜드명 / 대표이미지</div>
+    <div style="background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius); padding:4px 16px;">
+      <!-- 헤더 -->
+      <div style="display:grid; grid-template-columns:100px 1fr 1fr 160px; gap:12px; padding:8px 0; border-bottom:1px solid var(--border);">
+        <div style="font-size:11px; color:var(--text3); text-transform:uppercase; letter-spacing:0.8px;">사업자</div>
+        <div style="font-size:11px; color:var(--text3); text-transform:uppercase; letter-spacing:0.8px;">상품명</div>
+        <div style="font-size:11px; color:var(--text3); text-transform:uppercase; letter-spacing:0.8px;">브랜드명</div>
+        <div style="font-size:11px; color:var(--text3); text-transform:uppercase; letter-spacing:0.8px;">대표이미지</div>
+      </div>
+      <!-- 소울스토어 -->
+      <div class="toss-biz-row">
+        <div class="toss-biz-label">소울스토어</div>
+        <input type="text" id="toss-name-soul" placeholder="예: 노르웨이 순살 고등어 1kg" />
+        <input type="text" id="toss-brand-soul" placeholder="예: 소울스토어" />
+        <div class="toss-biz-img-wrap">
+          <img class="toss-biz-img-thumb" id="toss-thumb-soul" src="" alt="" />
+          <button class="btn-biz-img" onclick="openTossBizImgPicker('soul')">📷 이미지 선택</button>
+          <input type="file" id="toss-biz-img-soul" accept="image/*" style="display:none;" onchange="onTossBizImgSelect(event,'soul')" />
+        </div>
+      </div>
+      <!-- 제이원 -->
+      <div class="toss-biz-row">
+        <div class="toss-biz-label">제이원</div>
+        <input type="text" id="toss-name-j1" placeholder="예: 노르웨이 순살 고등어 1kg" />
+        <input type="text" id="toss-brand-j1" placeholder="예: 제이원" />
+        <div class="toss-biz-img-wrap">
+          <img class="toss-biz-img-thumb" id="toss-thumb-j1" src="" alt="" />
+          <button class="btn-biz-img" onclick="openTossBizImgPicker('j1')">📷 이미지 선택</button>
+          <input type="file" id="toss-biz-img-j1" accept="image/*" style="display:none;" onchange="onTossBizImgSelect(event,'j1')" />
+        </div>
+      </div>
+      <!-- 행복산업 -->
+      <div class="toss-biz-row">
+        <div class="toss-biz-label">행복산업</div>
+        <input type="text" id="toss-name-happy" placeholder="예: 노르웨이 순살 고등어 1kg" />
+        <input type="text" id="toss-brand-happy" placeholder="예: 행복산업" />
+        <div class="toss-biz-img-wrap">
+          <img class="toss-biz-img-thumb" id="toss-thumb-happy" src="" alt="" />
+          <button class="btn-biz-img" onclick="openTossBizImgPicker('happy')">📷 이미지 선택</button>
+          <input type="file" id="toss-biz-img-happy" accept="image/*" style="display:none;" onchange="onTossBizImgSelect(event,'happy')" />
+        </div>
       </div>
     </div>
 
@@ -1129,7 +1491,8 @@
     <div class="divider"></div>
 
     <!-- 이미지 섹션 -->
-    <div class="sub-label" style="margin-bottom:12px;">이미지 (최대 10장, 1번이 대표이미지)</div>
+    <div class="sub-label" style="margin-bottom:4px;">이미지 2~10번 (공통, 최대 9장)</div>
+    <div style="font-size:12px; color:var(--text3); margin-bottom:12px;">1번 대표이미지는 STEP T1에서 사업자별로 각각 업로드합니다.</div>
     <div class="toss-image-slots" id="toss-img-slots"></div>
     <input type="file" id="toss-img-input" accept="image/*" style="display:none;" onchange="onTossImgSelect(event)" />
 
@@ -1190,41 +1553,49 @@
   <!-- STEP T4: 배송 -->
   <div class="step-header toss-step"><span class="step-num">STEP T4</span><span class="step-title">배송</span></div>
   <div class="panel">
-    <div class="field-row" style="margin-bottom:16px; align-items:flex-end;">
-      <div class="field" style="flex:0 0 200px;">
-        <label>사업자 선택</label>
-        <select id="toss-merchant-select" onchange="onTossMerchantChange()">
-          <option value="j1">제이원 (J1)</option>
-          <option value="soul">소울스토어</option>
-          <option value="happy">행복산업</option>
-        </select>
+    <div class="template-auto-notice">
+      ℹ️ 사업자별 배송 템플릿이 자동 적용됩니다. 아래에서 현재 설정을 확인하고 필요 시 수정하세요.
+    </div>
+    <!-- 3개 사업자 배송 템플릿 미리보기 -->
+    <div class="template-preview-grid" id="toss-delivery-preview-grid">
+      <div class="template-preview-card" id="toss-delivery-card-soul">
+        <div class="template-preview-card-title">소울스토어</div>
+        <div class="template-preview-empty">템플릿 미설정</div>
+      </div>
+      <div class="template-preview-card" id="toss-delivery-card-j1">
+        <div class="template-preview-card-title">제이원</div>
+        <div class="template-preview-empty">로딩 중...</div>
+      </div>
+      <div class="template-preview-card" id="toss-delivery-card-happy">
+        <div class="template-preview-card-title">행복산업</div>
+        <div class="template-preview-empty">템플릿 미설정</div>
       </div>
     </div>
-    <div class="field" style="max-width:400px;">
-      <label>배송 템플릿</label>
-      <div id="toss-shipping-loading" style="display:none; font-size:13px; color:var(--text2);">⏳ 템플릿 로딩 중...</div>
-      <select id="toss-shipping-template" style="display:none;">
-        <option value="">-- 선택하세요 --</option>
-      </select>
-      <div id="toss-shipping-notice" style="display:none; font-size:13px; color:#e67e22; padding:10px 14px; background:rgba(230,126,34,0.1); border:1px solid rgba(230,126,34,0.3); border-radius:var(--radius-sm);">
-        배송 템플릿 미등록 — 토스 파트너스에서 먼저 등록해주세요
-      </div>
-    </div>
+    <button class="btn-template-manage" onclick="openTemplateModal()">⚙️ 배송/교환반품 템플릿 관리</button>
   </div>
 
   <!-- STEP T5: 교환반품 + 필수고시 -->
   <div class="step-header toss-step"><span class="step-num">STEP T5</span><span class="step-title">교환반품 + 필수고시</span></div>
   <div class="panel">
-    <div class="field" style="max-width:400px; margin-bottom:24px;">
-      <label>교환반품 템플릿</label>
-      <div id="toss-exchange-loading" style="display:none; font-size:13px; color:var(--text2);">⏳ 템플릿 로딩 중...</div>
-      <select id="toss-exchange-template" style="display:none;">
-        <option value="">-- 선택하세요 --</option>
-      </select>
-      <div id="toss-exchange-notice" style="display:none; font-size:13px; color:#e67e22; padding:10px 14px; background:rgba(230,126,34,0.1); border:1px solid rgba(230,126,34,0.3); border-radius:var(--radius-sm);">
-        교환반품 템플릿 미등록 — 토스 파트너스에서 먼저 등록해주세요
+    <div class="template-auto-notice">
+      ℹ️ 사업자별 교환반품 템플릿이 자동 적용됩니다. 아래에서 현재 설정을 확인하고 필요 시 수정하세요.
+    </div>
+    <!-- 3개 사업자 교환반품 템플릿 미리보기 -->
+    <div class="template-preview-grid" id="toss-exchange-preview-grid">
+      <div class="template-preview-card" id="toss-exchange-card-soul">
+        <div class="template-preview-card-title">소울스토어</div>
+        <div class="template-preview-empty">템플릿 미설정</div>
+      </div>
+      <div class="template-preview-card" id="toss-exchange-card-j1">
+        <div class="template-preview-card-title">제이원</div>
+        <div class="template-preview-empty">로딩 중...</div>
+      </div>
+      <div class="template-preview-card" id="toss-exchange-card-happy">
+        <div class="template-preview-card-title">행복산업</div>
+        <div class="template-preview-empty">템플릿 미설정</div>
       </div>
     </div>
+    <button class="btn-template-manage" onclick="openTemplateModal()" style="margin-bottom:20px;">⚙️ 배송/교환반품 템플릿 관리</button>
 
     <div class="divider"></div>
 
@@ -1247,9 +1618,14 @@
     <div class="notice-items-grid" id="toss-notice-items"></div>
   </div>
 
-  <!-- 토스쇼핑 등록 버튼 -->
+  <!-- 토스쇼핑 3개 사업자 동시 등록 버튼 -->
   <div style="padding-bottom: 48px;">
-    <button class="btn-platform-submit btn-toss-register" onclick="submitTossProduct()">🚀 토스쇼핑 등록</button>
+    <button class="btn-platform-submit btn-toss-register" id="btn-toss-register" onclick="registerTossProduct()">🚀 토스쇼핑 3개 사업자 동시 등록</button>
+    <!-- 등록 결과 -->
+    <div id="toss-register-result" style="display:none; margin-top:20px;">
+      <div style="font-size:14px; font-weight:700; color:var(--text); margin-bottom:8px;">등록 결과</div>
+      <div class="toss-result-grid" id="toss-register-result-grid"></div>
+    </div>
   </div>
 
 </div> <!-- /toss-section -->
@@ -1257,6 +1633,31 @@
 </div> <!-- /main -->
 
 <div class="toast" id="toast"></div>
+
+<!-- ===================================================
+     배송/교환반품 템플릿 관리 모달
+     =================================================== -->
+<div class="modal-overlay" id="template-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">⚙️ 배송/교환반품 템플릿 관리</div>
+      <button class="modal-close" onclick="closeTemplateModal()">✕</button>
+    </div>
+    <!-- 사업자 탭 -->
+    <div class="modal-tabs">
+      <button class="modal-tab active" id="mtab-soul" onclick="switchModalTab('soul')">소울스토어</button>
+      <button class="modal-tab" id="mtab-j1" onclick="switchModalTab('j1')">제이원</button>
+      <button class="modal-tab" id="mtab-happy" onclick="switchModalTab('happy')">행복산업</button>
+    </div>
+    <div class="modal-body" id="template-modal-body">
+      <!-- 동적 렌더링 -->
+    </div>
+    <div class="modal-footer">
+      <button class="btn-reset" onclick="closeTemplateModal()">닫기</button>
+      <button class="btn-platform-submit btn-toss-register" style="margin:0; padding:10px 24px; font-size:14px;" onclick="saveCurrentTemplate()">💾 저장</button>
+    </div>
+  </div>
+</div>
 
 <div class="history-drawer" id="historyDrawer">
   <div class="history-drawer-header">
@@ -2548,8 +2949,8 @@ function switchPlatform(platform) {
     loadTossCategories();
     loadTossNoticeCategories();
     initTossImageSlots();
-    // 사업자 선택 초기화: 제이원이면 배송/교환반품 템플릿 자동 로드
-    onTossMerchantChange();
+    // 3개 사업자 템플릿 자동 로드 및 미리보기
+    loadAllBizTemplates().catch(e => console.warn('biz templates:', e));
   }
 }
 
@@ -2577,6 +2978,10 @@ const tossState = {
 let tossOptionCounter = 0;
 let tossConstraintData = null;
 
+// 토스쇼핑 3개 사업자
+const TOSS_BIZ_LIST = ['soul', 'j1', 'happy'];
+const TOSS_BIZ_NAMES = { soul: '소울스토어', j1: '제이원', happy: '행복산업' };
+
 // ============================================================
 // sharedProduct → 토스쇼핑 사전 채우기
 // ============================================================
@@ -2594,11 +2999,13 @@ function prefillTossFromShared() {
     sharedProduct.mainImages = [...uploadedUrls['common-extra']];
   }
 
-  // 토스 필드에 채우기
-  const nameEl = document.getElementById('toss-name');
-  if (nameEl && !nameEl.value) nameEl.value = sharedProduct.name;
-  const brandEl = document.getElementById('toss-brand');
-  if (brandEl && !brandEl.value) brandEl.value = sharedProduct.brand;
+  // 토스 필드에 채우기 (3개 사업자별 상품명/브랜드)
+  TOSS_BIZ_LIST.forEach(biz => {
+    const nameEl = document.getElementById('toss-name-' + biz);
+    if (nameEl && !nameEl.value) nameEl.value = sharedProduct.name;
+    const brandEl = document.getElementById('toss-brand-' + biz);
+    if (brandEl && !brandEl.value) brandEl.value = sharedProduct.brand;
+  });
   const detailHtmlEl = document.getElementById('toss-detail-html');
   if (detailHtmlEl && !detailHtmlEl.value) detailHtmlEl.value = sharedProduct.detailHtml;
 
@@ -3431,17 +3838,418 @@ function updateTossNoticeItem(code, key, value) {
 }
 
 // ============================================================
-// 토스쇼핑 등록 페이로드 조립 & 제출
+// 토스쇼핑 사업자별 대표이미지 (1번 슬롯)
 // ============================================================
-function submitTossProduct() {
-  // 최신값 수집
-  tossState.name = document.getElementById('toss-name').value.trim();
-  tossState.brand = document.getElementById('toss-brand').value.trim();
-  tossState.managementCode = document.getElementById('toss-mgmt-code').value.trim();
-  tossState.shippingTemplateId = document.getElementById('toss-shipping-template').value;
-  tossState.exchangeReturnTemplateId = document.getElementById('toss-exchange-template').value;
-  tossState.taxType = document.querySelector('input[name="tossTaxType"]:checked')?.value || 'TAXABLE';
+const tossBizImages = { soul: null, j1: null, happy: null }; // CDN URL
 
+function openTossBizImgPicker(biz) {
+  document.getElementById('toss-biz-img-' + biz).click();
+}
+
+function onTossBizImgSelect(event, biz) {
+  const file = event.target.files[0];
+  if (!file) return;
+  event.target.value = '';
+  // 미리보기 표시 (로컬 오브젝트 URL)
+  const thumbEl = document.getElementById('toss-thumb-' + biz);
+  if (thumbEl) {
+    thumbEl.src = URL.createObjectURL(file);
+    thumbEl.classList.add('show');
+  }
+  // R2 업로드 (백그라운드)
+  const r2Key = `products/toss/images/${biz}_main_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.jpg`;
+  showToast('대표이미지 업로드 중...', 'info');
+  uploadFile(file, r2Key).then(url => {
+    tossBizImages[biz] = url;
+    showToast(`✓ ${biz} 대표이미지 업로드 완료`, 'success');
+  }).catch(e => {
+    showToast(`✗ 대표이미지 업로드 실패: ${e.message}`, 'error');
+  });
+}
+
+// ============================================================
+// 배송/교환반품 템플릿 관리 (R2 저장)
+// ============================================================
+const R2_TEMPLATE_API = R2_WORKER; // R2 worker 재사용 (현재는 미사용, R2_WORKER 직접 사용)
+
+// 현재 로드된 템플릿 (3개 사업자)
+const bizTemplates = {
+  soul: null,
+  j1: null,
+  happy: null,
+};
+
+// 제이원 기본값
+const J1_DEFAULT_TEMPLATE = {
+  // 배송
+  todayDelivery: false,
+  deliveryDeadline: '12:00',
+  preparationDays: 2,
+  deliveryFeeType: 'PAID',
+  deliveryFee: 3000,
+  minimumPurchasePrice: 0,
+  isJejuIslands: true,
+  jejuDeliveryFee: 4000,
+  islandsMountainsDeliveryFee: 5000,
+  courier: 'CJ대한통운',
+  // 교환반품
+  returnAddress: '전북특별자치도 전주시 덕진구 번영로 230-7 (성덕동) 1층',
+  returnLocationId: '',
+  refundDeliveryFee: 3000,
+  exchangeDeliveryFee: 6000,
+  applicationMethod: '',
+  applicationTerm: '상품 수령일로부터 7일 이내',
+};
+
+async function loadBizTemplate(biz) {
+  if (bizTemplates[biz] !== null) return bizTemplates[biz];
+  try {
+    const url = `${R2_WORKER}/toss/business-templates/${biz}.json`;
+    const res = await fetch(url + '?v=' + Date.now(), { cache: 'no-store' });
+    if (res.ok) {
+      bizTemplates[biz] = await res.json();
+    } else if (res.status === 404) {
+      bizTemplates[biz] = biz === 'j1' ? { ...J1_DEFAULT_TEMPLATE } : {};
+    } else {
+      bizTemplates[biz] = biz === 'j1' ? { ...J1_DEFAULT_TEMPLATE } : {};
+    }
+  } catch(e) {
+    bizTemplates[biz] = biz === 'j1' ? { ...J1_DEFAULT_TEMPLATE } : {};
+  }
+  return bizTemplates[biz];
+}
+
+async function saveTemplateToR2(biz, templateData) {
+  const key = `toss/business-templates/${biz}.json`;
+  const blob = new Blob([JSON.stringify(templateData, null, 2)], { type: 'application/json' });
+  const file = new File([blob], `${biz}.json`, { type: 'application/json' });
+  await uploadFile(file, key);
+  bizTemplates[biz] = { ...templateData };
+}
+
+async function loadAllBizTemplates() {
+  await Promise.all(TOSS_BIZ_LIST.map(biz => loadBizTemplate(biz)));
+  renderAllTemplatePreview();
+}
+
+function renderDeliveryPreviewCard(biz, tpl) {
+  const el = document.getElementById('toss-delivery-card-' + biz);
+  if (!el) return;
+  if (!tpl || Object.keys(tpl).length === 0) {
+    el.innerHTML = `<div class="template-preview-card-title">${TOSS_BIZ_NAMES[biz]}</div><div class="template-preview-empty">템플릿 미설정</div>`;
+    return;
+  }
+  const feeLabel = tpl.deliveryFeeType === 'FREE' ? '무료배송' : (tpl.deliveryFeeType === 'PAID' ? `유료 ${(tpl.deliveryFee||0).toLocaleString()}원` : `조건부무료 (${(tpl.minimumPurchasePrice||0).toLocaleString()}원 이상 무료, 미충족시 ${(tpl.deliveryFee||0).toLocaleString()}원)`);
+  const jejuLabel = tpl.isJejuIslands ? `가능 (제주 ${(tpl.jejuDeliveryFee||0).toLocaleString()}원 / 도서 ${(tpl.islandsMountainsDeliveryFee||0).toLocaleString()}원)` : '불가능';
+  const delivLabel = tpl.todayDelivery ? `오늘출발 (마감 ${tpl.deliveryDeadline||''})` : `발송예정 주문일+${tpl.preparationDays||1}일`;
+  el.innerHTML = `
+    <div class="template-preview-card-title">${TOSS_BIZ_NAMES[biz]}</div>
+    <div class="template-preview-row"><span class="template-preview-key">배송:</span><span class="template-preview-val">${delivLabel}</span></div>
+    <div class="template-preview-row"><span class="template-preview-key">배송비:</span><span class="template-preview-val">${feeLabel}</span></div>
+    <div class="template-preview-row"><span class="template-preview-key">제주/도서:</span><span class="template-preview-val">${jejuLabel}</span></div>
+    <div class="template-preview-row"><span class="template-preview-key">택배사:</span><span class="template-preview-val">${tpl.courier||'-'}</span></div>`;
+}
+
+function renderExchangePreviewCard(biz, tpl) {
+  const el = document.getElementById('toss-exchange-card-' + biz);
+  if (!el) return;
+  if (!tpl || Object.keys(tpl).length === 0) {
+    el.innerHTML = `<div class="template-preview-card-title">${TOSS_BIZ_NAMES[biz]}</div><div class="template-preview-empty">템플릿 미설정</div>`;
+    return;
+  }
+  el.innerHTML = `
+    <div class="template-preview-card-title">${TOSS_BIZ_NAMES[biz]}</div>
+    <div class="template-preview-row"><span class="template-preview-key">반품지:</span><span class="template-preview-val">${tpl.returnAddress||'-'}</span></div>
+    <div class="template-preview-row"><span class="template-preview-key">반품배송비:</span><span class="template-preview-val">${(tpl.refundDeliveryFee||0).toLocaleString()}원</span></div>
+    <div class="template-preview-row"><span class="template-preview-key">교환배송비:</span><span class="template-preview-val">${(tpl.exchangeDeliveryFee||0).toLocaleString()}원</span></div>
+    <div class="template-preview-row"><span class="template-preview-key">신청기간:</span><span class="template-preview-val">${tpl.applicationTerm||'-'}</span></div>`;
+}
+
+function renderAllTemplatePreview() {
+  TOSS_BIZ_LIST.forEach(biz => {
+    const tpl = bizTemplates[biz];
+    renderDeliveryPreviewCard(biz, tpl);
+    renderExchangePreviewCard(biz, tpl);
+  });
+}
+
+// ============================================================
+// 템플릿 관리 모달
+// ============================================================
+let modalCurrentBiz = 'soul';
+
+function openTemplateModal() {
+  document.getElementById('template-modal').classList.add('show');
+  modalCurrentBiz = 'soul';
+  TOSS_BIZ_LIST.forEach(biz => {
+    document.getElementById('mtab-' + biz).classList.toggle('active', biz === 'soul');
+  });
+  loadAllBizTemplates().then(() => renderModalBody(modalCurrentBiz));
+}
+
+function closeTemplateModal() {
+  document.getElementById('template-modal').classList.remove('show');
+}
+
+function switchModalTab(biz) {
+  modalCurrentBiz = biz;
+  TOSS_BIZ_LIST.forEach(b => {
+    document.getElementById('mtab-' + b).classList.toggle('active', b === biz);
+  });
+  renderModalBody(biz);
+}
+
+function renderModalBody(biz) {
+  const tpl = bizTemplates[biz] || {};
+  const body = document.getElementById('template-modal-body');
+  if (!body) return;
+
+  const feeType = tpl.deliveryFeeType || 'PAID';
+  const todayDel = !!tpl.todayDelivery;
+  const isJeju = tpl.isJejuIslands !== false ? (!!tpl.isJejuIslands) : false;
+
+  const preparationDaysOptions = [1,2,3,4,5,6,7].map(d =>
+    `<option value="${d}" ${(tpl.preparationDays||2)===d?'selected':''}>주문일+${d}일</option>`
+  ).join('');
+
+  const deadlineOptions = [];
+  for (let h = 10; h <= 23; h++) {
+    for (const m of ['00','30']) {
+      const t = `${String(h).padStart(2,'0')}:${m}`;
+      deadlineOptions.push(`<option value="${t}" ${(tpl.deliveryDeadline||'12:00')===t?'selected':''}>${t}</option>`);
+    }
+  }
+
+  const courierOptions = ['CJ대한통운','롯데택배','한진택배','우체국택배','로젠택배','홈픽택배'].map(c =>
+    `<option value="${c}" ${(tpl.courier||'CJ대한통운')===c?'selected':''}>${c}</option>`
+  ).join('');
+
+  body.innerHTML = `
+    <!-- 배송 설정 -->
+    <div class="modal-section-title">배송 설정</div>
+    <div class="modal-field-row">
+      <div class="modal-field" style="flex:0 0 100%;">
+        <div class="toggle-wrap">
+          <label class="toggle-switch">
+            <input type="checkbox" id="m-today-del-${biz}" ${todayDel?'checked':''} onchange="onModalTodayDelChange('${biz}')"/>
+            <span class="toggle-slider"></span>
+          </label>
+          <span class="toggle-label">오늘출발</span>
+        </div>
+      </div>
+    </div>
+    <div id="m-today-del-fields-${biz}" style="display:${todayDel?'flex':'none'}; gap:12px; margin-bottom:12px;">
+      <div class="modal-field" style="max-width:160px;">
+        <label>출고마감시각</label>
+        <select id="m-deadline-${biz}">${deadlineOptions.join('')}</select>
+      </div>
+    </div>
+    <div id="m-prep-fields-${biz}" style="display:${todayDel?'none':'flex'}; gap:12px; margin-bottom:12px;">
+      <div class="modal-field" style="max-width:180px;">
+        <label>발송예정일</label>
+        <select id="m-prep-${biz}">${preparationDaysOptions}</select>
+      </div>
+    </div>
+
+    <div class="modal-field-row" style="margin-bottom:0;">
+      <div class="modal-field" style="flex:0 0 100%;">
+        <label>배송비 유형</label>
+        <div class="fee-type-tabs">
+          <button class="fee-type-tab ${feeType==='FREE'?'active':''}" onclick="selectFeeType('${biz}','FREE')">무료배송</button>
+          <button class="fee-type-tab ${feeType==='PAID'?'active':''}" onclick="selectFeeType('${biz}','PAID')">유료배송</button>
+          <button class="fee-type-tab ${feeType==='CONDITIONALLY_FREE'?'active':''}" onclick="selectFeeType('${biz}','CONDITIONALLY_FREE')">조건부무료배송</button>
+        </div>
+      </div>
+    </div>
+    <div id="m-fee-paid-${biz}" style="display:${feeType==='PAID'?'flex':'none'}; gap:12px; margin-bottom:12px;">
+      <div class="modal-field" style="max-width:160px;">
+        <label>배송비 (원)</label>
+        <input type="number" id="m-fee-${biz}" value="${tpl.deliveryFee||3000}" min="0" />
+      </div>
+    </div>
+    <div id="m-fee-cond-${biz}" style="display:${feeType==='CONDITIONALLY_FREE'?'flex':'none'}; gap:12px; margin-bottom:12px;">
+      <div class="modal-field">
+        <label>무료배송 조건 (원 이상)</label>
+        <input type="number" id="m-minfree-${biz}" value="${tpl.minimumPurchasePrice||30000}" min="0" />
+      </div>
+      <div class="modal-field">
+        <label>조건 미충족시 배송비 (원)</label>
+        <input type="number" id="m-condfee-${biz}" value="${tpl.deliveryFee||3000}" min="0" />
+      </div>
+    </div>
+
+    <div class="modal-field-row">
+      <div class="modal-field" style="flex:0 0 100%;">
+        <div class="toggle-wrap">
+          <label class="toggle-switch">
+            <input type="checkbox" id="m-jeju-${biz}" ${isJeju?'checked':''} onchange="onModalJejuChange('${biz}')"/>
+            <span class="toggle-slider"></span>
+          </label>
+          <span class="toggle-label">제주·도서산간 배송 가능</span>
+        </div>
+      </div>
+    </div>
+    <div id="m-jeju-fields-${biz}" style="display:${isJeju?'flex':'none'}; gap:12px; margin-bottom:12px;">
+      <div class="modal-field">
+        <label>제주 추가배송비 (원)</label>
+        <input type="number" id="m-jeju-fee-${biz}" value="${tpl.jejuDeliveryFee||4000}" min="0" />
+      </div>
+      <div class="modal-field">
+        <label>도서산간 추가배송비 (원)</label>
+        <input type="number" id="m-island-fee-${biz}" value="${tpl.islandsMountainsDeliveryFee||5000}" min="0" />
+      </div>
+    </div>
+
+    <div class="modal-field-row">
+      <div class="modal-field" style="max-width:220px;">
+        <label>택배사</label>
+        <select id="m-courier-${biz}">${courierOptions}</select>
+      </div>
+    </div>
+
+    <!-- 교환·반품 설정 -->
+    <div class="modal-section-title" style="margin-top:20px;">교환·반품 설정</div>
+    <div class="modal-field-row">
+      <div class="modal-field" style="flex:0 0 100%;">
+        <label>반품지 주소 (표시용)</label>
+        <textarea id="m-return-addr-${biz}" placeholder="예: 전북특별자치도 전주시 덕진구 번영로 230-7 (성덕동) 1층">${tpl.returnAddress||''}</textarea>
+      </div>
+    </div>
+    <div class="modal-field-row">
+      <div class="modal-field">
+        <label>반품지 위치 ID (토스 API용)</label>
+        <input type="text" id="m-return-loc-id-${biz}" value="${tpl.returnLocationId||''}" placeholder="토스 파트너스에서 확인" />
+      </div>
+    </div>
+    <div class="modal-field-row">
+      <div class="modal-field">
+        <label>반품 배송비 (원)</label>
+        <input type="number" id="m-refund-fee-${biz}" value="${tpl.refundDeliveryFee||3000}" min="0" />
+      </div>
+      <div class="modal-field">
+        <label>교환 배송비 (원)</label>
+        <input type="number" id="m-exchange-fee-${biz}" value="${tpl.exchangeDeliveryFee||6000}" min="0" />
+      </div>
+    </div>
+    <div class="modal-field-row">
+      <div class="modal-field" style="flex:0 0 100%;">
+        <label>신청방법 설명</label>
+        <textarea id="m-app-method-${biz}" placeholder="예: 고객센터 연락 또는 앱에서 신청">${tpl.applicationMethod||''}</textarea>
+      </div>
+    </div>
+    <div class="modal-field-row">
+      <div class="modal-field" style="flex:0 0 100%;">
+        <label>신청가능기간 설명</label>
+        <textarea id="m-app-term-${biz}" placeholder="예: 상품 수령일로부터 7일 이내">${tpl.applicationTerm||''}</textarea>
+      </div>
+    </div>
+  `;
+}
+
+function onModalTodayDelChange(biz) {
+  const checked = document.getElementById('m-today-del-' + biz).checked;
+  document.getElementById('m-today-del-fields-' + biz).style.display = checked ? 'flex' : 'none';
+  document.getElementById('m-prep-fields-' + biz).style.display = checked ? 'none' : 'flex';
+}
+
+function onModalJejuChange(biz) {
+  const checked = document.getElementById('m-jeju-' + biz).checked;
+  document.getElementById('m-jeju-fields-' + biz).style.display = checked ? 'flex' : 'none';
+}
+
+function selectFeeType(biz, type) {
+  ['FREE','PAID','CONDITIONALLY_FREE'].forEach(t => {
+    const btn = document.querySelector(`#template-modal-body .fee-type-tab:nth-child(${t==='FREE'?1:t==='PAID'?2:3})`);
+  });
+  // 모달 바디 내 탭 버튼 재렌더링
+  document.querySelectorAll('#template-modal-body .fee-type-tab').forEach((btn, idx) => {
+    const types = ['FREE','PAID','CONDITIONALLY_FREE'];
+    btn.classList.toggle('active', types[idx] === type);
+  });
+  document.getElementById('m-fee-paid-' + biz).style.display = type === 'PAID' ? 'flex' : 'none';
+  document.getElementById('m-fee-cond-' + biz).style.display = type === 'CONDITIONALLY_FREE' ? 'flex' : 'none';
+  // 현재 선택된 타입 저장
+  if (!bizTemplates[biz]) bizTemplates[biz] = {};
+  bizTemplates[biz]._feeTypeSelected = type;
+}
+
+function getModalCurrentFeeType(biz) {
+  // 모달 내 활성 탭 읽기
+  const tabs = document.querySelectorAll('#template-modal-body .fee-type-tab');
+  const types = ['FREE','PAID','CONDITIONALLY_FREE'];
+  for (let i = 0; i < tabs.length; i++) {
+    if (tabs[i].classList.contains('active')) return types[i];
+  }
+  return 'PAID';
+}
+
+function getTemplateFromModal(biz) {
+  const g = (id) => { const el = document.getElementById(id); return el ? el.value : ''; };
+  const gn = (id, def=0) => Number(g(id)) || def;
+  const gb = (id) => { const el = document.getElementById(id); return el ? el.checked : false; };
+  const feeType = getModalCurrentFeeType(biz);
+  return {
+    todayDelivery: gb('m-today-del-' + biz),
+    deliveryDeadline: g('m-deadline-' + biz) || '12:00',
+    preparationDays: gn('m-prep-' + biz, 2),
+    deliveryFeeType: feeType,
+    deliveryFee: feeType === 'PAID' ? gn('m-fee-' + biz, 3000) : (feeType === 'CONDITIONALLY_FREE' ? gn('m-condfee-' + biz, 3000) : 0),
+    minimumPurchasePrice: feeType === 'CONDITIONALLY_FREE' ? gn('m-minfree-' + biz, 30000) : 0,
+    isJejuIslands: gb('m-jeju-' + biz),
+    jejuDeliveryFee: gn('m-jeju-fee-' + biz, 4000),
+    islandsMountainsDeliveryFee: gn('m-island-fee-' + biz, 5000),
+    courier: g('m-courier-' + biz) || 'CJ대한통운',
+    returnAddress: g('m-return-addr-' + biz),
+    returnLocationId: g('m-return-loc-id-' + biz),
+    refundDeliveryFee: gn('m-refund-fee-' + biz, 3000),
+    exchangeDeliveryFee: gn('m-exchange-fee-' + biz, 6000),
+    applicationMethod: g('m-app-method-' + biz),
+    applicationTerm: g('m-app-term-' + biz),
+  };
+}
+
+async function saveCurrentTemplate() {
+  const biz = modalCurrentBiz;
+  const btn = document.querySelector('.modal-footer .btn-toss-register');
+  if (btn) { btn.disabled = true; btn.textContent = '저장 중...'; }
+  try {
+    const tplData = getTemplateFromModal(biz);
+    await saveTemplateToR2(biz, tplData);
+    showToast(`✓ ${TOSS_BIZ_NAMES[biz]} 템플릿이 저장되었습니다.`, 'success');
+    renderAllTemplatePreview();
+  } catch(e) {
+    showToast(`✗ 저장 실패: ${e.message}`, 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '💾 저장'; }
+  }
+}
+
+// ============================================================
+// 토스쇼핑 등록 페이로드 조립 & 제출 (3개 사업자 동시)
+// ============================================================
+async function registerTossProduct() {
+  // 필수 검증
+  const mgmtCode = document.getElementById('toss-mgmt-code').value.trim();
+  if (!tossState.categoryLeafId) {
+    showToast('카테고리를 선택해주세요.', 'error');
+    return;
+  }
+  // 최소 1개 사업자 상품명 확인
+  const namesSoul = document.getElementById('toss-name-soul')?.value.trim();
+  const namesJ1 = document.getElementById('toss-name-j1')?.value.trim();
+  const namesHappy = document.getElementById('toss-name-happy')?.value.trim();
+  if (!namesSoul && !namesJ1 && !namesHappy) {
+    showToast('최소 1개 사업자의 상품명을 입력해주세요.', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('btn-toss-register');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ 등록 중 (3개 사업자)...'; }
+  document.getElementById('toss-register-result').style.display = 'none';
+
+  // 최신값 수집
+  tossState.managementCode = mgmtCode;
+  tossState.taxType = document.querySelector('input[name="tossTaxType"]:checked')?.value || 'TAXABLE';
   const detailMode = document.querySelector('input[name="tossDetailMode"]:checked')?.value;
   if (detailMode === 'html') {
     tossState.detailHtml = document.getElementById('toss-detail-html').value.trim();
@@ -3451,111 +4259,123 @@ function submitTossProduct() {
     tossState.detailHtml = '';
   }
 
-  const tossPayload = {
-    name: tossState.name,
-    brand: tossState.brand,
+  // 1. R2에서 각 사업자 템플릿 로드
+  await loadAllBizTemplates();
+
+  // 2. 공통 payload 구성
+  const commonPayload = {
     managementCode: tossState.managementCode,
     categoryId: tossState.categoryLeafId,
     options: tossState.options.filter(o => o.name.trim()).map(o => ({
       name: o.name.trim(),
       value: o.value.trim() ? o.value.split(',').map(v => v.trim()).filter(Boolean) : [],
     })),
-    images: tossState.images.filter(Boolean),
+    images: tossState.images.filter(Boolean), // 2~10번 이미지
     detailContent: tossState.detailHtml || tossState.detailImgUrl,
     taxType: tossState.taxType,
     tags: tossState.tags,
-    shippingTemplateId: tossState.shippingTemplateId, // placeholder
-    exchangeReturnTemplateId: tossState.exchangeReturnTemplateId, // placeholder
     notices: tossState.notices,
     salePrice: Number(document.getElementById('salePrice')?.value) || Number(sharedProduct.salePrice) || 0,
     costPrice: Number(document.getElementById('supplyPrice')?.value) || Number(sharedProduct.costPrice) || 0,
     stock: Number(document.getElementById('stock')?.value) || Number(sharedProduct.stock) || 0,
   };
 
-  console.log('[토스쇼핑 페이로드]', JSON.stringify(tossPayload, null, 2));
-  // TODO: POST to n8n webhook - endpoint TBD
-  showToast('페이로드가 콘솔에 출력되었습니다. (웹훅 엔드포인트 미설정)', 'info');
-}
+  // 3. 각 사업자별 payload 조립
+  function buildBizPayload(biz) {
+    const name = document.getElementById('toss-name-' + biz)?.value.trim();
+    const brand = document.getElementById('toss-brand-' + biz)?.value.trim();
+    const mainImg = tossBizImages[biz];
+    if (!name) return null; // 상품명 없으면 스킵
 
-// ============================================================
-// 토스쇼핑 사업자별 배송/교환반품 템플릿 로딩
-// ============================================================
-const TOSS_TEMPLATE_PROXY = 'https://n8n.wonflowai.com/webhook/toss-templates';
+    const tpl = bizTemplates[biz] || {};
+    const deliveryPolicy = {
+      deliveryMethod: tpl.todayDelivery ? 'TODAY_DELIVERY' : 'NORMAL',
+      ...(tpl.todayDelivery ? { deliveryDeadline: tpl.deliveryDeadline } : { preparationDays: tpl.preparationDays || 1 }),
+      deliveryFeeType: tpl.deliveryFeeType || 'PAID',
+      ...(tpl.deliveryFeeType !== 'FREE' ? { deliveryFee: tpl.deliveryFee || 0 } : {}),
+      ...(tpl.deliveryFeeType === 'CONDITIONALLY_FREE' ? { minimumPurchasePrice: tpl.minimumPurchasePrice || 0 } : {}),
+      isJejuAndIslandsMountainsDelivery: !!tpl.isJejuIslands,
+      ...(tpl.isJejuIslands ? {
+        jejuDeliveryFee: tpl.jejuDeliveryFee || 0,
+        islandsMountainsDeliveryFee: tpl.islandsMountainsDeliveryFee || 0,
+      } : {}),
+    };
+    const exchangeReturnPolicy = {
+      ...(tpl.returnLocationId ? { exchangeRefundLocationId: tpl.returnLocationId } : {}),
+      refundOneWayDeliveryFee: tpl.refundDeliveryFee || 0,
+      exchangeRoundTripDeliveryFee: tpl.exchangeDeliveryFee || 0,
+      ...(tpl.applicationMethod ? { applicationMethodDescription: tpl.applicationMethod } : {}),
+      ...(tpl.applicationTerm ? { applicationTermDescription: tpl.applicationTerm } : {}),
+    };
 
-async function loadTossTemplates(type) {
-  // type: 'delivery' | 'exchange'
-  const loadingEl = document.getElementById(type === 'delivery' ? 'toss-shipping-loading' : 'toss-exchange-loading');
-  const selectEl  = document.getElementById(type === 'delivery' ? 'toss-shipping-template' : 'toss-exchange-template');
-  const noticeEl  = document.getElementById(type === 'delivery' ? 'toss-shipping-notice' : 'toss-exchange-notice');
-
-  if (!loadingEl || !selectEl || !noticeEl) return;
-
-  loadingEl.style.display = 'block';
-  selectEl.style.display  = 'none';
-  noticeEl.style.display  = 'none';
-
-  try {
-    const res = await fetch(`${TOSS_TEMPLATE_PROXY}?type=${type}`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' }
-    });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-
-    // 응답 형태: { items: [{id, name, ...}] } 또는 배열
-    const items = Array.isArray(data) ? data : (data.items || data.deliveryLocations || data.exchangeRefundLocations || []);
-
-    loadingEl.style.display = 'none';
-    selectEl.innerHTML = '<option value="">-- 선택하세요 --</option>';
-    items.forEach(item => {
-      const opt = document.createElement('option');
-      opt.value = item.id;
-      opt.textContent = item.name || item.templateName || String(item.id);
-      selectEl.appendChild(opt);
-    });
-    selectEl.style.display = '';
-
-    // "제이원" 매칭 항목 기본 선택
-    const j1Item = items.find(item => {
-      const name = (item.name || item.templateName || '').toLowerCase();
-      return name.includes('제이원') || name.includes('j1') || name.includes('jone');
-    });
-    if (j1Item) {
-      selectEl.value = j1Item.id;
-    }
-  } catch (err) {
-    console.warn('[Toss 템플릿 로딩 실패]', type, err);
-    loadingEl.style.display = 'none';
-    // 실패 시에도 빈 드롭다운으로 표시
-    selectEl.innerHTML = '<option value="">-- 템플릿을 불러오지 못했습니다 --</option>';
-    selectEl.style.display = '';
+    const allImages = mainImg ? [mainImg, ...commonPayload.images] : commonPayload.images;
+    return {
+      ...commonPayload,
+      name,
+      brand: brand || '',
+      images: allImages.slice(0, 10),
+      deliveryPolicy,
+      exchangeReturnPolicy,
+      _biz: biz,
+      _bizName: TOSS_BIZ_NAMES[biz],
+    };
   }
-}
 
-function onTossMerchantChange() {
-  const merchant = document.getElementById('toss-merchant-select')?.value || 'j1';
+  const payloads = TOSS_BIZ_LIST.map(biz => ({ biz, payload: buildBizPayload(biz) })).filter(p => p.payload !== null);
 
-  const shippingSelect  = document.getElementById('toss-shipping-template');
-  const shippingNotice  = document.getElementById('toss-shipping-notice');
-  const exchangeSelect  = document.getElementById('toss-exchange-template');
-  const exchangeNotice  = document.getElementById('toss-exchange-notice');
+  if (payloads.length === 0) {
+    showToast('등록할 사업자 상품명을 입력해주세요.', 'error');
+    if (btn) { btn.disabled = false; btn.textContent = '🚀 토스쇼핑 3개 사업자 동시 등록'; }
+    return;
+  }
 
-  if (merchant === 'j1') {
-    // 제이원: API로 템플릿 목록 조회 후 "제이원" 항목 기본선택
-    loadTossTemplates('delivery');
-    loadTossTemplates('exchange');
+  // 4. Promise.all로 3개 사업자 동시 등록
+  const TOSS_REGISTER_WEBHOOK = 'https://n8n.wonflowai.com/webhook/toss-register-product';
+  const results = await Promise.allSettled(payloads.map(({ biz, payload }) =>
+    fetch(TOSS_REGISTER_WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).then(async res => {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json().catch(() => ({}));
+      return { biz, bizName: TOSS_BIZ_NAMES[biz], success: true, data };
+    })
+  ));
+
+  // 5. 결과 표시
+  const grid = document.getElementById('toss-register-result-grid');
+  grid.innerHTML = '';
+  let successCount = 0;
+  results.forEach((result, idx) => {
+    const biz = payloads[idx].biz;
+    const bizName = TOSS_BIZ_NAMES[biz];
+    const ok = result.status === 'fulfilled';
+    if (ok) successCount++;
+    const card = document.createElement('div');
+    card.className = 'toss-result-card ' + (ok ? 'success' : 'error');
+    card.innerHTML = `<div class="toss-result-card-name">${ok ? '✓' : '✗'} ${bizName}</div>
+      <div class="toss-result-card-msg">${ok ? '등록 성공' : ('오류: ' + (result.reason?.message || '알 수 없는 오류'))}</div>`;
+    grid.appendChild(card);
+  });
+  document.getElementById('toss-register-result').style.display = '';
+
+  if (successCount > 0) {
+    showToast(`✓ ${successCount}/${payloads.length}개 사업자 등록 완료`, 'success');
   } else {
-    // 소울스토어 / 행복산업: 미등록 안내
-    const shippingLoading = document.getElementById('toss-shipping-loading');
-    const exchangeLoading = document.getElementById('toss-exchange-loading');
-    if (shippingLoading) shippingLoading.style.display = 'none';
-    if (exchangeLoading) exchangeLoading.style.display = 'none';
-
-    if (shippingSelect) { shippingSelect.style.display = 'none'; shippingSelect.value = ''; }
-    if (shippingNotice) shippingNotice.style.display = '';
-    if (exchangeSelect) { exchangeSelect.style.display = 'none'; exchangeSelect.value = ''; }
-    if (exchangeNotice) exchangeNotice.style.display = '';
+    showToast('모든 사업자 등록 실패. 콘솔 확인.', 'error');
   }
+
+  console.log('[토스 3사업자 등록 결과]', results);
+  if (btn) { btn.disabled = false; btn.textContent = '🚀 토스쇼핑 3개 사업자 동시 등록'; }
+}
+
+// ============================================================
+// 토스쇼핑 사업자별 배송/교환반품 템플릿 로딩 (레거시 stub — 더 이상 사용 안 함)
+// ============================================================
+function onTossMerchantChange() {
+  // 새 구조에서는 loadAllBizTemplates()가 담당 — 하위 호환용으로 유지
+  loadAllBizTemplates().catch(e => console.warn('template load:', e));
 }
 
 // ============================================================
@@ -3563,10 +4383,10 @@ function onTossMerchantChange() {
 // ============================================================
 initTossImageSlots();
 
-// 토스 사업자 선택 초기화 (기본값: 제이원 → 템플릿 자동 로드)
+// 토스 초기화: 페이지 로드 시 템플릿 미리 로드 (백그라운드)
 document.addEventListener('DOMContentLoaded', () => {
-  // 토스 섹션이 보일 때 초기화 - switchPlatform 호출 시에도 트리거
-  onTossMerchantChange();
+  // 토스 섹션 진입 전에도 템플릿 미리 로드해 두기 (선택 사항)
+  // 실제 미리보기는 switchPlatform('toss') 시 renderAllTemplatePreview()로 표시
 });
 </script>
 </body>
