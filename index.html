@@ -1988,9 +1988,153 @@ function loadFromHistory(id) {
   const k = currentPlatform === 'toss' ? HISTORY_KEY_TOSS : HISTORY_KEY_CAFE24;
   const entry = getHistory(k).find(p => p.id === id);
   if (!entry) return;
-  populateFormFromPayload(entry.payload);
+  if (entry.payload._platform === 'toss') {
+    populateTossFormFromPayload(entry.payload);
+  } else {
+    populateFormFromPayload(entry.payload);
+  }
   toggleHistoryDrawer();
   showToast('✓ "' + (entry.productName || '') + '" 데이터를 폼에 불러왔습니다. 확인 후 업로드하세요.', 'success');
+}
+
+async function populateTossFormFromPayload(payload) {
+  // 관리코드
+  const mgmtEl = document.getElementById('toss-mgmt-code');
+  if (mgmtEl && payload.managementCode !== undefined) mgmtEl.value = payload.managementCode || '';
+
+  // 사업자별 상품명 / 브랜드명 / 대표이미지
+  const bizFields = payload.bizFields || {};
+  ['soul', 'j1', 'happy'].forEach(biz => {
+    const bf = bizFields[biz] || {};
+    const nameEl = document.getElementById('toss-name-' + biz);
+    const brandEl = document.getElementById('toss-brand-' + biz);
+    if (nameEl && bf.name !== undefined) nameEl.value = bf.name || '';
+    if (brandEl && bf.brand !== undefined) brandEl.value = bf.brand || '';
+    if (bf.image) {
+      tossBizImages[biz] = bf.image;
+      const thumbEl = document.getElementById('toss-thumb-' + biz);
+      if (thumbEl) { thumbEl.src = bf.image; thumbEl.classList.add('show'); }
+    } else {
+      tossBizImages[biz] = null;
+      const thumbEl = document.getElementById('toss-thumb-' + biz);
+      if (thumbEl) { thumbEl.src = ''; thumbEl.classList.remove('show'); }
+    }
+  });
+
+  // 카테고리 복원
+  if (Array.isArray(payload.categoryId) && payload.categoryId.length > 0) {
+    // 카테고리 트리가 아직 로드 안 됐으면 먼저 로드
+    if (!tossCategoryTree || tossCategoryTree.length === 0) {
+      await loadTossCategories();
+    }
+    tossCatSelectedIds = payload.categoryId.slice();
+    tossState.categoryPath = payload.categoryPath || '';
+    tossState.categoryLeafId = tossCatSelectedIds[tossCatSelectedIds.length - 1] || null;
+    tossState.categoryConfirmed = true;
+    renderTossCategoryColumns();
+  }
+
+  // 옵션 / 조합 복원
+  if (Array.isArray(payload.optionsRaw)) {
+    // 기존 옵션 UI 초기화
+    tossOptionCounter = 0;
+    tossState.options = [];
+    tossState.stockCombos = [];
+    const optContainer = document.getElementById('toss-option-rows');
+    if (optContainer) {
+      optContainer.querySelectorAll('.toss-option-row').forEach(el => el.remove());
+    }
+    const emptyEl = document.getElementById('toss-option-empty');
+    const comboSection = document.getElementById('toss-combo-section');
+    if (comboSection) comboSection.innerHTML = '';
+
+    payload.optionsRaw.forEach(opt => {
+      const id = ++tossOptionCounter;
+      const restored = { id, name: opt.name || '', chips: opt.chips || [], type: opt.type || 'free', optUnits: opt.optUnits || [], optValues: opt.optValues || [] };
+      tossState.options.push(restored);
+      if (optContainer) {
+        _appendTossOptionRow(optContainer, id, restored.name, restored.type, restored.optValues, restored.optUnits);
+        // 칩 복원
+        _renderTossOptChips(id);
+      }
+    });
+    if (emptyEl) emptyEl.style.display = tossState.options.length === 0 ? '' : 'none';
+
+    // 조합 복원
+    if (Array.isArray(payload.stockCombos) && payload.stockCombos.length > 0) {
+      tossState.stockCombos = JSON.parse(JSON.stringify(payload.stockCombos));
+    }
+    renderTossOptionCombos();
+    // 저장된 조합 값(가격/재고/관리코드) 재적용 (renderTossOptionCombos 가 새 조합을 만들어 덮어씌우므로 이후에 재적용)
+    if (Array.isArray(payload.stockCombos)) {
+      payload.stockCombos.forEach(saved => {
+        const match = tossState.stockCombos.find(c => c.comboLabel === saved.comboLabel);
+        if (match) {
+          match.originPrice = saved.originPrice;
+          match.salePrice = saved.salePrice;
+          match.remainingCount = saved.remainingCount;
+          match.managementCode = saved.managementCode || '';
+          match.checked = saved.checked !== false;
+        }
+      });
+      renderTossOptionCombos();
+    }
+  }
+
+  // 추가이미지 복원
+  if (Array.isArray(payload.extraImages)) {
+    tossExtraUploadedUrls.length = 0;
+    tossExtraUploadedUrls.push(...payload.extraImages.filter(Boolean));
+    renderTossExtraThumbs();
+    if (typeof updateTossExtraDot === 'function') updateTossExtraDot();
+  }
+
+  // 상세이미지 복원
+  if (Array.isArray(payload.detailImages)) {
+    tossDetailUploadedUrls.length = 0;
+    tossDetailUploadedUrls.push(...payload.detailImages.filter(Boolean));
+    renderTossDetailThumbs();
+    if (typeof updateTossDetailDot === 'function') updateTossDetailDot();
+  }
+
+  // 상세설명 모드 / HTML 복원
+  if (payload.detailMode) {
+    const modeRadio = document.querySelector(`input[name="tossDetailMode"][value="${payload.detailMode}"]`);
+    if (modeRadio) modeRadio.checked = true;
+    onTossDetailModeChange();
+  }
+  if (payload.detailHtml !== undefined) {
+    const htmlEl = document.getElementById('toss-detail-html');
+    if (htmlEl) htmlEl.value = payload.detailHtml || '';
+  }
+
+  // 부가세 복원
+  if (payload.taxType) {
+    const taxRadio = document.querySelector(`input[name="tossTaxType"][value="${payload.taxType}"]`);
+    if (taxRadio) taxRadio.checked = true;
+    tossState.taxType = payload.taxType;
+  }
+
+  // 검색 태그 복원
+  if (Array.isArray(payload.tags)) {
+    tossState.tags = payload.tags.slice();
+    renderTossTags();
+  }
+
+  // 필수고시 복원 (notices 배열을 그대로 복원하고 DOM에 값을 채움)
+  if (Array.isArray(payload.notices) && payload.notices.length > 0) {
+    tossState.notices = JSON.parse(JSON.stringify(payload.notices));
+    const notice = tossState.notices[0];
+    if (notice && notice.items) {
+      const container = document.getElementById('toss-notice-items');
+      if (container) {
+        const inputs = container.querySelectorAll('input[type="text"]');
+        notice.items.forEach((item, i) => {
+          if (inputs[i] !== undefined) inputs[i].value = item.value || '';
+        });
+      }
+    }
+  }
 }
 
 
@@ -5350,8 +5494,29 @@ async function registerTossProduct() {
   const tossHistoryName = namesSoul || namesJ1 || namesHappy || '(상품명 없음)';
   const tossStatus = successCount > 0 ? 'success' : 'failed';
   const tossErrMsg = tossStatus === 'failed' ? '모든 사업자 등록 실패' : '';
-  // 이력용 간략 payload (name 필드 포함)
-  const tossHistoryPayload = { name: tossHistoryName, _platform: 'toss', _results: results.map((r, i) => ({ biz: payloads[i].biz, ok: r.status === 'fulfilled' })) };
+  // 이력용 상세 payload (불러오기 복원에 필요한 모든 필드 포함)
+  const tossHistoryPayload = {
+    name: tossHistoryName,
+    _platform: 'toss',
+    _results: results.map((r, i) => ({ biz: payloads[i].biz, ok: r.status === 'fulfilled' })),
+    categoryId: tossCatSelectedIds,
+    categoryPath: tossState.categoryPath,
+    stockCombos: tossState.stockCombos,
+    optionsRaw: tossState.options,
+    extraImages: tossExtraUploadedUrls.slice(),
+    detailImages: tossDetailUploadedUrls.slice(),
+    detailMode: document.querySelector('input[name="tossDetailMode"]:checked')?.value || 'image',
+    detailHtml: tossState.detailHtml,
+    taxType: tossState.taxType,
+    tags: tossState.tags.slice(),
+    notices: JSON.parse(JSON.stringify(tossState.notices)),
+    managementCode: document.getElementById('toss-mgmt-code')?.value,
+    bizFields: {
+      soul: { name: document.getElementById('toss-name-soul')?.value, brand: document.getElementById('toss-brand-soul')?.value, image: tossBizImages.soul },
+      j1:   { name: document.getElementById('toss-name-j1')?.value,   brand: document.getElementById('toss-brand-j1')?.value,   image: tossBizImages.j1 },
+      happy: { name: document.getElementById('toss-name-happy')?.value, brand: document.getElementById('toss-brand-happy')?.value, image: tossBizImages.happy },
+    },
+  };
   saveHistoryEntry(tossUploadId, tossHistoryPayload, tossStatus, tossErrMsg, HISTORY_KEY_TOSS);
 
   console.log('[토스 3사업자 등록 결과]', results);
