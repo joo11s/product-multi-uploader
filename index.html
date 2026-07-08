@@ -1540,7 +1540,10 @@
     </div>
 
     <!-- 3개 사업자별 상품명/브랜드/대표이미지 -->
-    <div class="sub-label" style="margin-bottom:10px;">사업자별 상품명 / 브랜드명 / 대표이미지</div>
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+      <div class="sub-label" style="margin-bottom:0;">사업자별 상품명 / 브랜드명 / 대표이미지</div>
+      <button class="btn-add-option" onclick="copyBrandsFromCafe24()" style="border-color:var(--blue); color:var(--blue); font-size:12px; padding:5px 12px;">🏷️ 카페24 브랜드명 가져오기</button>
+    </div>
     <div style="background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius); padding:4px 16px;">
       <!-- 헤더 -->
       <div style="display:grid; grid-template-columns:100px 1fr 1fr 160px; gap:12px; padding:8px 0; border-bottom:1px solid var(--border);">
@@ -1623,7 +1626,10 @@
     <div class="divider"></div>
 
     <!-- 이미지 섹션 -->
-    <div class="sub-label" style="margin-bottom:4px;">이미지 2~10번 (공통, 최대 9장)</div>
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+      <div class="sub-label" style="margin-bottom:0;">이미지 2~10번 (공통, 최대 9장)</div>
+      <button class="btn-add-option" onclick="copyFromCafe24Images()" style="border-color:var(--blue); color:var(--blue); font-size:12px; padding:5px 12px;">📋 카페24 이미지 그대로 쓰기</button>
+    </div>
     <div style="font-size:12px; color:var(--text3); margin-bottom:12px;">1번 대표이미지는 STEP T1에서 사업자별로 각각 업로드합니다. 아래에 추가이미지(2~10번)를 드래그 업로드하세요.</div>
     <!-- 드래그 업로드 박스 (카페24 방식 통일) -->
     <div class="upload-box" id="box-toss-extra-imgs" style="margin-bottom:12px;">
@@ -4406,6 +4412,59 @@ function updateTossDetailDot() {
   if (dot) dot.className = 'dot ' + ((tossDetailUploadedUrls.length + tossDetailFiles.length) > 0 ? 'active' : '');
 }
 
+// ============================================================
+// 카페24 이미지 → 토스 이미지 복사
+// ============================================================
+function copyFromCafe24Images() {
+  const cafe24Extra = uploadedUrls['common-extra'] || [];
+  const cafe24Detail = uploadedUrls['common-detail'] || [];
+  if (cafe24Extra.length === 0 && cafe24Detail.length === 0) {
+    showToast('카페24에 먼저 이미지를 업로드해주세요.', 'error');
+    return;
+  }
+  const hasExistingToss = tossExtraUploadedUrls.length > 0 || tossDetailUploadedUrls.length > 0;
+  if (hasExistingToss) {
+    if (!confirm('토스쇼핑에 이미 등록된 이미지가 있습니다. 카페24 이미지로 덮어쓰시겠습니까?')) return;
+  }
+  // 추가이미지 복사 (최대 9장)
+  if (cafe24Extra.length > 0) {
+    tossExtraUploadedUrls.length = 0;
+    tossExtraFiles.length = 0;
+    tossExtraUploadedUrls.push(...cafe24Extra.slice(0, 9));
+    renderTossExtraThumbs();
+    updateTossExtraDot();
+  }
+  // 상세설명 이미지 복사
+  if (cafe24Detail.length > 0) {
+    tossDetailUploadedUrls.length = 0;
+    tossDetailFiles.length = 0;
+    tossDetailUploadedUrls.push(...cafe24Detail);
+    renderTossDetailThumbs();
+    updateTossDetailDot();
+  }
+  showToast('✓ 카페24 이미지를 토스쇼핑에 복사했습니다.', 'success');
+}
+
+// ============================================================
+// 카페24 브랜드명 → 토스 브랜드명 복사
+// ============================================================
+function copyBrandsFromCafe24() {
+  const bizes = ['soul', 'j1', 'happy'];
+  const defaults = { soul: '소울스토어 협력사', j1: '제이원 협력사', happy: '행복산업 협력사' };
+  bizes.forEach(biz => {
+    const cafe24BrandEl = document.getElementById(biz + '-brand');
+    const tossBrandEl = document.getElementById('toss-brand-' + biz);
+    if (!cafe24BrandEl || !tossBrandEl) return;
+    const cafe24Val = cafe24BrandEl.value.trim();
+    if (cafe24Val) {
+      tossBrandEl.value = cafe24Val;
+    } else if (!tossBrandEl.value.trim()) {
+      tossBrandEl.value = defaults[biz];
+    }
+  });
+  showToast('✓ 카페24 브랜드명을 토스쇼핑에 복사했습니다.', 'success');
+}
+
 // HTML 모드 R2 업로드 (토스 상세설명)
 let tossDetailHtmlUrl = '';
 async function uploadTossDetailHtml() {
@@ -5120,6 +5179,7 @@ async function registerTossProduct() {
     managementCode: tossState.managementCode,
     categoryId: tossState.categoryLeafId,
     options: optionsPayload,
+    description: document.getElementById('productSummaryDesc')?.value.trim() || sharedProduct.summaryDesc || '',
     // 추가이미지 URL 목록 (n8n에서 images 배열 조립 시 사용하는 단순 URL 배열 — 하위 호환 유지)
     images: tossExtraImageList,
     // 구조화된 images 배열 (type/url/order 포함, Toss API 스펙 기반)
