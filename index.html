@@ -3353,9 +3353,11 @@ function populateTossNoticeCat1() {
     cat1El.innerHTML = '<option value="">-- 로드 실패 --</option>';
     return;
   }
-  const cats = Array.isArray(tossNoticeCatsData) ? tossNoticeCatsData : (tossNoticeCatsData.categories || []);
+  const codes = tossNoticeCatsData.codes || (Array.isArray(tossNoticeCatsData) ? tossNoticeCatsData : []);
+  // firstCategoryName 기준으로 유니크한 1차 목록 생성
+  const firstNames = [...new Set(codes.map(c => c.firstCategoryName))];
   cat1El.innerHTML = '<option value="">-- 1차 카테고리 선택 --</option>' +
-    cats.map(c => `<option value="${c.code || c.id || ''}">${c.name || c.code}</option>`).join('');
+    firstNames.map(name => `<option value="${name}">${name}</option>`).join('');
 }
 
 function onTossNoticeCat1Change() {
@@ -3366,18 +3368,15 @@ function onTossNoticeCat1Change() {
   tossState.notices = [];
 
   if (!cat1Val || !tossNoticeCatsData) { cat2Wrap.style.display = 'none'; return; }
-  const cats = Array.isArray(tossNoticeCatsData) ? tossNoticeCatsData : (tossNoticeCatsData.categories || []);
-  const cat1 = cats.find(c => String(c.code || c.id) === String(cat1Val));
-  const subCats = cat1 ? (cat1.subcategories || cat1.children || []) : [];
+  const codes = tossNoticeCatsData.codes || (Array.isArray(tossNoticeCatsData) ? tossNoticeCatsData : []);
+  const subCats = codes.filter(c => c.firstCategoryName === cat1Val);
 
   if (subCats.length > 0) {
     cat2El.innerHTML = '<option value="">-- 2차 카테고리 선택 --</option>' +
-      subCats.map(c => `<option value="${c.code || c.id || ''}">${c.name || c.code}</option>`).join('');
+      subCats.map(c => `<option value="${c.categoryCode}">${c.secondCategoryName}</option>`).join('');
     cat2Wrap.style.display = '';
   } else {
     cat2Wrap.style.display = 'none';
-    // 1차에서 바로 items 로드
-    loadTossNoticeItems(cat1Val);
   }
 }
 
@@ -3389,26 +3388,29 @@ function onTossNoticeCat2Change() {
   loadTossNoticeItems(cat2Val);
 }
 
-async function loadTossNoticeItems(code) {
+async function loadTossNoticeItems(categoryCode) {
   const container = document.getElementById('toss-notice-items');
   if (!container) return;
   container.innerHTML = '<div class="category-loading"><div class="spinner"></div><span>필수고시 항목 로딩 중...</span></div>';
   try {
-    const url = `https://cdn.wonflowai.com/toss/notice-items/${code}.json`;
-    const res = await fetch(url + '?v=' + Date.now(), { mode: 'cors', cache: 'no-store' });
+    const res = await fetch('https://n8n.wonflowai.com/webhook/toss-get-notice-items', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ categoryCode })
+    });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
-    const items = Array.isArray(data) ? data : (data.items || []);
+    const items = (data.success && data.success.items) || data.items || [];
     container.innerHTML = '';
-    tossState.notices = [{ code, items: [] }];
-    items.forEach((item, idx) => {
-      const key = item.key || item.code || String(idx);
-      const label = item.label || item.name || key;
+    tossState.notices = [{ code: categoryCode, items: [] }];
+    items.forEach((item) => {
+      const key = String(item.id);
+      const label = item.title || key;
       const fieldDiv = document.createElement('div');
       fieldDiv.className = 'field';
       fieldDiv.innerHTML = `<label>${label}</label>
-        <input type="text" placeholder="${item.placeholder || label + ' 입력'}"
-          oninput="updateTossNoticeItem('${code}', '${key}', this.value)" />`;
+        <input type="text" placeholder="${label} 입력"
+          oninput="updateTossNoticeItem('${categoryCode}', '${key}', this.value)" />`;
       container.appendChild(fieldDiv);
       tossState.notices[0].items.push({ key, value: '' });
     });
