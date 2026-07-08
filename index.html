@@ -1423,7 +1423,7 @@
       <div class="toss-biz-row">
         <div class="toss-biz-label">소울스토어</div>
         <input type="text" id="toss-name-soul" placeholder="예: 노르웨이 순살 고등어 1kg" />
-        <input type="text" id="toss-brand-soul" placeholder="예: 소울스토어" />
+        <input type="text" id="toss-brand-soul" placeholder="예: 소울스토어" value="소울스토어 협력사" />
         <div class="toss-biz-img-wrap">
           <img class="toss-biz-img-thumb" id="toss-thumb-soul" src="" alt="" />
           <button class="btn-biz-img" onclick="openTossBizImgPicker('soul')">📷 이미지 선택</button>
@@ -1434,7 +1434,7 @@
       <div class="toss-biz-row">
         <div class="toss-biz-label">제이원</div>
         <input type="text" id="toss-name-j1" placeholder="예: 노르웨이 순살 고등어 1kg" />
-        <input type="text" id="toss-brand-j1" placeholder="예: 제이원" />
+        <input type="text" id="toss-brand-j1" placeholder="예: 제이원" value="제이원 협력사" />
         <div class="toss-biz-img-wrap">
           <img class="toss-biz-img-thumb" id="toss-thumb-j1" src="" alt="" />
           <button class="btn-biz-img" onclick="openTossBizImgPicker('j1')">📷 이미지 선택</button>
@@ -1445,7 +1445,7 @@
       <div class="toss-biz-row">
         <div class="toss-biz-label">행복산업</div>
         <input type="text" id="toss-name-happy" placeholder="예: 노르웨이 순살 고등어 1kg" />
-        <input type="text" id="toss-brand-happy" placeholder="예: 행복산업" />
+        <input type="text" id="toss-brand-happy" placeholder="예: 행복산업" value="행복산업 협력사" />
         <div class="toss-biz-img-wrap">
           <img class="toss-biz-img-thumb" id="toss-thumb-happy" src="" alt="" />
           <button class="btn-biz-img" onclick="openTossBizImgPicker('happy')">📷 이미지 선택</button>
@@ -1492,9 +1492,19 @@
 
     <!-- 이미지 섹션 -->
     <div class="sub-label" style="margin-bottom:4px;">이미지 2~10번 (공통, 최대 9장)</div>
-    <div style="font-size:12px; color:var(--text3); margin-bottom:12px;">1번 대표이미지는 STEP T1에서 사업자별로 각각 업로드합니다.</div>
-    <div class="toss-image-slots" id="toss-img-slots"></div>
-    <input type="file" id="toss-img-input" accept="image/*" style="display:none;" onchange="onTossImgSelect(event)" />
+    <div style="font-size:12px; color:var(--text3); margin-bottom:12px;">1번 대표이미지는 STEP T1에서 사업자별로 각각 업로드합니다. 아래에 추가이미지(2~10번)를 드래그 업로드하세요.</div>
+    <!-- 드래그 업로드 박스 (카페24 방식 통일) -->
+    <div class="upload-box" id="box-toss-extra-imgs" style="margin-bottom:12px;">
+      <div class="upload-box-header">
+        <div class="upload-box-title"><span class="dot" id="dot-toss-extra-imgs"></span>추가이미지 2~10번</div>
+        <span class="upload-folder" id="folder-toss-extra-imgs">공통/상품명_토스추가이미지/</span>
+      </div>
+      <div class="upload-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDropTossExtra(event)">
+        <input type="file" accept="image/*" multiple onchange="handleFilesTossExtra(event)" />
+        <div class="upload-placeholder" id="ph-toss-extra-imgs"><div class="upload-icon">🖼️</div><p>이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택 (최대 9장)</p><p style="font-size:11px; color:var(--text3);">JPG, PNG, WEBP · 업로드 후 CDN URL 자동 저장</p></div>
+      </div>
+      <div class="thumb-grid thumb-grid-row" id="thumbs-toss-extra-imgs"></div>
+    </div>
 
     <!-- 1:1 크롭 UI -->
     <div class="crop-preview-container" id="toss-crop-container">
@@ -1519,15 +1529,25 @@
       <label class="radio-item"><input type="radio" name="tossDetailMode" value="html" onchange="onTossDetailModeChange()" /> HTML</label>
     </div>
     <div id="toss-detail-html-wrap" style="display:none; margin-bottom:16px;">
-      <div class="field">
+      <div class="field" style="margin-bottom:12px;">
         <label>상세설명 HTML</label>
         <textarea id="toss-detail-html" style="min-height:120px; font-family:monospace; font-size:12px;" placeholder="인라인화 완료된 HTML 코드"></textarea>
       </div>
+      <button class="btn-add-option" id="btnUploadTossDetailHtml" onclick="uploadTossDetailHtml()">R2에 업로드</button>
+      <span id="tossDetailHtmlStatus" style="margin-left:12px; font-size:13px; color: var(--text3);"></span>
     </div>
     <div id="toss-detail-img-wrap" style="margin-bottom:16px;">
-      <div class="field">
-        <label>상세설명 이미지 URL</label>
-        <input type="text" id="toss-detail-img-url" placeholder="https://cdn.wonflowai.com/..." />
+      <!-- 드래그 업로드 박스 (카페24 detailImageSection 방식 통일) -->
+      <div class="upload-box" id="box-toss-detail-imgs">
+        <div class="upload-box-header">
+          <div class="upload-box-title"><span class="dot" id="dot-toss-detail-imgs"></span>상세설명 이미지</div>
+          <span class="upload-folder" id="folder-toss-detail-imgs">공통/상품명_토스상세이미지/</span>
+        </div>
+        <div class="upload-area" style="min-height:200px;" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDropTossDetail(event)">
+          <input type="file" accept="image/*" multiple onchange="handleFilesTossDetail(event)" />
+          <div class="upload-placeholder" id="ph-toss-detail-imgs"><div class="upload-icon">📦</div><p>상세설명 이미지를 <strong>드래그</strong>하거나<br>클릭해서 선택</p><p style="font-size:11px; color:var(--text3);">JPG, PNG, WEBP · 업로드 후 type:DESCRIPTION으로 매핑</p></div>
+        </div>
+        <div class="thumb-grid thumb-grid-row" id="thumbs-toss-detail-imgs"></div>
       </div>
     </div>
 
@@ -2938,8 +2958,20 @@ function resetToss() {
   const constraintSelect = document.getElementById('toss-constraint-template');
   if (constraintSelect) constraintSelect.innerHTML = '<option value="">-- 템플릿 선택 --</option>';
 
-  // 토스 이미지 슬롯 재초기화
-  initTossImageSlots();
+  // 토스 추가이미지 드래그 업로드 초기화
+  tossExtraFiles.length = 0;
+  tossExtraUploadedUrls.length = 0;
+  renderTossExtraThumbs();
+  updateTossExtraDot();
+
+  // 토스 상세이미지 드래그 업로드 초기화
+  tossDetailFiles.length = 0;
+  tossDetailUploadedUrls.length = 0;
+  renderTossDetailThumbs();
+  updateTossDetailDot();
+  tossDetailHtmlUrl = '';
+  const tossDetailHtmlStatusEl = document.getElementById('tossDetailHtmlStatus');
+  if (tossDetailHtmlStatusEl) tossDetailHtmlStatusEl.textContent = '';
 
   // 카테고리 드릴다운 초기화
   tossCatSelectedIds = [];
@@ -2949,8 +2981,6 @@ function resetToss() {
   // 상세페이지 초기화
   const detailHtmlEl = document.getElementById('toss-detail-html');
   if (detailHtmlEl) detailHtmlEl.value = '';
-  const detailImgEl = document.getElementById('toss-detail-img-url');
-  if (detailImgEl) detailImgEl.value = '';
 
   // 필수고시 초기화
   const noticeCat1 = document.getElementById('toss-notice-cat1');
@@ -3134,10 +3164,12 @@ function prefillTossFromShared() {
     }
   }
 
-  // sharedProduct.mainImages → 이미지 슬롯 사전 채우기
-  if (tossState.images.length === 0 && sharedProduct.mainImages.length > 0) {
-    tossState.images = sharedProduct.mainImages.slice(0, 10);
-    renderTossImageSlots();
+  // sharedProduct.mainImages → 토스 추가이미지 드래그 업로드 배열 사전 채우기
+  if (tossExtraUploadedUrls.length === 0 && sharedProduct.mainImages.length > 0) {
+    const toFill = sharedProduct.mainImages.slice(0, 9);
+    tossExtraUploadedUrls.push(...toFill);
+    renderTossExtraThumbs();
+    updateTossExtraDot();
   }
 }
 
@@ -3798,6 +3830,223 @@ function tossCancelCrop() {
 }
 
 // ============================================================
+// 토스쇼핑 추가이미지 (2~10번) 드래그 업로드
+// ============================================================
+const tossExtraFiles = [];          // 로컬 File 객체 대기열
+const tossExtraUploadedUrls = [];   // CDN에 업로드된 URL 배열
+
+function handleFilesTossExtra(event) {
+  addTossExtraFiles(Array.from(event.target.files));
+}
+
+function handleDropTossExtra(event) {
+  event.preventDefault();
+  event.currentTarget.classList.remove('dragover');
+  const newFiles = Array.from(event.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+  addTossExtraFiles(newFiles);
+}
+
+function addTossExtraFiles(newFiles) {
+  // 합산 최대 9개
+  const remaining = 9 - tossExtraFiles.length - tossExtraUploadedUrls.length;
+  if (remaining <= 0) {
+    showToast('추가이미지는 최대 9장까지 등록 가능합니다.', 'error');
+    return;
+  }
+  const toAdd = newFiles.slice(0, remaining);
+  if (newFiles.length > remaining) {
+    showToast(`최대 9장 초과 — ${remaining}장만 추가됩니다.`, 'error');
+  }
+  tossExtraFiles.push(...toAdd);
+  renderTossExtraThumbs();
+  updateTossExtraDot();
+  // 선택 즉시 R2 업로드
+  uploadTossExtraFiles(toAdd);
+}
+
+async function uploadTossExtraFiles(files) {
+  for (const file of files) {
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+    const r2Key = `products/toss/extra-images/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    try {
+      const url = await uploadFile(file, r2Key);
+      tossExtraUploadedUrls.push(url);
+      renderTossExtraThumbs();
+      updateTossExtraDot();
+      showToast('✓ 추가이미지 업로드 완료', 'success');
+    } catch(e) {
+      showToast('✗ 추가이미지 업로드 실패: ' + e.message, 'error');
+    }
+  }
+}
+
+function removeTossExtraFile(idx) {
+  // idx < tossExtraUploadedUrls.length → 업로드된 것, 그 이상 → 대기 중인 것
+  if (idx < tossExtraUploadedUrls.length) {
+    tossExtraUploadedUrls.splice(idx, 1);
+  } else {
+    tossExtraFiles.splice(idx - tossExtraUploadedUrls.length, 1);
+  }
+  renderTossExtraThumbs();
+  updateTossExtraDot();
+}
+
+function renderTossExtraThumbs() {
+  const container = document.getElementById('thumbs-toss-extra-imgs');
+  const ph = document.getElementById('ph-toss-extra-imgs');
+  const ua = ph ? ph.closest('.upload-area') : null;
+  if (!container) return;
+  const allItems = [
+    ...tossExtraUploadedUrls.map((url, i) => ({ url, idx: i, isUploaded: true })),
+    ...tossExtraFiles.map((file, i) => ({ url: URL.createObjectURL(file), idx: tossExtraUploadedUrls.length + i, isUploaded: false }))
+  ];
+  container.innerHTML = '';
+  if (allItems.length === 0) {
+    if (ph) { if (ph.dataset.origHtml) ph.innerHTML = ph.dataset.origHtml; ph.style.display = 'flex'; }
+    if (ua) ua.classList.remove('has-files');
+    return;
+  }
+  if (ph) {
+    if (!ph.dataset.origHtml) ph.dataset.origHtml = ph.innerHTML;
+    ph.innerHTML = '<p style="font-size:12px;color:var(--text3);margin:0;pointer-events:none">+ 이미지 추가</p>';
+    ph.style.display = 'flex';
+  }
+  if (ua) ua.classList.add('has-files');
+  allItems.forEach(({ url, idx, isUploaded }) => {
+    const div = document.createElement('div');
+    div.className = 'thumb-item';
+    const badge = isUploaded ? '' : '<span style="position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:9px;background:rgba(0,0,0,0.6);color:#fff;">업로드중</span>';
+    div.innerHTML = `<img src="${url}" /><button class="remove-btn" onclick="removeTossExtraFile(${idx})">✕</button>${badge}`;
+    container.appendChild(div);
+  });
+  // 카운트 배지
+  const header = document.querySelector('#box-toss-extra-imgs .upload-box-title');
+  if (header) {
+    let badge = header.querySelector('.count-badge');
+    if (!badge) { badge = document.createElement('span'); badge.className = 'count-badge'; header.appendChild(badge); }
+    badge.textContent = `${allItems.length}/9`;
+  }
+}
+
+function updateTossExtraDot() {
+  const dot = document.getElementById('dot-toss-extra-imgs');
+  if (dot) dot.className = 'dot ' + ((tossExtraUploadedUrls.length + tossExtraFiles.length) > 0 ? 'active' : '');
+}
+
+// ============================================================
+// 토스쇼핑 상세설명 이미지 드래그 업로드
+// ============================================================
+const tossDetailFiles = [];
+const tossDetailUploadedUrls = [];
+
+function handleFilesTossDetail(event) {
+  addTossDetailFiles(Array.from(event.target.files));
+}
+
+function handleDropTossDetail(event) {
+  event.preventDefault();
+  event.currentTarget.classList.remove('dragover');
+  const newFiles = Array.from(event.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+  addTossDetailFiles(newFiles);
+}
+
+function addTossDetailFiles(newFiles) {
+  tossDetailFiles.push(...newFiles);
+  renderTossDetailThumbs();
+  updateTossDetailDot();
+  uploadTossDetailFiles(newFiles);
+}
+
+async function uploadTossDetailFiles(files) {
+  for (const file of files) {
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+    const r2Key = `products/toss/detail-images/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    try {
+      const url = await uploadFile(file, r2Key);
+      tossDetailUploadedUrls.push(url);
+      renderTossDetailThumbs();
+      updateTossDetailDot();
+      showToast('✓ 상세이미지 업로드 완료', 'success');
+    } catch(e) {
+      showToast('✗ 상세이미지 업로드 실패: ' + e.message, 'error');
+    }
+  }
+}
+
+function removeTossDetailFile(idx) {
+  if (idx < tossDetailUploadedUrls.length) {
+    tossDetailUploadedUrls.splice(idx, 1);
+  } else {
+    tossDetailFiles.splice(idx - tossDetailUploadedUrls.length, 1);
+  }
+  renderTossDetailThumbs();
+  updateTossDetailDot();
+}
+
+function renderTossDetailThumbs() {
+  const container = document.getElementById('thumbs-toss-detail-imgs');
+  const ph = document.getElementById('ph-toss-detail-imgs');
+  const ua = ph ? ph.closest('.upload-area') : null;
+  if (!container) return;
+  const allItems = [
+    ...tossDetailUploadedUrls.map((url, i) => ({ url, idx: i, isUploaded: true })),
+    ...tossDetailFiles.map((file, i) => ({ url: URL.createObjectURL(file), idx: tossDetailUploadedUrls.length + i, isUploaded: false }))
+  ];
+  container.innerHTML = '';
+  if (allItems.length === 0) {
+    if (ph) { if (ph.dataset.origHtml) ph.innerHTML = ph.dataset.origHtml; ph.style.display = 'flex'; }
+    if (ua) ua.classList.remove('has-files');
+    return;
+  }
+  if (ph) {
+    if (!ph.dataset.origHtml) ph.dataset.origHtml = ph.innerHTML;
+    ph.innerHTML = '<p style="font-size:12px;color:var(--text3);margin:0;pointer-events:none">+ 이미지 추가</p>';
+    ph.style.display = 'flex';
+  }
+  if (ua) ua.classList.add('has-files');
+  allItems.forEach(({ url, idx, isUploaded }) => {
+    const div = document.createElement('div');
+    div.className = 'thumb-item';
+    const badge = isUploaded ? '' : '<span style="position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:9px;background:rgba(0,0,0,0.6);color:#fff;">업로드중</span>';
+    div.innerHTML = `<img src="${url}" /><button class="remove-btn" onclick="removeTossDetailFile(${idx})">✕</button>${badge}`;
+    container.appendChild(div);
+  });
+  const header = document.querySelector('#box-toss-detail-imgs .upload-box-title');
+  if (header) {
+    let badge = header.querySelector('.count-badge');
+    if (!badge) { badge = document.createElement('span'); badge.className = 'count-badge'; header.appendChild(badge); }
+    badge.textContent = allItems.length + '장';
+  }
+}
+
+function updateTossDetailDot() {
+  const dot = document.getElementById('dot-toss-detail-imgs');
+  if (dot) dot.className = 'dot ' + ((tossDetailUploadedUrls.length + tossDetailFiles.length) > 0 ? 'active' : '');
+}
+
+// HTML 모드 R2 업로드 (토스 상세설명)
+let tossDetailHtmlUrl = '';
+async function uploadTossDetailHtml() {
+  const html = document.getElementById('toss-detail-html').value.trim();
+  const statusEl = document.getElementById('tossDetailHtmlStatus');
+  if (!html) { statusEl.textContent = 'HTML을 먼저 붙여넣어주세요.'; return; }
+  const btn = document.getElementById('btnUploadTossDetailHtml');
+  btn.disabled = true;
+  statusEl.textContent = '업로드 중...';
+  try {
+    const blob = new Blob([html], { type: 'text/html' });
+    const file = new File([blob], `toss_detail_${Date.now()}.html`, { type: 'text/html' });
+    const r2Key = `products/toss/detail-html/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.html`;
+    tossDetailHtmlUrl = await uploadFile(file, r2Key);
+    statusEl.textContent = `✓ 업로드 완료: ${tossDetailHtmlUrl}`;
+  } catch(e) {
+    statusEl.textContent = '✗ 업로드 실패: ' + e.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ============================================================
 // 토스쇼핑 상세설명 모드 전환
 // ============================================================
 function onTossDetailModeChange() {
@@ -4423,14 +4672,44 @@ async function registerTossProduct() {
     tossState.detailHtml = document.getElementById('toss-detail-html').value.trim();
     tossState.detailImgUrl = '';
   } else {
-    tossState.detailImgUrl = document.getElementById('toss-detail-img-url').value.trim();
+    // 이미지 모드: 드래그 업로드된 URL 배열 사용
+    tossState.detailImgUrl = '';
     tossState.detailHtml = '';
   }
 
   // 1. R2에서 각 사업자 템플릿 로드
   await loadAllBizTemplates();
 
+  // 2~10번 추가이미지 — 드래그 업로드 배열에서 수집 (최대 9장)
+  const tossExtraImageList = tossExtraUploadedUrls.filter(Boolean).slice(0, 9);
+
+  // 상세설명 이미지 배열 (type:DESCRIPTION) — 드래그 업로드 배열
+  const tossDetailImageList = tossDetailUploadedUrls.filter(Boolean);
+
+  // 상세설명 content 결정
+  let tossDetailContent = '';
+  if (detailMode === 'html') {
+    // HTML 모드: R2에 업로드된 URL 또는 textarea 내용 직접 사용
+    tossDetailContent = tossDetailHtmlUrl || tossState.detailHtml;
+  }
+  // 이미지 모드: detailContent는 비워두고 images 배열에 type:DESCRIPTION으로 포함
+
   // 2. 공통 payload 구성
+  // images 배열: 추가이미지(THUMBNAIL order 1~9) + 상세이미지(DESCRIPTION)
+  const extraImgObjects = tossExtraImageList.map((url, i) => ({
+    type: 'THUMBNAIL',
+    url,
+    order: String(i + 1),
+  }));
+  const detailImgObjects = tossDetailImageList.map((url, i) => ({
+    type: 'DESCRIPTION',
+    url,
+    order: String(tossExtraImageList.length + i),
+  }));
+  const htmlImgObject = (detailMode === 'html' && tossDetailContent)
+    ? [{ type: 'DESCRIPTION_HTML', url: tossDetailContent, order: '0' }]
+    : [];
+
   const commonPayload = {
     managementCode: tossState.managementCode,
     categoryId: tossState.categoryLeafId,
@@ -4438,8 +4717,11 @@ async function registerTossProduct() {
       name: o.name.trim(),
       value: o.value.trim() ? o.value.split(',').map(v => v.trim()).filter(Boolean) : [],
     })),
-    images: tossState.images.filter(Boolean), // 2~10번 이미지
-    detailContent: tossState.detailHtml || tossState.detailImgUrl,
+    // 추가이미지 URL 목록 (n8n에서 images 배열 조립 시 사용하는 단순 URL 배열 — 하위 호환 유지)
+    images: tossExtraImageList,
+    // 구조화된 images 배열 (type/url/order 포함, Toss API 스펙 기반)
+    imagesStructured: [...extraImgObjects, ...detailImgObjects, ...htmlImgObject],
+    detailContent: tossDetailContent,
     taxType: tossState.taxType,
     tags: tossState.tags,
     notices: tossState.notices,
@@ -4476,12 +4758,20 @@ async function registerTossProduct() {
       ...(tpl.applicationTerm ? { applicationTermDescription: tpl.applicationTerm } : {}),
     };
 
+    // 대표이미지 (THUMBNAIL order:0) + 추가이미지 (THUMBNAIL order:1~9) + 상세이미지 (DESCRIPTION) 구조화
+    const mainImgObj = mainImg ? [{ type: 'THUMBNAIL', url: mainImg, order: '0' }] : [];
+    const extraImgsStructured = (commonPayload.imagesStructured || []).filter(img => img.type === 'THUMBNAIL');
+    const detailImgsStructured = (commonPayload.imagesStructured || []).filter(img => img.type !== 'THUMBNAIL');
+    const bizImagesStructured = [...mainImgObj, ...extraImgsStructured, ...detailImgsStructured];
+
+    // 하위 호환: 단순 URL 배열도 유지 (n8n 측에서 구버전 처리 시 사용)
     const allImages = mainImg ? [mainImg, ...commonPayload.images] : commonPayload.images;
     return {
       ...commonPayload,
       name,
       brand: brand || '',
       images: allImages.slice(0, 10),
+      imagesStructured: bizImagesStructured,
       deliveryPolicy,
       exchangeReturnPolicy,
       _biz: biz,
