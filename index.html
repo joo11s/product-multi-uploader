@@ -754,22 +754,152 @@
   }
   .notice-items-grid .field input:focus { border-color: var(--accent); }
 
-  /* 토스 옵션 */
-  .toss-option-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
-  .toss-option-row input, .toss-option-row select {
+  /* 토스 옵션 — chip-based multi-value UI */
+  .toss-option-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
     background: var(--bg2);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
-    padding: 10px 14px;
+    padding: 12px 14px;
+  }
+  .toss-option-row-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .toss-option-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    min-width: 90px;
+    flex-shrink: 0;
+  }
+  .toss-option-input-wrap {
+    display: flex;
+    gap: 6px;
+    flex: 1;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .toss-option-input-wrap input, .toss-option-input-wrap select {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 7px 12px;
     color: var(--text);
-    font-size: 14px;
+    font-size: 13px;
     font-family: 'Noto Sans KR', sans-serif;
     outline: none;
     transition: border-color 0.2s;
-    flex: 1;
   }
-  .toss-option-row input:focus, .toss-option-row select:focus { border-color: var(--accent); }
-  .toss-option-row select option { background: var(--bg3); }
+  .toss-option-input-wrap input { flex: 1; min-width: 80px; }
+  .toss-option-input-wrap input:focus, .toss-option-input-wrap select:focus { border-color: var(--accent); }
+  .toss-option-input-wrap select option { background: var(--bg3); }
+  .toss-unit-select { min-width: 70px; }
+  .btn-opt-add-val {
+    padding: 7px 14px;
+    background: transparent;
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-sm);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+  .btn-opt-add-val:hover { background: rgba(245,230,200,0.1); }
+  .toss-opt-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-height: 28px;
+  }
+  .toss-opt-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(74,158,255,0.12);
+    border: 1px solid rgba(74,158,255,0.3);
+    border-radius: 16px;
+    padding: 3px 9px;
+    font-size: 12px;
+    color: var(--blue);
+    font-weight: 500;
+  }
+  .toss-opt-chip .chip-remove {
+    background: none;
+    border: none;
+    color: var(--text3);
+    cursor: pointer;
+    font-size: 11px;
+    padding: 0;
+    line-height: 1;
+    transition: color 0.15s;
+  }
+  .toss-opt-chip .chip-remove:hover { color: #ff5c5c; }
+
+  /* 토스 옵션 조합 테이블 */
+  .toss-combo-section {
+    margin-top: 20px;
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+  .toss-combo-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+  }
+  .toss-combo-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .toss-combo-table th {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 8px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: left;
+    white-space: nowrap;
+  }
+  .toss-combo-table td {
+    border: 1px solid var(--border);
+    padding: 6px 8px;
+    vertical-align: middle;
+  }
+  .toss-combo-table td.combo-label-cell {
+    font-size: 13px;
+    color: var(--text);
+    white-space: nowrap;
+    background: rgba(255,255,255,0.02);
+  }
+  .toss-combo-table input {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 10px;
+    color: var(--text);
+    font-size: 13px;
+    font-family: 'Noto Sans KR', sans-serif;
+    outline: none;
+    width: 100%;
+    min-width: 80px;
+    transition: border-color 0.2s;
+  }
+  .toss-combo-table input:focus { border-color: var(--accent); }
+  .toss-combo-table input::placeholder { color: var(--text3); }
+  .toss-combo-table tr.checked td { background: rgba(245,230,200,0.04); }
 
   /* ===== 3개 사업자별 기본정보 행 ===== */
   .toss-biz-row {
@@ -1486,6 +1616,8 @@
       <div id="toss-option-rows">
         <div class="options-empty" id="toss-option-empty">옵션이 없습니다. "옵션 추가" 버튼을 클릭하세요.</div>
       </div>
+      <!-- 옵션 조합 테이블 -->
+      <div class="toss-combo-section" id="toss-combo-section"></div>
     </div>
 
     <div class="divider"></div>
@@ -2926,7 +3058,12 @@ function resetToss() {
     tags: [],
     shippingTemplateId: '', exchangeReturnTemplateId: '',
     notices: [],
+    stockCombos: [],
   });
+
+  // 조합 테이블 초기화
+  const comboSection = document.getElementById('toss-combo-section');
+  if (comboSection) comboSection.innerHTML = '';
 
   // 관리코드
   const mgmtEl = document.getElementById('toss-mgmt-code');
@@ -3109,7 +3246,7 @@ const tossState = {
   categoryLeafId: null,
   categoryPath: '',
   categoryConfirmed: false,
-  options: [],         // [{name, value}]
+  options: [],         // [{id, name, chips:[{display, rawValue, unit}], type:'unit'|'select'|'free'}]
   images: [],          // CDN URL array (max 10)
   detailHtml: '',
   detailImgUrl: '',
@@ -3118,6 +3255,7 @@ const tossState = {
   shippingTemplateId: '',
   exchangeReturnTemplateId: '',
   notices: [],         // [{code, items: [{key, value}]}]
+  stockCombos: [],     // [{comboLabel, options:[{groupName,valueName}], originPrice, salePrice, remainingCount, managementCode}]
 };
 
 let tossOptionCounter = 0;
@@ -3580,7 +3718,12 @@ function renderTossConstraintOptions() {
   // 기존 옵션 행 초기화
   container.querySelectorAll('.toss-option-row').forEach(el => el.remove());
   tossState.options = [];
+  tossState.stockCombos = [];
   tossOptionCounter = 0;
+
+  // 조합 테이블 초기화
+  const comboSection = document.getElementById('toss-combo-section');
+  if (comboSection) comboSection.innerHTML = '';
 
   const salesOptions = tossConstraintData && (tossConstraintData.categorySalesOptions || tossConstraintData.optionNames);
   if (!salesOptions || (Array.isArray(salesOptions) && salesOptions.length === 0)) {
@@ -3591,78 +3734,191 @@ function renderTossConstraintOptions() {
 
   // categorySalesOptions: [{name, values:[...]}, ...] 또는 optionNames: [string, ...]
   const optionDefs = Array.isArray(salesOptions) && salesOptions.length > 0 && typeof salesOptions[0] === 'object'
-    ? salesOptions  // [{name, values:[]}]
-    : salesOptions.map(n => ({ name: n, values: [] }));  // string[] → normalize
+    ? salesOptions
+    : salesOptions.map(n => ({ name: n, values: [] }));
 
   optionDefs.forEach(optDef => {
     const id = ++tossOptionCounter;
     const optName = optDef.key || optDef.name || '';
     const optValues = optDef.valueCandidates || optDef.values || [];
     const optUnits = optDef.unitValues || [];
-    const optPlaceholder = optDef.placeholder || (optUnits.length > 0 ? optUnits[0] : '값 입력');
-    tossState.options.push({ id, name: optName, value: '' });
-    const row = document.createElement('div');
-    row.className = 'toss-option-row';
-    row.id = 'toss-opt-row-' + id;
-    if (optValues.length > 0) {
-      const valOpts = optValues.map(v => `<option value="${String(v).replace(/"/g, '&quot;')}">${v}</option>`).join('');
-      row.innerHTML = `
-        <span style="font-size:13px; color:var(--text2); min-width:100px; flex-shrink:0;">${optName}</span>
-        <select onchange="updateTossOption(${id},'value',this.value)" style="flex:1;">
-          <option value="">-- 선택 --</option>${valOpts}
-        </select>
-        <button class="btn-del-option" onclick="removeTossOptionRow(${id})" title="삭제">✕</button>`;
-    } else {
-      row.innerHTML = `
-        <span style="font-size:13px; color:var(--text2); min-width:100px; flex-shrink:0;">${optName}</span>
-        <input type="text" placeholder="${optPlaceholder.replace(/"/g,'&quot;')}" oninput="updateTossOption(${id},'value',this.value)" style="flex:1;" />
-        <button class="btn-del-option" onclick="removeTossOptionRow(${id})" title="삭제">✕</button>`;
-    }
-    const stateOpt = tossState.options.find(o => o.id === id);
-    if (stateOpt) stateOpt.name = optName;
-    container.appendChild(row);
+
+    // Determine type: 'unit' | 'select' | 'free'
+    const type = optUnits.length > 0 ? 'unit' : (optValues.length > 0 ? 'select' : 'free');
+    tossState.options.push({ id, name: optName, chips: [], type, optUnits, optValues });
+
+    _appendTossOptionRow(container, id, optName, type, optValues, optUnits);
   });
 }
 
+// Internal: build and append a chip-based option row to container
+function _appendTossOptionRow(container, id, optName, type, optValues, optUnits) {
+  const row = document.createElement('div');
+  row.className = 'toss-option-row';
+  row.id = 'toss-opt-row-' + id;
+
+  // Build input area based on type
+  let inputHTML = '';
+  if (type === 'unit') {
+    const unitOpts = optUnits.map(u => `<option value="${u}">${u}</option>`).join('');
+    inputHTML = `
+      <input type="number" id="toss-opt-val-${id}" placeholder="숫자" min="0" style="max-width:100px;" />
+      <select id="toss-opt-unit-${id}" class="toss-unit-select">${unitOpts}</select>`;
+  } else if (type === 'select') {
+    const valOpts = optValues.map(v => `<option value="${String(v).replace(/"/g,'&quot;')}">${v}</option>`).join('');
+    inputHTML = `
+      <select id="toss-opt-val-${id}">
+        <option value="">-- 선택 --</option>${valOpts}
+      </select>`;
+  } else {
+    inputHTML = `<input type="text" id="toss-opt-val-${id}" placeholder="값 입력 (예: 250g 3개)" />`;
+  }
+
+  row.innerHTML = `
+    <div class="toss-option-row-header">
+      <span class="toss-option-label">${optName}</span>
+      <div class="toss-option-input-wrap">
+        ${inputHTML}
+        <button class="btn-opt-add-val" onclick="addTossOptionChip(${id})">추가</button>
+      </div>
+      <button class="btn-del-option" onclick="removeTossOptionRow(${id})" title="삭제" style="flex-shrink:0;">✕</button>
+    </div>
+    <div class="toss-opt-chips" id="toss-opt-chips-${id}"></div>`;
+
+  // Allow Enter key to trigger add
+  row.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); addTossOptionChip(id); }
+  });
+
+  container.appendChild(row);
+}
+
 // ============================================================
-// 토스쇼핑 옵션 행
+// 토스쇼핑 옵션 행 (chip-based)
 // ============================================================
 function addTossOptionRow() {
   const id = ++tossOptionCounter;
   const empty = document.getElementById('toss-option-empty');
   if (empty) empty.style.display = 'none';
-  tossState.options.push({ id, name: '', value: '' });
+
   const container = document.getElementById('toss-option-rows');
+
+  // 자유 입력 행 추가 (constraint template이 없을 때)
+  // name도 입력 가능하도록 헤더에 name 입력 필드 추가
+  const salesOpts = tossConstraintData && (tossConstraintData.categorySalesOptions || tossConstraintData.optionNames);
+  let optName = '';
+  let type = 'free';
+  let optValues = [];
+  let optUnits = [];
+
+  if (salesOpts && salesOpts.length > 0) {
+    // constraint template이 있으면 free-text row 추가 (이름은 선택 드롭다운)
+    type = 'free';
+    optName = '';
+  }
+
+  tossState.options.push({ id, name: optName, chips: [], type, optUnits, optValues });
+
   const row = document.createElement('div');
   row.className = 'toss-option-row';
   row.id = 'toss-opt-row-' + id;
 
-  const salesOpts = tossConstraintData && (tossConstraintData.categorySalesOptions || tossConstraintData.optionNames);
   if (salesOpts && salesOpts.length > 0) {
-    // constraint template 기반 드롭다운
     const isObjectArray = typeof salesOpts[0] === 'object';
     const nameOptions = isObjectArray
-      ? salesOpts.map(o => `<option value="${o.name}">${o.name}</option>`).join('')
+      ? salesOpts.map(o => `<option value="${o.key||o.name}">${o.key||o.name}</option>`).join('')
       : salesOpts.map(n => `<option value="${n}">${n}</option>`).join('');
     row.innerHTML = `
-      <select onchange="updateTossOption(${id},'name',this.value)">
-        <option value="">-- 옵션명 선택 --</option>${nameOptions}
-      </select>
-      <input type="text" placeholder="옵션값 (예: 빨강, 파랑)" oninput="updateTossOption(${id},'value',this.value)" />
-      <button class="btn-del-option" onclick="removeTossOptionRow(${id})" title="삭제">✕</button>`;
+      <div class="toss-option-row-header">
+        <select class="toss-option-label" style="min-width:90px; background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius-sm); padding:6px 10px; color:var(--accent); font-weight:700; font-size:13px; font-family:inherit;"
+          onchange="_updateTossOptName(${id}, this.value)">
+          <option value="">-- 옵션명 --</option>${nameOptions}
+        </select>
+        <div class="toss-option-input-wrap">
+          <input type="text" id="toss-opt-val-${id}" placeholder="값 입력" />
+          <button class="btn-opt-add-val" onclick="addTossOptionChip(${id})">추가</button>
+        </div>
+        <button class="btn-del-option" onclick="removeTossOptionRow(${id})" title="삭제" style="flex-shrink:0;">✕</button>
+      </div>
+      <div class="toss-opt-chips" id="toss-opt-chips-${id}"></div>`;
   } else {
-    // 자유 입력
     row.innerHTML = `
-      <input type="text" placeholder="옵션명 (예: 색상)" oninput="updateTossOption(${id},'name',this.value)" style="max-width:180px;" />
-      <input type="text" placeholder="옵션값 (예: 빨강, 파랑)" oninput="updateTossOption(${id},'value',this.value)" />
-      <button class="btn-del-option" onclick="removeTossOptionRow(${id})" title="삭제">✕</button>`;
+      <div class="toss-option-row-header">
+        <input type="text" placeholder="옵션명 (예: 색상)" class="toss-option-label"
+          style="font-weight:700; font-size:13px; color:var(--accent); background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius-sm); padding:6px 10px;"
+          oninput="_updateTossOptName(${id}, this.value)" />
+        <div class="toss-option-input-wrap">
+          <input type="text" id="toss-opt-val-${id}" placeholder="값 입력 (예: 빨강)" />
+          <button class="btn-opt-add-val" onclick="addTossOptionChip(${id})">추가</button>
+        </div>
+        <button class="btn-del-option" onclick="removeTossOptionRow(${id})" title="삭제" style="flex-shrink:0;">✕</button>
+      </div>
+      <div class="toss-opt-chips" id="toss-opt-chips-${id}"></div>`;
   }
+
+  row.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); addTossOptionChip(id); }
+  });
+
   container.appendChild(row);
 }
 
-function updateTossOption(id, field, val) {
+function _updateTossOptName(id, val) {
   const opt = tossState.options.find(o => o.id === id);
-  if (opt) opt[field] = val;
+  if (opt) opt.name = val;
+}
+
+// Add a chip to an option group
+function addTossOptionChip(id) {
+  const opt = tossState.options.find(o => o.id === id);
+  if (!opt) return;
+
+  let display = '';
+  let rawValue = '';
+  let unit = '';
+
+  if (opt.type === 'unit') {
+    const numEl = document.getElementById('toss-opt-val-' + id);
+    const unitEl = document.getElementById('toss-opt-unit-' + id);
+    rawValue = (numEl ? numEl.value.trim() : '');
+    unit = (unitEl ? unitEl.value : '');
+    if (!rawValue) { showToast('숫자를 입력해주세요.', 'error'); return; }
+    display = rawValue + unit;
+    if (numEl) numEl.value = '';
+  } else {
+    const valEl = document.getElementById('toss-opt-val-' + id);
+    rawValue = (valEl ? valEl.value.trim() : '');
+    if (!rawValue) { showToast('값을 입력해주세요.', 'error'); return; }
+    display = rawValue;
+    if (valEl) valEl.value = '';
+  }
+
+  // Prevent duplicates
+  if (opt.chips.some(c => c.display === display)) {
+    showToast('이미 추가된 값입니다.', 'error');
+    return;
+  }
+
+  opt.chips.push({ display, rawValue, unit });
+  _renderTossOptChips(id);
+  renderTossOptionCombos();
+}
+
+function removeTossOptionChip(id, chipIdx) {
+  const opt = tossState.options.find(o => o.id === id);
+  if (!opt) return;
+  opt.chips.splice(chipIdx, 1);
+  _renderTossOptChips(id);
+  renderTossOptionCombos();
+}
+
+function _renderTossOptChips(id) {
+  const opt = tossState.options.find(o => o.id === id);
+  const container = document.getElementById('toss-opt-chips-' + id);
+  if (!container || !opt) return;
+  container.innerHTML = opt.chips.map((chip, idx) =>
+    `<span class="toss-opt-chip">${chip.display}<button class="chip-remove" onclick="removeTossOptionChip(${id},${idx})">✕</button></span>`
+  ).join('');
 }
 
 function removeTossOptionRow(id) {
@@ -3672,6 +3928,132 @@ function removeTossOptionRow(id) {
   if (tossState.options.length === 0) {
     const empty = document.getElementById('toss-option-empty');
     if (empty) empty.style.display = '';
+  }
+  renderTossOptionCombos();
+}
+
+// ============================================================
+// 토스 옵션 조합 테이블 (Cartesian product)
+// ============================================================
+function renderTossOptionCombos() {
+  const comboSection = document.getElementById('toss-combo-section');
+  if (!comboSection) return;
+
+  // Only groups with at least 1 chip
+  const activeGroups = tossState.options.filter(o => o.chips.length > 0);
+
+  if (activeGroups.length === 0) {
+    comboSection.innerHTML = '';
+    tossState.stockCombos = [];
+    return;
+  }
+
+  // Build Cartesian product
+  function cartesian(groups) {
+    return groups.reduce((acc, group) => {
+      const result = [];
+      acc.forEach(prev => {
+        group.chips.forEach(chip => {
+          result.push([...prev, { groupName: group.name, chip }]);
+        });
+      });
+      return result;
+    }, [[]]);
+  }
+
+  const combos = cartesian(activeGroups);
+
+  // Preserve existing stockCombos input values by comboLabel
+  const prevMap = {};
+  tossState.stockCombos.forEach(c => { prevMap[c.comboLabel] = c; });
+
+  // Build new stockCombos
+  const newCombos = combos.map(comboItems => {
+    const comboLabel = comboItems.map(ci => ci.chip.display).join(', ');
+    const prev = prevMap[comboLabel] || {};
+    return {
+      comboLabel,
+      options: comboItems.map(ci => ({
+        groupName: ci.groupName,
+        // API must only send numeric value when unitValues option
+        valueName: ci.chip.rawValue,
+      })),
+      checked: prev.checked !== undefined ? prev.checked : true,
+      originPrice: prev.originPrice || '',
+      salePrice: prev.salePrice || '',
+      remainingCount: prev.remainingCount || '',
+      managementCode: prev.managementCode || '',
+    };
+  });
+  tossState.stockCombos = newCombos;
+
+  // Render table
+  comboSection.innerHTML = `
+    <div class="toss-combo-title">옵션 정보 입력 <span style="font-size:11px; color:var(--text3); font-weight:400;">(${newCombos.length}개 조합)</span></div>
+    <div style="overflow-x:auto;">
+    <table class="toss-combo-table">
+      <thead>
+        <tr>
+          <th style="width:36px;"><input type="checkbox" id="toss-combo-check-all" checked onchange="_tossComboCheckAll(this.checked)" /></th>
+          <th>옵션</th>
+          <th>정상가</th>
+          <th>판매가</th>
+          <th>재고수량</th>
+          <th>관리코드 <span style="color:var(--text3); font-weight:400;">(선택)</span></th>
+        </tr>
+      </thead>
+      <tbody id="toss-combo-tbody">
+      </tbody>
+    </table>
+    </div>`;
+
+  const tbody = comboSection.querySelector('#toss-combo-tbody');
+  newCombos.forEach((combo, idx) => {
+    const tr = document.createElement('tr');
+    tr.className = combo.checked ? 'checked' : '';
+    tr.innerHTML = `
+      <td style="text-align:center;"><input type="checkbox" ${combo.checked ? 'checked' : ''} onchange="_tossComboCheckRow(${idx}, this.checked)" /></td>
+      <td class="combo-label-cell">${combo.comboLabel}</td>
+      <td><input type="number" placeholder="정상가" value="${combo.originPrice}" min="0"
+        oninput="_tossComboFieldChange(${idx},'originPrice',this.value)" /></td>
+      <td><input type="number" placeholder="판매가" value="${combo.salePrice}" min="0"
+        oninput="_tossComboFieldChange(${idx},'salePrice',this.value)" /></td>
+      <td><input type="number" placeholder="재고" value="${combo.remainingCount}" min="0"
+        oninput="_tossComboFieldChange(${idx},'remainingCount',this.value)" /></td>
+      <td><input type="text" placeholder="선택입력" value="${combo.managementCode}"
+        oninput="_tossComboFieldChange(${idx},'managementCode',this.value)" /></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function _tossComboCheckAll(checked) {
+  tossState.stockCombos.forEach((c, idx) => {
+    c.checked = checked;
+    const tbody = document.getElementById('toss-combo-tbody');
+    if (tbody) {
+      const tr = tbody.rows[idx];
+      if (tr) {
+        tr.className = checked ? 'checked' : '';
+        const cb = tr.querySelector('input[type=checkbox]');
+        if (cb) cb.checked = checked;
+      }
+    }
+  });
+}
+
+function _tossComboCheckRow(idx, checked) {
+  if (tossState.stockCombos[idx]) {
+    tossState.stockCombos[idx].checked = checked;
+    const tbody = document.getElementById('toss-combo-tbody');
+    if (tbody && tbody.rows[idx]) {
+      tbody.rows[idx].className = checked ? 'checked' : '';
+    }
+  }
+}
+
+function _tossComboFieldChange(idx, field, val) {
+  if (tossState.stockCombos[idx]) {
+    tossState.stockCombos[idx][field] = val;
   }
 }
 
@@ -4710,13 +5092,34 @@ async function registerTossProduct() {
     ? [{ type: 'DESCRIPTION_HTML', url: tossDetailContent, order: '0' }]
     : [];
 
+  // Build options array (chip-based)
+  const optionsPayload = tossState.options
+    .filter(o => o.name && o.name.trim())
+    .map(o => ({
+      name: o.name.trim(),
+      // For API: send numeric rawValue for unit options, display for others
+      value: o.chips.map(c => c.rawValue || c.display),
+    }));
+
+  // Build stockCombos payload (only checked rows)
+  const stockCombosPayload = tossState.stockCombos
+    .filter(c => c.checked !== false)
+    .map(c => ({
+      comboLabel: c.comboLabel,
+      options: c.options,
+      originPrice: Number(c.originPrice) || 0,
+      salePrice: Number(c.salePrice) || 0,
+      remainingCount: Number(c.remainingCount) || 0,
+      managementCode: c.managementCode || '',
+    }));
+
+  const sharedSalePrice = Number(document.getElementById('salePrice')?.value) || Number(sharedProduct.salePrice) || 0;
+  const sharedStock = Number(document.getElementById('stock')?.value) || Number(sharedProduct.stock) || 0;
+
   const commonPayload = {
     managementCode: tossState.managementCode,
     categoryId: tossState.categoryLeafId,
-    options: tossState.options.filter(o => o.name.trim()).map(o => ({
-      name: o.name.trim(),
-      value: o.value.trim() ? o.value.split(',').map(v => v.trim()).filter(Boolean) : [],
-    })),
+    options: optionsPayload,
     // 추가이미지 URL 목록 (n8n에서 images 배열 조립 시 사용하는 단순 URL 배열 — 하위 호환 유지)
     images: tossExtraImageList,
     // 구조화된 images 배열 (type/url/order 포함, Toss API 스펙 기반)
@@ -4725,9 +5128,15 @@ async function registerTossProduct() {
     taxType: tossState.taxType,
     tags: tossState.tags,
     notices: tossState.notices,
-    salePrice: Number(document.getElementById('salePrice')?.value) || Number(sharedProduct.salePrice) || 0,
-    costPrice: Number(document.getElementById('supplyPrice')?.value) || Number(sharedProduct.costPrice) || 0,
-    stock: Number(document.getElementById('stock')?.value) || Number(sharedProduct.stock) || 0,
+    // stockCombos가 있으면 조합별 재고/가격 정보 포함; 없으면 공통 단일 값 사용 (하위 호환)
+    ...(stockCombosPayload.length > 0
+      ? { stocksInput: stockCombosPayload }
+      : {
+          salePrice: sharedSalePrice,
+          costPrice: Number(document.getElementById('supplyPrice')?.value) || Number(sharedProduct.costPrice) || 0,
+          stock: sharedStock,
+        }
+    ),
   };
 
   // 3. 각 사업자별 payload 조립
