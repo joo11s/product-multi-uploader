@@ -5075,6 +5075,17 @@ function getTemplateFromModal(biz) {
   const g = (id) => { const el = document.getElementById(id); return el ? el.value : ''; };
   const gn = (id, def=0) => Number(g(id)) || def;
   const gb = (id) => { const el = document.getElementById(id); return el ? el.checked : false; };
+  if (_templateModalMode === 'return') {
+    // 교환반품 모달: 교환반품 관련 필드만 읽기 (배송 필드는 건드리지 않음)
+    return {
+      returnLocationId: g('m-return-loc-id-' + biz),
+      refundDeliveryFee: gn('m-refund-fee-' + biz, 3000),
+      exchangeDeliveryFee: gn('m-exchange-fee-' + biz, 6000),
+      applicationMethod: g('m-app-method-' + biz),
+      applicationTerm: g('m-app-term-' + biz),
+    };
+  }
+  // 배송 모달: 배송 관련 필드만 읽기 (교환반품 필드는 건드리지 않음)
   const feeType = getModalCurrentFeeType(biz);
   return {
     todayDelivery: gb('m-today-del-' + biz),
@@ -5087,11 +5098,6 @@ function getTemplateFromModal(biz) {
     jejuDeliveryFee: gn('m-jeju-fee-' + biz, 4000),
     islandsMountainsDeliveryFee: gn('m-island-fee-' + biz, 5000),
     courier: g('m-courier-' + biz) || 'CJ대한통운',
-    returnLocationId: g('m-return-loc-id-' + biz),
-    refundDeliveryFee: gn('m-refund-fee-' + biz, 3000),
-    exchangeDeliveryFee: gn('m-exchange-fee-' + biz, 6000),
-    applicationMethod: g('m-app-method-' + biz),
-    applicationTerm: g('m-app-term-' + biz),
   };
 }
 
@@ -5167,6 +5173,20 @@ async function registerTossProduct() {
   }
   // 이미지 모드: detailContent는 비워두고 images 배열에 type:DESCRIPTION으로 포함
 
+  // 필수고시 항목 최신값을 DOM에서 직접 수집하여 tossState.notices 동기화
+  // (oninput 이벤트 누락 또는 인덱스 불일치 방지)
+  if (tossState.notices.length > 0 && tossState.notices[0].items.length > 0) {
+    const noticeContainer = document.getElementById('toss-notice-items');
+    if (noticeContainer) {
+      const noticeInputs = noticeContainer.querySelectorAll('input[type="text"]');
+      noticeInputs.forEach((input, i) => {
+        if (tossState.notices[0].items[i] !== undefined) {
+          tossState.notices[0].items[i].value = input.value;
+        }
+      });
+    }
+  }
+
   // 2. 공통 payload 구성
   // images 배열: 추가이미지(THUMBNAIL order 1~9) + 상세이미지(DESCRIPTION)
   const extraImgObjects = tossExtraImageList.map((url, i) => ({
@@ -5177,7 +5197,7 @@ async function registerTossProduct() {
   const detailImgObjects = tossDetailImageList.map((url, i) => ({
     type: 'DESCRIPTION',
     url,
-    order: String(tossExtraImageList.length + i),
+    order: String(tossExtraImageList.length + 1 + i),
   }));
   const htmlImgObject = (detailMode === 'html' && tossDetailContent)
     ? [{ type: 'DESCRIPTION_HTML', url: tossDetailContent, order: '0' }]
