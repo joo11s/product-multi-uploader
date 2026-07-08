@@ -4487,6 +4487,13 @@ function copyBrandsFromCafe24() {
     }
   });
 
+  // 4. 자체상품코드 → 관리코드 복사 (값이 있을 때만 덮어씀)
+  const customCode = (document.getElementById('customProductCode') || {}).value || '';
+  if (customCode.trim()) {
+    const mgmtCodeEl = document.getElementById('toss-mgmt-code');
+    if (mgmtCodeEl) mgmtCodeEl.value = customCode.trim();
+  }
+
   showToast('✓ 카페24 기본정보(상품명·브랜드명·대표이미지)를 토스쇼핑에 복사했습니다.', 'success');
 }
 
