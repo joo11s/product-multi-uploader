@@ -1542,7 +1542,7 @@
     <!-- 3개 사업자별 상품명/브랜드/대표이미지 -->
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
       <div class="sub-label" style="margin-bottom:0;">사업자별 상품명 / 브랜드명 / 대표이미지</div>
-      <button class="btn-add-option" onclick="copyBrandsFromCafe24()" style="border-color:var(--blue); color:var(--blue); font-size:12px; padding:5px 12px;">🏷️ 카페24 브랜드명 가져오기</button>
+      <button class="btn-add-option" onclick="copyBrandsFromCafe24()" style="border-color:var(--blue); color:var(--blue); font-size:12px; padding:5px 12px;">🏷️ 카페24 기본정보 가져오기</button>
     </div>
     <div style="background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius); padding:4px 16px;">
       <!-- 헤더 -->
@@ -4446,23 +4446,48 @@ function copyFromCafe24Images() {
 }
 
 // ============================================================
-// 카페24 브랜드명 → 토스 브랜드명 복사
+// 카페24 기본정보 → 토스 기본정보 복사 (브랜드명 + 상품명 + 대표이미지)
 // ============================================================
 function copyBrandsFromCafe24() {
   const bizes = ['soul', 'j1', 'happy'];
   const defaults = { soul: '소울스토어 협력사', j1: '제이원 협력사', happy: '행복산업 협력사' };
+
   bizes.forEach(biz => {
-    const cafe24BrandEl = document.getElementById(biz + '-brand');
+    const store = biz; // 카페24와 토스의 사업자 키가 동일
+
+    // 1. 브랜드명 복사 (기존 로직 유지)
+    const cafe24BrandEl = document.getElementById(store + '-brand');
     const tossBrandEl = document.getElementById('toss-brand-' + biz);
-    if (!cafe24BrandEl || !tossBrandEl) return;
-    const cafe24Val = cafe24BrandEl.value.trim();
-    if (cafe24Val) {
-      tossBrandEl.value = cafe24Val;
-    } else if (!tossBrandEl.value.trim()) {
-      tossBrandEl.value = defaults[biz];
+    if (cafe24BrandEl && tossBrandEl) {
+      const cafe24Val = cafe24BrandEl.value.trim();
+      if (cafe24Val) {
+        tossBrandEl.value = cafe24Val;
+      } else if (!tossBrandEl.value.trim()) {
+        tossBrandEl.value = defaults[biz];
+      }
+    }
+
+    // 2. 상품명 복사 (카페24 값이 비어있지 않으면 덮어씀)
+    const nameVal = (document.getElementById(store + '-productName') || {}).value || '';
+    if (nameVal.trim()) {
+      const tossNameEl = document.getElementById('toss-name-' + biz);
+      if (tossNameEl) tossNameEl.value = nameVal.trim();
+    }
+
+    // 3. 대표이미지 복사 (uploadedUrls의 첫 번째 URL 사용)
+    const mainImages = uploadedUrls[store + '-main'];
+    if (mainImages && mainImages.length > 0) {
+      const url = mainImages[0];
+      tossBizImages[biz] = url;
+      const thumbEl = document.getElementById('toss-thumb-' + biz);
+      if (thumbEl) {
+        thumbEl.src = url;
+        thumbEl.classList.add('show');
+      }
     }
   });
-  showToast('✓ 카페24 브랜드명을 토스쇼핑에 복사했습니다.', 'success');
+
+  showToast('✓ 카페24 기본정보(상품명·브랜드명·대표이미지)를 토스쇼핑에 복사했습니다.', 'success');
 }
 
 // HTML 모드 R2 업로드 (토스 상세설명)
