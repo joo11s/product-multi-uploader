@@ -1996,13 +1996,150 @@ function loadFromHistory(id) {
   const k = currentPlatform === 'toss' ? HISTORY_KEY_TOSS : HISTORY_KEY_CAFE24;
   const entry = getHistory(k).find(p => p.id === id);
   if (!entry) return;
-  if (entry.payload._platform === 'toss') {
+  if (currentPlatform === 'toss') {
     populateTossFormFromPayload(entry.payload);
   } else {
     populateFormFromPayload(entry.payload);
   }
   toggleHistoryDrawer();
-  showToast('✓ "' + (entry.productName || '') + '" 데이터를 폼에 불러왔습니다. 확인 후 업로드하세요.', 'success');
+  showToast('✓ "' + (entry.productName || entry.payload?.name || '') + '" 데이터를 폼에 불러왔습니다. 확인 후 업로드하세요.', 'success');
+}
+
+// ============================================================
+// 토스쇼핑 전송이력 복원: 각 섹션별 독립 try/catch로 하나가 실패해도 나머지 진행
+// ============================================================
+function populateTossFormFromPayload(payload) {
+  if (!payload) return;
+
+  // 사업자 필드 복원 섹션
+  try {
+    const bizes = ['soul', 'j1', 'happy'];
+    bizes.forEach(biz => {
+      const nameEl = document.getElementById('toss-name-' + biz);
+      if (nameEl && payload['name_' + biz] !== undefined) nameEl.value = payload['name_' + biz];
+      const brandEl = document.getElementById('toss-brand-' + biz);
+      if (brandEl && payload['brand_' + biz] !== undefined) brandEl.value = payload['brand_' + biz];
+    });
+    // 상품명(공통)
+    if (payload.name) {
+      const bizes2 = ['soul', 'j1', 'happy'];
+      bizes2.forEach(biz => {
+        const el = document.getElementById('toss-name-' + biz);
+        if (el && !el.value) el.value = payload.name;
+      });
+    }
+  } catch(e) { console.error('[populateTossForm] 사업자 필드 복원 실패:', e); }
+
+  // 카테고리 복원 섹션
+  try {
+    if (payload.categoryId) {
+      tossState.categoryLeafId = payload.categoryId;
+      tossState.categoryConfirmed = true;
+      const breadcrumb = document.getElementById('toss-category-breadcrumb');
+      if (breadcrumb) {
+        const path = payload.categoryPath || ('ID: ' + payload.categoryId);
+        breadcrumb.innerHTML = `<span class="crumb-path">${path}</span>`;
+        breadcrumb.classList.add('show');
+      }
+    }
+  } catch(e) { console.error('[populateTossForm] 카테고리 복원 실패:', e); }
+
+  // 옵션/조합 복원 섹션
+  try {
+    if (Array.isArray(payload.optionsRaw) && payload.optionsRaw.length > 0) {
+      // 옵션 행 초기화 후 복원
+      const container = document.getElementById('toss-option-rows');
+      if (container) {
+        container.innerHTML = '';
+        tossState.options = [];
+        tossOptionCounter = 0;
+        payload.optionsRaw.forEach(opt => {
+          const id = ++tossOptionCounter;
+          const chips = (opt.chips || []).map(c => ({ display: c.display, rawValue: c.rawValue || c.display, unit: c.unit || '' }));
+          tossState.options.push({ id, name: opt.name || '', chips, type: opt.type || 'free', optUnits: opt.optUnits || [], optValues: opt.optValues || [] });
+          _appendTossOptionRow(container, id, opt.name || '', opt.type || 'free', opt.optValues || [], opt.optUnits || []);
+          chips.forEach((chip, ci) => _renderTossOptChips(id));
+        });
+        if (tossState.options.length > 0) {
+          const empty = document.getElementById('toss-option-empty');
+          if (empty) empty.style.display = 'none';
+        }
+        renderTossOptionCombos();
+      }
+    }
+    if (Array.isArray(payload.stockCombos) && payload.stockCombos.length > 0) {
+      tossState.stockCombos = payload.stockCombos.map(c => ({ ...c }));
+      renderTossOptionCombos();
+    }
+  } catch(e) { console.error('[populateTossForm] 옵션/조합 복원 실패:', e); }
+
+  // 이미지 복원 섹션
+  try {
+    if (Array.isArray(payload.extraImages) && payload.extraImages.length > 0) {
+      tossExtraUploadedUrls.length = 0;
+      tossExtraUploadedUrls.push(...payload.extraImages);
+      renderTossExtraThumbs && renderTossExtraThumbs();
+      updateTossExtraDot && updateTossExtraDot();
+    }
+    if (Array.isArray(payload.detailImages) && payload.detailImages.length > 0) {
+      tossDetailUploadedUrls.length = 0;
+      tossDetailUploadedUrls.push(...payload.detailImages);
+      renderTossDetailThumbs && renderTossDetailThumbs();
+      updateTossDetailDot && updateTossDetailDot();
+    }
+    // 사업자별 대표이미지 복원
+    const bizes3 = ['soul', 'j1', 'happy'];
+    bizes3.forEach(biz => {
+      const url = payload['mainImg_' + biz];
+      if (url) {
+        tossBizImages[biz] = url;
+        const thumbEl = document.getElementById('toss-thumb-' + biz);
+        if (thumbEl) { thumbEl.src = url; thumbEl.classList.add('show'); }
+      }
+    });
+  } catch(e) { console.error('[populateTossForm] 이미지 복원 실패:', e); }
+
+  // 상세설명모드 복원 섹션
+  try {
+    if (payload.detailMode) {
+      const radio = document.querySelector(`input[name="tossDetailMode"][value="${payload.detailMode}"]`);
+      if (radio) { radio.checked = true; if (typeof onTossDetailModeChange === 'function') onTossDetailModeChange(); }
+    }
+    if (payload.detailHtml) {
+      const el = document.getElementById('toss-detail-html');
+      if (el) el.value = payload.detailHtml;
+      tossState.detailHtml = payload.detailHtml;
+    }
+  } catch(e) { console.error('[populateTossForm] 상세설명모드 복원 실패:', e); }
+
+  // 부가세 복원 섹션
+  try {
+    if (payload.taxType) {
+      const radio = document.querySelector(`input[name="tossTaxType"][value="${payload.taxType}"]`);
+      if (radio) radio.checked = true;
+      tossState.taxType = payload.taxType;
+    }
+  } catch(e) { console.error('[populateTossForm] 부가세 복원 실패:', e); }
+
+  // 태그 복원 섹션
+  try {
+    if (Array.isArray(payload.tags) && payload.tags.length > 0) {
+      tossState.tags = [...payload.tags];
+      if (typeof renderTossTags === 'function') renderTossTags();
+    }
+  } catch(e) { console.error('[populateTossForm] 태그 복원 실패:', e); }
+
+  // 필수고시 복원 섹션
+  try {
+    if (Array.isArray(payload.notices) && payload.notices.length > 0) {
+      tossState.notices = payload.notices.map(n => ({ ...n, items: (n.items || []).map(i => ({ ...i })) }));
+      // 필수고시 UI는 복잡하므로 state만 복원 (재렌더링은 사용자가 카테고리 재선택 시 자동)
+      const noticeItems = document.getElementById('toss-notice-items');
+      if (noticeItems && tossState.notices.length > 0) {
+        noticeItems.innerHTML = `<div style="font-size:12px;color:var(--accent);padding:8px 0;">✓ 필수고시 ${tossState.notices.length}건 복원됨 (카테고리 재선택 시 항목이 표시됩니다)</div>`;
+      }
+    }
+  } catch(e) { console.error('[populateTossForm] 필수고시 복원 실패:', e); }
 }
 
 async function populateTossFormFromPayload(payload) {
@@ -2449,9 +2586,9 @@ function onShippingTypeChange(store) {
 
 function applyStoreDefaults(store, name, force) {
   const map = {
-    manufacturer: name + ' 협력사',
-    supplier: name + ' 협력사',
-    brand: name + ' 협력사',
+    manufacturer: name,
+    supplier: name,
+    brand: name,
     contact: '판매자 연락처 참조',
   };
   Object.entries(map).forEach(([field, val]) => {
@@ -4179,7 +4316,7 @@ function renderTossOptionCombos() {
       comboLabel,
       options: comboItems.map(ci => ({
         groupName: ci.groupName,
-        // unitValues 옵션은 숫자+단위 결합 문자열, 그 외는 rawValue 사용
+        // unit 옵션의 경우 숫자+단위 결합값(display)을 사용, 일반 옵션은 rawValue 사용
         valueName: ci.chip.unit ? ci.chip.display : ci.chip.rawValue,
       })),
       checked: prev.checked !== undefined ? prev.checked : true,
@@ -4991,6 +5128,52 @@ const bizTemplates = {
   happy: null,
 };
 
+// 교환반품 위치 JSON 캐시
+let _exchangeRefundTemplatesCache = null;
+
+// 교환반품 위치 JSON 로드 (캐시 활용)
+async function loadExchangeRefundTemplates() {
+  if (_exchangeRefundTemplatesCache) return _exchangeRefundTemplatesCache;
+  try {
+    const res = await fetch('https://cdn.wonflowai.com/toss/exchange-refund-templates.json?v=' + Date.now(), { cache: 'no-store' });
+    if (!res.ok) throw new Error('fetch failed');
+    const data = await res.json();
+    _exchangeRefundTemplatesCache = data.exchangeTemplates || [];
+  } catch(e) {
+    _exchangeRefundTemplatesCache = [];
+  }
+  return _exchangeRefundTemplatesCache;
+}
+
+// returnLocationId로 주소 문자열 조회
+async function getReturnAddressById(id) {
+  if (!id) return null;
+  const templates = await loadExchangeRefundTemplates();
+  const found = templates.find(t => String(t.id) === String(id));
+  if (!found) return null;
+  return (found.address || '') + (found.detailAddress ? ' ' + found.detailAddress : '');
+}
+
+// 사업자 공통 기본값 (교환반품 신청기간)
+const BIZ_DEFAULT_APPLICATION_TERM = '상품 수령일로부터 7일 이내';
+
+// 사업자별 기본 교환반품 템플릿
+const SOUL_DEFAULT_RETURN_FIELDS = {
+  returnLocationId: '',
+  refundDeliveryFee: 3000,
+  exchangeDeliveryFee: 6000,
+  applicationMethod: '',
+  applicationTerm: '상품 수령일로부터 7일 이내',
+};
+
+const HAPPY_DEFAULT_RETURN_FIELDS = {
+  returnLocationId: '',
+  refundDeliveryFee: 3000,
+  exchangeDeliveryFee: 6000,
+  applicationMethod: '',
+  applicationTerm: '상품 수령일로부터 7일 이내',
+};
+
 // 제이원 기본값
 const J1_DEFAULT_TEMPLATE = {
   // 배송
@@ -5013,20 +5196,32 @@ const J1_DEFAULT_TEMPLATE = {
   applicationTerm: '상품 수령일로부터 7일 이내',
 };
 
+function getBizDefaultTemplate(biz) {
+  if (biz === 'j1') return { ...J1_DEFAULT_TEMPLATE };
+  if (biz === 'soul') return { ...SOUL_DEFAULT_RETURN_FIELDS };
+  if (biz === 'happy') return { ...HAPPY_DEFAULT_RETURN_FIELDS };
+  return {};
+}
+
 async function loadBizTemplate(biz) {
   if (bizTemplates[biz] !== null) return bizTemplates[biz];
   try {
     const url = `${R2_WORKER}/toss/business-templates/${biz}.json`;
     const res = await fetch(url + '?v=' + Date.now(), { cache: 'no-store' });
     if (res.ok) {
-      bizTemplates[biz] = await res.json();
+      const loaded = await res.json();
+      // applicationTerm 기본값 보장: 저장된 값이 없으면 기본값 적용
+      if (!loaded.applicationTerm) {
+        loaded.applicationTerm = BIZ_DEFAULT_APPLICATION_TERM;
+      }
+      bizTemplates[biz] = loaded;
     } else if (res.status === 404) {
-      bizTemplates[biz] = biz === 'j1' ? { ...J1_DEFAULT_TEMPLATE } : {};
+      bizTemplates[biz] = getBizDefaultTemplate(biz);
     } else {
-      bizTemplates[biz] = biz === 'j1' ? { ...J1_DEFAULT_TEMPLATE } : {};
+      bizTemplates[biz] = getBizDefaultTemplate(biz);
     }
   } catch(e) {
-    bizTemplates[biz] = biz === 'j1' ? { ...J1_DEFAULT_TEMPLATE } : {};
+    bizTemplates[biz] = getBizDefaultTemplate(biz);
   }
   return bizTemplates[biz];
 }
@@ -5062,16 +5257,22 @@ function renderDeliveryPreviewCard(biz, tpl) {
     <div class="template-preview-row"><span class="template-preview-key">택배사:</span><span class="template-preview-val">${tpl.courier||'-'}</span></div>`;
 }
 
-function renderExchangePreviewCard(biz, tpl) {
+async function renderExchangePreviewCard(biz, tpl) {
   const el = document.getElementById('toss-exchange-card-' + biz);
   if (!el) return;
   if (!tpl || Object.keys(tpl).length === 0) {
     el.innerHTML = `<div class="template-preview-card-title">${TOSS_BIZ_NAMES[biz]}</div><div class="template-preview-empty">템플릿 미설정</div>`;
     return;
   }
+  // 반품지 주소: returnAddress가 있으면 사용, 없으면 returnLocationId로 JSON에서 조회
+  let returnAddressText = tpl.returnAddress || '';
+  if (!returnAddressText && tpl.returnLocationId) {
+    returnAddressText = (await getReturnAddressById(tpl.returnLocationId)) || '-';
+  }
+  if (!returnAddressText) returnAddressText = '-';
   el.innerHTML = `
     <div class="template-preview-card-title">${TOSS_BIZ_NAMES[biz]}</div>
-    <div class="template-preview-row"><span class="template-preview-key">반품지:</span><span class="template-preview-val">${tpl.returnAddress||'-'}</span></div>
+    <div class="template-preview-row"><span class="template-preview-key">반품지:</span><span class="template-preview-val">${returnAddressText}</span></div>
     <div class="template-preview-row"><span class="template-preview-key">반품배송비:</span><span class="template-preview-val">${(tpl.refundDeliveryFee||0).toLocaleString()}원</span></div>
     <div class="template-preview-row"><span class="template-preview-key">교환배송비:</span><span class="template-preview-val">${(tpl.exchangeDeliveryFee||0).toLocaleString()}원</span></div>
     <div class="template-preview-row"><span class="template-preview-key">신청기간:</span><span class="template-preview-val">${tpl.applicationTerm||'-'}</span></div>`;
@@ -5081,7 +5282,7 @@ function renderAllTemplatePreview() {
   TOSS_BIZ_LIST.forEach(biz => {
     const tpl = bizTemplates[biz];
     renderDeliveryPreviewCard(biz, tpl);
-    renderExchangePreviewCard(biz, tpl);
+    renderExchangePreviewCard(biz, tpl); // async: runs in background, updates DOM when resolved
   });
 }
 
@@ -5257,10 +5458,8 @@ async function populateReturnLocationDropdown(biz, savedId) {
   const select = document.getElementById('m-return-loc-id-' + biz);
   if (!select) return;
   try {
-    const res = await fetch('https://cdn.wonflowai.com/toss/exchange-refund-templates.json?v=' + Date.now(), { cache: 'no-store' });
-    if (!res.ok) throw new Error('fetch failed');
-    const data = await res.json();
-    const templates = data.exchangeTemplates || [];
+    const templates = await loadExchangeRefundTemplates();
+    if (!templates.length) throw new Error('empty');
     select.innerHTML = '<option value="">-- 반품지 선택 --</option>' +
       templates.map(t => {
         const label = (t.address || '') + (t.detailAddress ? ' ' + t.detailAddress : '');
@@ -5488,7 +5687,7 @@ async function registerTossProduct() {
     .filter(o => o.name && o.name.trim())
     .map(o => ({
       name: o.name.trim(),
-      // unitValues 옵션은 숫자+단위 결합 문자열, 그 외는 rawValue 사용
+      // unit 옵션은 숫자+단위 결합값(display) 사용, 일반 옵션은 rawValue 사용
       value: o.chips.map(c => c.unit ? c.display : (c.rawValue || c.display)),
     }));
 
@@ -5626,12 +5825,12 @@ async function registerTossProduct() {
     showToast('모든 사업자 등록 실패. 콘솔 확인.', 'error');
   }
 
-  // 토스쇼핑 전송 이력 저장
+  // 토스쇼핑 전송 이력 저장 (복원 가능하도록 폼 상태 전체 보관)
   const tossUploadId = 'toss_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
   const tossHistoryName = namesSoul || namesJ1 || namesHappy || '(상품명 없음)';
   const tossStatus = successCount > 0 ? 'success' : 'failed';
   const tossErrMsg = tossStatus === 'failed' ? '모든 사업자 등록 실패' : '';
-  // 이력용 상세 payload (불러오기 복원에 필요한 모든 필드 포함)
+  // 이력용 상세 payload (복원에 필요한 전체 폼 상태 보관)
   const tossHistoryPayload = {
     name: tossHistoryName,
     _platform: 'toss',
@@ -5639,19 +5838,25 @@ async function registerTossProduct() {
     categoryId: tossCatSelectedIds,
     categoryPath: tossState.categoryPath,
     stockCombos: tossState.stockCombos,
-    optionsRaw: tossState.options,
-    extraImages: tossExtraUploadedUrls.slice(),
-    detailImages: tossDetailUploadedUrls.slice(),
+    optionsRaw: tossState.options.map(o => ({
+      name: o.name,
+      type: o.type,
+      optUnits: o.optUnits || [],
+      optValues: o.optValues || [],
+      chips: o.chips.map(c => ({ display: c.display, rawValue: c.rawValue, unit: c.unit || '' })),
+    })),
+    extraImages: tossExtraUploadedUrls.slice().filter(Boolean),
+    detailImages: tossDetailUploadedUrls.slice().filter(Boolean),
     detailMode: document.querySelector('input[name="tossDetailMode"]:checked')?.value || 'image',
-    detailHtml: tossState.detailHtml,
-    taxType: tossState.taxType,
+    detailHtml: tossState.detailHtml || '',
+    taxType: tossState.taxType || 'TAXABLE',
     tags: tossState.tags.slice(),
-    notices: JSON.parse(JSON.stringify(tossState.notices)),
-    managementCode: document.getElementById('toss-mgmt-code')?.value,
+    notices: JSON.parse(JSON.stringify(tossState.notices || [])),
+    managementCode: document.getElementById('toss-mgmt-code')?.value || '',
     bizFields: {
-      soul: { name: document.getElementById('toss-name-soul')?.value, brand: document.getElementById('toss-brand-soul')?.value, image: tossBizImages.soul },
-      j1:   { name: document.getElementById('toss-name-j1')?.value,   brand: document.getElementById('toss-brand-j1')?.value,   image: tossBizImages.j1 },
-      happy: { name: document.getElementById('toss-name-happy')?.value, brand: document.getElementById('toss-brand-happy')?.value, image: tossBizImages.happy },
+      soul: { name: document.getElementById('toss-name-soul')?.value || '', brand: document.getElementById('toss-brand-soul')?.value || '', image: tossBizImages.soul },
+      j1:   { name: document.getElementById('toss-name-j1')?.value || '',   brand: document.getElementById('toss-brand-j1')?.value || '',   image: tossBizImages.j1 },
+      happy: { name: document.getElementById('toss-name-happy')?.value || '', brand: document.getElementById('toss-brand-happy')?.value || '', image: tossBizImages.happy },
     },
   };
   saveHistoryEntry(tossUploadId, tossHistoryPayload, tossStatus, tossErrMsg, HISTORY_KEY_TOSS);
