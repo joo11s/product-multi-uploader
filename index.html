@@ -5252,11 +5252,11 @@ async function registerTossProduct() {
       } : {}),
     };
     const exchangeReturnPolicy = {
-      ...(tpl.returnLocationId ? { exchangeRefundLocationId: tpl.returnLocationId } : {}),
+      exchangeRefundLocationId: tpl.returnLocationId,
       refundOneWayDeliveryFee: tpl.refundDeliveryFee || 0,
       exchangeRoundTripDeliveryFee: tpl.exchangeDeliveryFee || 0,
-      ...(tpl.applicationMethod ? { applicationMethodDescription: tpl.applicationMethod } : {}),
-      ...(tpl.applicationTerm ? { applicationTermDescription: tpl.applicationTerm } : {}),
+      applicationMethodDescription: tpl.applicationMethod || '고객센터 연락 후 교환/반품 신청',
+      applicationTermDescription: tpl.applicationTerm || '상품 수령일로부터 7일 이내',
     };
 
     // 대표이미지 (THUMBNAIL order:0) + 추가이미지 (THUMBNAIL order:1~9) + 상세이미지 (DESCRIPTION) 구조화
