@@ -1104,7 +1104,7 @@
   <div class="header-right">
     <button class="btn-reset" id="btnHistory" onclick="toggleHistoryDrawer()">📋 전송 이력 <span id="historyCount">0</span></button>
     <button class="btn-reset" id="btnRetryBadge" style="display:none; border-color:#e74c3c; color:#e74c3c;" onclick="document.getElementById('retryPanel').scrollIntoView({behavior:'smooth'})">⚠ 재전송 대기 <span id="retryBadgeCount">0</span></button>
-    <button class="btn-reset" id="btnReset" onclick="resetAll()">초기화</button>
+    <button class="btn-reset" id="btnReset" onclick="resetCafe24()">초기화</button>
     <!-- 헤더 업로드 버튼은 하단 플랫폼 버튼으로 대체됨 (하위 호환용 hidden 유지) -->
     <button class="btn-upload-all" id="btnUpload" onclick="startUpload()" style="display:none;">
       <span id="btnText">🚀 업로드</span>
@@ -1571,11 +1571,11 @@
         <div class="template-preview-empty">템플릿 미설정</div>
       </div>
     </div>
-    <button class="btn-template-manage" onclick="openTemplateModal()">⚙️ 배송/교환반품 템플릿 관리</button>
+    <button class="btn-template-manage" onclick="openDeliveryTemplateModal()">🚚 배송 템플릿 관리</button>
   </div>
 
-  <!-- STEP T5: 교환반품 + 필수고시 -->
-  <div class="step-header toss-step"><span class="step-num">STEP T5</span><span class="step-title">교환반품 + 필수고시</span></div>
+  <!-- STEP T5: 교환반품 -->
+  <div class="step-header toss-step"><span class="step-num">STEP T5</span><span class="step-title">교환반품</span></div>
   <div class="panel">
     <div class="template-auto-notice">
       ℹ️ 사업자별 교환반품 템플릿이 자동 적용됩니다. 아래에서 현재 설정을 확인하고 필요 시 수정하세요.
@@ -1595,11 +1595,12 @@
         <div class="template-preview-empty">템플릿 미설정</div>
       </div>
     </div>
-    <button class="btn-template-manage" onclick="openTemplateModal()" style="margin-bottom:20px;">⚙️ 배송/교환반품 템플릿 관리</button>
+    <button class="btn-template-manage" onclick="openReturnTemplateModal()">↩️ 교환반품 템플릿 관리</button>
+  </div>
 
-    <div class="divider"></div>
-
-    <div class="sub-label">필수고시</div>
+  <!-- STEP T6: 필수고시 -->
+  <div class="step-header toss-step"><span class="step-num">STEP T6</span><span class="step-title">필수고시</span></div>
+  <div class="panel">
     <div id="toss-notice-loading" style="display:none;" class="category-loading"><div class="spinner"></div><span>필수고시 카테고리 로딩 중...</span></div>
     <div class="notice-select-wrap" id="toss-notice-selects">
       <div class="field">
@@ -1635,12 +1636,12 @@
 <div class="toast" id="toast"></div>
 
 <!-- ===================================================
-     배송/교환반품 템플릿 관리 모달
+     배송/교환반품 템플릿 관리 모달 (배송/교환반품 공용 — 제목 동적 변경)
      =================================================== -->
 <div class="modal-overlay" id="template-modal">
   <div class="modal-box">
     <div class="modal-header">
-      <div class="modal-title">⚙️ 배송/교환반품 템플릿 관리</div>
+      <div class="modal-title" id="template-modal-title">⚙️ 배송/교환반품 템플릿 관리</div>
       <button class="modal-close" onclick="closeTemplateModal()">✕</button>
     </div>
     <!-- 사업자 탭 -->
@@ -1671,40 +1672,62 @@
 <script>
 const R2_WORKER = 'https://r2-uploader.joo11s11.workers.dev';
 const N8N_WEBHOOK = 'https://n8n.wonflowai.com/webhook/product-upload';
-const HISTORY_KEY = 'soulkit_upload_history';
+const HISTORY_KEY_CAFE24 = 'soulkit_upload_history_cafe24';
+const HISTORY_KEY_TOSS = 'soulkit_upload_history_toss';
+// 하위 호환: 기존 키 마이그레이션용 (읽기 전용)
+const HISTORY_KEY_LEGACY = 'soulkit_upload_history';
 const HISTORY_RETENTION_DAYS = 30;
 
-function getHistory() {
-  try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); }
-  catch (e) { return []; }
+function getHistory(key) {
+  const k = key || HISTORY_KEY_CAFE24;
+  try {
+    let list = JSON.parse(localStorage.getItem(k) || '[]');
+    // 카페24 키 첫 조회 시 레거시 데이터 마이그레이션
+    if (k === HISTORY_KEY_CAFE24 && list.length === 0) {
+      const legacy = JSON.parse(localStorage.getItem(HISTORY_KEY_LEGACY) || '[]');
+      if (legacy.length > 0) {
+        localStorage.setItem(k, JSON.stringify(legacy));
+        list = legacy;
+      }
+    }
+    return list;
+  } catch (e) { return []; }
 }
-function setHistory(list) {
-  try { localStorage.setItem(HISTORY_KEY, JSON.stringify(list)); } catch (e) {}
+function setHistory(list, key) {
+  const k = key || HISTORY_KEY_CAFE24;
+  try { localStorage.setItem(k, JSON.stringify(list)); } catch (e) {}
 }
 function pruneHistory() {
   const cutoff = Date.now() - HISTORY_RETENTION_DAYS * 24 * 60 * 60 * 1000;
-  const list = getHistory().filter(e => new Date(e.savedAt).getTime() >= cutoff);
-  setHistory(list);
+  [HISTORY_KEY_CAFE24, HISTORY_KEY_TOSS].forEach(k => {
+    const list = getHistory(k).filter(e => new Date(e.savedAt).getTime() >= cutoff);
+    setHistory(list, k);
+  });
 }
-function saveHistoryEntry(id, payload, status, errorMsg) {
-  const list = getHistory();
+function saveHistoryEntry(id, payload, status, errorMsg, key) {
+  const k = key || HISTORY_KEY_CAFE24;
+  const list = getHistory(k);
   const existing = list.find(p => p.id === id);
-  const entry = { id, payload, productName: payload.product.name, status, error: errorMsg || '', savedAt: new Date().toISOString() };
+  const productName = (payload.product && payload.product.name) || payload.name || '';
+  const entry = { id, payload, productName, status, error: errorMsg || '', savedAt: new Date().toISOString() };
   if (existing) Object.assign(existing, entry);
   else list.unshift(entry);
-  setHistory(list);
+  setHistory(list, k);
   renderRetryPanel();
   renderHistoryDrawer();
 }
 function removeHistoryEntry(id) {
-  setHistory(getHistory().filter(p => p.id !== id));
+  // 두 플랫폼 모두에서 삭제 시도
+  [HISTORY_KEY_CAFE24, HISTORY_KEY_TOSS].forEach(k => {
+    setHistory(getHistory(k).filter(p => p.id !== id), k);
+  });
   renderRetryPanel();
   renderHistoryDrawer();
 }
 
-// 헤더의 "재전송 대기" 빨간 배지/패널은 실패건만 모아서 보여줌 (history의 부분집합)
+// 헤더의 "재전송 대기" 빨간 배지/패널은 실패건만 모아서 보여줌 (카페24 이력 기반)
 function renderRetryPanel() {
-  const list = getHistory().filter(e => e.status === 'failed');
+  const list = getHistory(HISTORY_KEY_CAFE24).filter(e => e.status === 'failed');
   const panel = document.getElementById('retryPanel');
   const listEl = document.getElementById('retryList');
   const badge = document.getElementById('btnRetryBadge');
@@ -1739,7 +1762,8 @@ function renderRetryPanel() {
 }
 
 async function retrySend(id) {
-  const list = getHistory();
+  // 재전송은 카페24 이력 기반 (retryPanel은 카페24 전용)
+  const list = getHistory(HISTORY_KEY_CAFE24);
   const entry = list.find(p => p.id === id);
   if (!entry) return;
   try {
@@ -1748,11 +1772,11 @@ async function retrySend(id) {
     if (!res.ok) throw new Error('HTTP ' + res.status);
     logMsg('✓ 재전송 성공', 'ok');
     showToast('✓ 재전송 성공! n8n에 전달됐습니다.', 'success');
-    saveHistoryEntry(id, entry.payload, 'success', '');
+    saveHistoryEntry(id, entry.payload, 'success', '', HISTORY_KEY_CAFE24);
   } catch (e) {
     entry.error = 'HTTP 오류: ' + e.message;
     entry.savedAt = new Date().toISOString();
-    setHistory(list);
+    setHistory(list, HISTORY_KEY_CAFE24);
     renderRetryPanel();
     renderHistoryDrawer();
     showToast('⚠ 재전송 실패: ' + e.message, 'error');
@@ -1762,10 +1786,13 @@ async function retrySend(id) {
 // ===== 전송 이력 패널 (성공/실패 전체, 30일 보관) =====
 function toggleHistoryDrawer() {
   const d = document.getElementById('historyDrawer');
+  const key = currentPlatform === 'toss' ? HISTORY_KEY_TOSS : HISTORY_KEY_CAFE24;
+  renderHistoryDrawer(key);
   d.classList.toggle('show');
 }
-function renderHistoryDrawer() {
-  const list = getHistory();
+function renderHistoryDrawer(key) {
+  const k = key || (currentPlatform === 'toss' ? HISTORY_KEY_TOSS : HISTORY_KEY_CAFE24);
+  const list = getHistory(k);
   const listEl = document.getElementById('historyList');
   const countEl = document.getElementById('historyCount');
   if (!listEl) return;
@@ -1800,7 +1827,8 @@ function renderHistoryDrawer() {
 }
 
 function loadFromHistory(id) {
-  const entry = getHistory().find(p => p.id === id);
+  const k = currentPlatform === 'toss' ? HISTORY_KEY_TOSS : HISTORY_KEY_CAFE24;
+  const entry = getHistory(k).find(p => p.id === id);
   if (!entry) return;
   populateFormFromPayload(entry.payload);
   toggleHistoryDrawer();
@@ -2714,13 +2742,13 @@ async function sendWebhook() {
     if (res.ok) {
       logMsg('✓ n8n 웹훅 전송 성공', 'ok');
       showToast('✓ 업로드 완료! n8n에 성공적으로 전송됐습니다.', 'success');
-      saveHistoryEntry(uploadId, payload, 'success', '');
+      saveHistoryEntry(uploadId, payload, 'success', '', HISTORY_KEY_CAFE24);
     }
     else throw new Error('HTTP ' + res.status);
   } catch (e) {
     logMsg('✗ n8n 웹훅 전송 실패: ' + e.message, 'err');
     showToast('⚠ 이미지 업로드는 완료됐으나 n8n 전송에 실패했습니다. 재전송 패널/전송 이력에서 다시 시도하세요.', 'error');
-    saveHistoryEntry(uploadId, payload, 'failed', 'HTTP 오류: ' + e.message);
+    saveHistoryEntry(uploadId, payload, 'failed', 'HTTP 오류: ' + e.message, HISTORY_KEY_CAFE24);
   }
 }
 
@@ -2803,8 +2831,8 @@ async function startUpload() {
   }
 }
 
-function resetAll() {
-  if (!confirm('모든 입력값을 초기화할까요?')) return;
+function resetCafe24() {
+  if (!confirm('카페24 입력값을 초기화할까요?')) return;
   Object.keys(SLOTS).forEach(slot => { files[slot] = []; uploadedUrls[slot] = []; renderThumbs(slot); updateDot(slot); });
   updateTabCount();
 
@@ -2862,6 +2890,82 @@ function resetAll() {
   document.getElementById('progressPanel').classList.remove('show');
   document.getElementById('resultPanel').classList.remove('show');
   Object.keys(SLOTS).forEach(updateFolderLabel);
+}
+
+function resetToss() {
+  if (!confirm('토스쇼핑 입력값을 초기화할까요?')) return;
+
+  // tossState 초기화
+  Object.assign(tossState, {
+    name: '', brand: '', managementCode: '',
+    categoryLeafId: null, categoryPath: '', categoryConfirmed: false,
+    options: [],
+    images: [],
+    detailHtml: '', detailImgUrl: '',
+    taxType: 'TAXABLE',
+    tags: [],
+    shippingTemplateId: '', exchangeReturnTemplateId: '',
+    notices: [],
+  });
+
+  // 관리코드
+  const mgmtEl = document.getElementById('toss-mgmt-code');
+  if (mgmtEl) mgmtEl.value = '';
+
+  // 사업자별 입력값 초기화
+  TOSS_BIZ_LIST.forEach(biz => {
+    const nameEl = document.getElementById('toss-name-' + biz);
+    if (nameEl) nameEl.value = '';
+    const brandEl = document.getElementById('toss-brand-' + biz);
+    if (brandEl) brandEl.value = '';
+  });
+
+  // 검색 태그 초기화
+  const tagChips = document.getElementById('toss-tag-chips');
+  if (tagChips) tagChips.innerHTML = '';
+  const tagInput = document.getElementById('toss-tag-input');
+  if (tagInput) tagInput.value = '';
+  const tagCount = document.getElementById('toss-tag-count');
+  if (tagCount) tagCount.textContent = '0 / 10';
+
+  // 옵션 행 초기화
+  tossOptionCounter = 0;
+  const optContainer = document.getElementById('toss-option-rows');
+  if (optContainer) optContainer.innerHTML = '<div class="options-empty" id="toss-option-empty">옵션이 없습니다. "옵션 추가" 버튼을 클릭하세요.</div>';
+
+  // 제약조건/constraint 초기화
+  tossConstraintData = null;
+  const constraintSelect = document.getElementById('toss-constraint-template');
+  if (constraintSelect) constraintSelect.innerHTML = '<option value="">-- 템플릿 선택 --</option>';
+
+  // 토스 이미지 슬롯 재초기화
+  initTossImageSlots();
+
+  // 카테고리 드릴다운 초기화
+  tossCatSelectedIds = [];
+  const catContainer = document.getElementById('toss-cat-drilldown');
+  if (catContainer) loadTossCategories();
+
+  // 상세페이지 초기화
+  const detailHtmlEl = document.getElementById('toss-detail-html');
+  if (detailHtmlEl) detailHtmlEl.value = '';
+  const detailImgEl = document.getElementById('toss-detail-img-url');
+  if (detailImgEl) detailImgEl.value = '';
+
+  // 필수고시 초기화
+  const noticeCat1 = document.getElementById('toss-notice-cat1');
+  if (noticeCat1) noticeCat1.value = '';
+  const noticeCat2 = document.getElementById('toss-notice-cat2');
+  if (noticeCat2) noticeCat2.innerHTML = '<option value="">-- 2차 선택 --</option>';
+  const noticeCat2Wrap = document.getElementById('toss-notice-cat2-wrap');
+  if (noticeCat2Wrap) noticeCat2Wrap.style.display = 'none';
+  const noticeItems = document.getElementById('toss-notice-items');
+  if (noticeItems) noticeItems.innerHTML = '';
+  tossState.notices = [];
+
+  // 등록 결과 패널 숨김
+  const tossResult = document.getElementById('toss-register-result');
+  if (tossResult) tossResult.style.display = 'none';
 }
 
 // 초기화
@@ -2943,6 +3047,17 @@ function switchPlatform(platform) {
   document.querySelectorAll('.platform-nav-item').forEach(el => {
     el.classList.toggle('active', el.dataset.platform === platform);
   });
+  // 초기화 버튼 동적 라벨링
+  const resetBtn = document.getElementById('btnReset');
+  if (resetBtn) {
+    if (platform === 'cafe24') {
+      resetBtn.textContent = '초기화';
+      resetBtn.onclick = resetCafe24;
+    } else {
+      resetBtn.textContent = '초기화';
+      resetBtn.onclick = resetToss;
+    }
+  }
   // 토스쇼핑으로 전환 시 sharedProduct에서 사전 채우기
   if (platform === 'toss') {
     prefillTossFromShared();
@@ -3978,13 +4093,35 @@ function renderAllTemplatePreview() {
 // ============================================================
 let modalCurrentBiz = 'soul';
 
-function openTemplateModal() {
+let _templateModalMode = 'delivery'; // 'delivery' | 'return'
+
+function openDeliveryTemplateModal() {
+  _templateModalMode = 'delivery';
+  const titleEl = document.getElementById('template-modal-title');
+  if (titleEl) titleEl.textContent = '🚚 배송 템플릿 관리';
   document.getElementById('template-modal').classList.add('show');
   modalCurrentBiz = 'soul';
   TOSS_BIZ_LIST.forEach(biz => {
     document.getElementById('mtab-' + biz).classList.toggle('active', biz === 'soul');
   });
   loadAllBizTemplates().then(() => renderModalBody(modalCurrentBiz));
+}
+
+function openReturnTemplateModal() {
+  _templateModalMode = 'return';
+  const titleEl = document.getElementById('template-modal-title');
+  if (titleEl) titleEl.textContent = '↩️ 교환반품 템플릿 관리';
+  document.getElementById('template-modal').classList.add('show');
+  modalCurrentBiz = 'soul';
+  TOSS_BIZ_LIST.forEach(biz => {
+    document.getElementById('mtab-' + biz).classList.toggle('active', biz === 'soul');
+  });
+  loadAllBizTemplates().then(() => renderModalBody(modalCurrentBiz));
+}
+
+// 하위 호환용: 배송+교환반품 통합 모달 (기존 코드에서 호출 시 fallback)
+function openTemplateModal() {
+  openDeliveryTemplateModal();
 }
 
 function closeTemplateModal() {
@@ -4024,7 +4161,16 @@ function renderModalBody(biz) {
     `<option value="${c}" ${(tpl.courier||'CJ대한통운')===c?'selected':''}>${c}</option>`
   ).join('');
 
-  body.innerHTML = `
+  if (_templateModalMode === 'return') {
+    body.innerHTML = renderReturnModalBody(biz, tpl);
+  } else {
+    body.innerHTML = renderDeliveryModalBody(biz, tpl, { todayDel, preparationDaysOptions, deadlineOptions, feeType, isJeju, courierOptions });
+  }
+}
+
+function renderDeliveryModalBody(biz, tpl, opts) {
+  const { todayDel, preparationDaysOptions, deadlineOptions, feeType, isJeju, courierOptions } = opts;
+  return `
     <!-- 배송 설정 -->
     <div class="modal-section-title">배송 설정</div>
     <div class="modal-field-row">
@@ -4106,9 +4252,13 @@ function renderModalBody(biz) {
         <select id="m-courier-${biz}">${courierOptions}</select>
       </div>
     </div>
+  `;
+}
 
+function renderReturnModalBody(biz, tpl) {
+  return `
     <!-- 교환·반품 설정 -->
-    <div class="modal-section-title" style="margin-top:20px;">교환·반품 설정</div>
+    <div class="modal-section-title">교환·반품 설정</div>
     <div class="modal-field-row">
       <div class="modal-field" style="flex:0 0 100%;">
         <label>반품지 주소 (표시용)</label>
@@ -4213,7 +4363,10 @@ async function saveCurrentTemplate() {
   const btn = document.querySelector('.modal-footer .btn-toss-register');
   if (btn) { btn.disabled = true; btn.textContent = '저장 중...'; }
   try {
-    const tplData = getTemplateFromModal(biz);
+    // 모드에 따라 현재 모달에 있는 필드만 읽어서 기존 템플릿에 병합
+    const existing = bizTemplates[biz] || {};
+    const partial = getTemplateFromModal(biz);
+    const tplData = Object.assign({}, existing, partial);
     await saveTemplateToR2(biz, tplData);
     showToast(`✓ ${TOSS_BIZ_NAMES[biz]} 템플릿이 저장되었습니다.`, 'success');
     renderAllTemplatePreview();
@@ -4365,6 +4518,15 @@ async function registerTossProduct() {
   } else {
     showToast('모든 사업자 등록 실패. 콘솔 확인.', 'error');
   }
+
+  // 토스쇼핑 전송 이력 저장
+  const tossUploadId = 'toss_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+  const tossHistoryName = namesSoul || namesJ1 || namesHappy || '(상품명 없음)';
+  const tossStatus = successCount > 0 ? 'success' : 'failed';
+  const tossErrMsg = tossStatus === 'failed' ? '모든 사업자 등록 실패' : '';
+  // 이력용 간략 payload (name 필드 포함)
+  const tossHistoryPayload = { name: tossHistoryName, _platform: 'toss', _results: results.map((r, i) => ({ biz: payloads[i].biz, ok: r.status === 'fulfilled' })) };
+  saveHistoryEntry(tossUploadId, tossHistoryPayload, tossStatus, tossErrMsg, HISTORY_KEY_TOSS);
 
   console.log('[토스 3사업자 등록 결과]', results);
   if (btn) { btn.disabled = false; btn.textContent = '🚀 토스쇼핑 3개 사업자 동시 등록'; }
