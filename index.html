@@ -4671,6 +4671,8 @@ async function uploadTossExtraFiles(files) {
     try {
       const url = await uploadFile(file, r2Key);
       tossExtraUploadedUrls.push(url);
+      const pendingIdx = tossExtraFiles.indexOf(file);
+      if (pendingIdx !== -1) tossExtraFiles.splice(pendingIdx, 1);
       renderTossExtraThumbs();
       updateTossExtraDot();
       showToast('✓ 추가이미지 업로드 완료', 'success');
@@ -4764,6 +4766,8 @@ async function uploadTossDetailFiles(files) {
     try {
       const url = await uploadFile(file, r2Key);
       tossDetailUploadedUrls.push(url);
+      const pendingIdx = tossDetailFiles.indexOf(file);
+      if (pendingIdx !== -1) tossDetailFiles.splice(pendingIdx, 1);
       renderTossDetailThumbs();
       updateTossDetailDot();
       showToast('✓ 상세이미지 업로드 완료', 'success');
