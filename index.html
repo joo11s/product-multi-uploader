@@ -5128,27 +5128,38 @@ const bizTemplates = {
   happy: null,
 };
 
-// 교환반품 위치 JSON 캐시
-let _exchangeRefundTemplatesCache = null;
+// 교환반품 위치 JSON 캐시 (사업자별)
+const _exchangeRefundTemplatesCache = {};
 
-// 교환반품 위치 JSON 로드 (캐시 활용)
-async function loadExchangeRefundTemplates() {
-  if (_exchangeRefundTemplatesCache) return _exchangeRefundTemplatesCache;
+// 교환반품 위치 JSON 로드 (사업자별 파일 우선, fallback: 공용 파일)
+async function loadExchangeRefundTemplates(biz) {
+  const cacheKey = biz || '_shared';
+  if (_exchangeRefundTemplatesCache[cacheKey]) return _exchangeRefundTemplatesCache[cacheKey];
   try {
-    const res = await fetch('https://cdn.wonflowai.com/toss/exchange-refund-templates.json?v=' + Date.now(), { cache: 'no-store' });
-    if (!res.ok) throw new Error('fetch failed');
-    const data = await res.json();
-    _exchangeRefundTemplatesCache = data.exchangeTemplates || [];
+    const v = Date.now();
+    let data = null;
+    if (biz) {
+      try {
+        const bizRes = await fetch(`https://cdn.wonflowai.com/toss/exchange-refund-templates-${biz}.json?v=${v}`, { cache: 'no-store' });
+        if (bizRes.ok) data = await bizRes.json();
+      } catch(e) { /* 사업자별 파일 없음, fallback으로 진행 */ }
+    }
+    if (!data) {
+      const res = await fetch('https://cdn.wonflowai.com/toss/exchange-refund-templates.json?v=' + v, { cache: 'no-store' });
+      if (!res.ok) throw new Error('fetch failed');
+      data = await res.json();
+    }
+    _exchangeRefundTemplatesCache[cacheKey] = data.exchangeTemplates || [];
   } catch(e) {
-    _exchangeRefundTemplatesCache = [];
+    _exchangeRefundTemplatesCache[cacheKey] = [];
   }
-  return _exchangeRefundTemplatesCache;
+  return _exchangeRefundTemplatesCache[cacheKey];
 }
 
-// returnLocationId로 주소 문자열 조회
-async function getReturnAddressById(id) {
+// returnLocationId로 주소 문자열 조회 (사업자별 파일 우선)
+async function getReturnAddressById(id, biz) {
   if (!id) return null;
-  const templates = await loadExchangeRefundTemplates();
+  const templates = await loadExchangeRefundTemplates(biz);
   const found = templates.find(t => String(t.id) === String(id));
   if (!found) return null;
   return (found.address || '') + (found.detailAddress ? ' ' + found.detailAddress : '');
@@ -5267,7 +5278,7 @@ async function renderExchangePreviewCard(biz, tpl) {
   // 반품지 주소: returnAddress가 있으면 사용, 없으면 returnLocationId로 JSON에서 조회
   let returnAddressText = tpl.returnAddress || '';
   if (!returnAddressText && tpl.returnLocationId) {
-    returnAddressText = (await getReturnAddressById(tpl.returnLocationId)) || '-';
+    returnAddressText = (await getReturnAddressById(tpl.returnLocationId, biz)) || '-';
   }
   if (!returnAddressText) returnAddressText = '-';
   el.innerHTML = `
@@ -5458,8 +5469,7 @@ async function populateReturnLocationDropdown(biz, savedId) {
   const select = document.getElementById('m-return-loc-id-' + biz);
   if (!select) return;
   try {
-    const templates = await loadExchangeRefundTemplates();
-    if (!templates.length) throw new Error('empty');
+    const templates = await loadExchangeRefundTemplates(biz);
     select.innerHTML = '<option value="">-- 반품지 선택 --</option>' +
       templates.map(t => {
         const label = (t.address || '') + (t.detailAddress ? ' ' + t.detailAddress : '');
