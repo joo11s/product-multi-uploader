@@ -3457,8 +3457,15 @@ function resetToss() {
 
   // 카테고리 드릴다운 초기화
   tossCatSelectedIds = [];
-  const catContainer = document.getElementById('toss-cat-drilldown');
-  if (catContainer) loadTossCategories();
+  const catSearchInput = document.getElementById('tossCatSearchInput');
+  if (catSearchInput) catSearchInput.value = '';
+  closeTossCatDropdown && closeTossCatDropdown();
+  const catPathEl = document.getElementById('toss-cat-path');
+  if (catPathEl) catPathEl.textContent = '(없음)';
+  const catBreadcrumb = document.getElementById('toss-cat-breadcrumb');
+  if (catBreadcrumb) { catBreadcrumb.classList.remove('show'); catBreadcrumb.classList.remove('confirmed'); }
+  const catContainer = document.getElementById('toss-cat-columns');
+  if (catContainer) { loadTossCategories(); renderTossCategoryColumns(); }
 
   // 상세페이지 초기화
   const detailHtmlEl = document.getElementById('toss-detail-html');
