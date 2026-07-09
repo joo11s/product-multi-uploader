@@ -4125,8 +4125,8 @@ function renderTossOptionCombos() {
       comboLabel,
       options: comboItems.map(ci => ({
         groupName: ci.groupName,
-        // API must only send numeric value when unitValues option
-        valueName: ci.chip.rawValue,
+        // unitValues 옵션은 숫자+단위 결합 문자열, 그 외는 rawValue 사용
+        valueName: ci.chip.unit ? ci.chip.display : ci.chip.rawValue,
       })),
       checked: prev.checked !== undefined ? prev.checked : true,
       originPrice: prev.originPrice || '',
@@ -5352,8 +5352,8 @@ async function registerTossProduct() {
     .filter(o => o.name && o.name.trim())
     .map(o => ({
       name: o.name.trim(),
-      // For API: send numeric rawValue for unit options, display for others
-      value: o.chips.map(c => c.rawValue || c.display),
+      // unitValues 옵션은 숫자+단위 결합 문자열, 그 외는 rawValue 사용
+      value: o.chips.map(c => c.unit ? c.display : (c.rawValue || c.display)),
     }));
 
   // Build stockCombos payload (only checked rows)
