@@ -5255,7 +5255,7 @@ function getBizDefaultTemplate(biz) {
 async function loadBizTemplate(biz) {
   if (bizTemplates[biz] !== null) return bizTemplates[biz];
   try {
-    const url = `${R2_WORKER}/toss/business-templates/${biz}.json`;
+    const url = `https://cdn.wonflowai.com/toss/business-templates/${biz}.json`;
     const res = await fetch(url + '?v=' + Date.now(), { cache: 'no-store' });
     if (res.ok) {
       const loaded = await res.json();
