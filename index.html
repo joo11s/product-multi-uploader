@@ -2088,6 +2088,7 @@ async function populateTossFormFromPayload(payload) {
             match.remainingCount = saved.remainingCount;
             match.managementCode = saved.managementCode || '';
             match.checked = saved.checked !== false;
+            match.representativeThumbnailImage = saved.representativeThumbnailImage || '';
           }
         });
         renderTossOptionCombos();
@@ -3378,6 +3379,13 @@ document.addEventListener('DOMContentLoaded', () => {
 // ============================================================
 let currentPlatform = 'cafe24';
 
+function updateHistoryBadge(key) {
+  const k = key || (currentPlatform === 'toss' ? HISTORY_KEY_TOSS : HISTORY_KEY_CAFE24);
+  const list = getHistory(k);
+  const countEl = document.getElementById('historyCount');
+  if (countEl) countEl.textContent = list.length;
+}
+
 function switchPlatform(platform) {
   currentPlatform = platform;
   document.getElementById('cafe24-section').style.display = platform === 'cafe24' ? '' : 'none';
@@ -3407,6 +3415,9 @@ function switchPlatform(platform) {
     // 3개 사업자 템플릿 자동 로드 및 미리보기
     loadAllBizTemplates().catch(e => console.warn('biz templates:', e));
   }
+  // 탭 전환 즉시 전송이력 뱃지 숫자 갱신
+  const histKey = platform === 'toss' ? HISTORY_KEY_TOSS : HISTORY_KEY_CAFE24;
+  updateHistoryBadge(histKey);
 }
 
 // ============================================================
@@ -3428,7 +3439,7 @@ const tossState = {
   shippingTemplateId: '',
   exchangeReturnTemplateId: '',
   notices: [],         // [{code, items: [{key, value}]}]
-  stockCombos: [],     // [{comboLabel, options:[{groupName,valueName}], originPrice, salePrice, remainingCount, managementCode}]
+  stockCombos: [],     // [{comboLabel, options:[{groupName,valueName}], originPrice, salePrice, remainingCount, managementCode, representativeThumbnailImage}]
 };
 
 let tossOptionCounter = 0;
@@ -4176,6 +4187,7 @@ function renderTossOptionCombos() {
       salePrice: prev.salePrice || '',
       remainingCount: prev.remainingCount || '',
       managementCode: prev.managementCode || '',
+      representativeThumbnailImage: prev.representativeThumbnailImage || '',
     };
   });
   tossState.stockCombos = newCombos;
@@ -4193,6 +4205,7 @@ function renderTossOptionCombos() {
           <th>판매가</th>
           <th>재고수량</th>
           <th>관리코드 <span style="color:var(--text3); font-weight:400;">(선택)</span></th>
+          <th>옵션 이미지 <span style="color:var(--text3); font-weight:400;">(선택)</span></th>
         </tr>
       </thead>
       <tbody id="toss-combo-tbody">
@@ -4222,7 +4235,16 @@ function renderTossOptionCombos() {
       <td><div class="combo-field-wrap"><input type="text" placeholder="선택입력" value="${combo.managementCode}"
         oninput="_tossComboFieldChange(${idx},'managementCode',this.value)"
         onfocus="_showBulkBtn(this)" onblur="_hideBulkBtn(this)" />
-        <button class="btn-bulk-apply" onmousedown="event.preventDefault()" onclick="_tossComboFillAll('managementCode',this.previousElementSibling.value)">↕ 일괄적용</button></div></td>`;
+        <button class="btn-bulk-apply" onmousedown="event.preventDefault()" onclick="_tossComboFillAll('managementCode',this.previousElementSibling.value)">↕ 일괄적용</button></div></td>
+      <td style="text-align:center; white-space:nowrap;">
+        <div style="display:flex; flex-direction:column; align-items:center; gap:4px;">
+          ${combo.representativeThumbnailImage
+            ? `<img src="${combo.representativeThumbnailImage}" style="width:40px; height:40px; object-fit:cover; border-radius:4px; border:1px solid var(--border);" id="combo-img-thumb-${idx}" />`
+            : `<div style="width:40px; height:40px; border:1px dashed var(--border2); border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:18px; color:var(--text3);" id="combo-img-thumb-${idx}">+</div>`}
+          <button class="btn-biz-img" style="font-size:11px; padding:4px 8px;" onclick="_tossComboImgPick(${idx})">📷</button>
+          <input type="file" accept="image/*" style="display:none;" id="combo-img-input-${idx}" onchange="_tossComboImgSelect(event,${idx})" />
+        </div>
+      </td>`;
     tbody.appendChild(tr);
   });
 }
@@ -4283,6 +4305,37 @@ function _tossComboFillAll(field, value) {
     }
   });
   showToast(`${tossState.stockCombos.length}개 조합에 일괄 적용되었습니다.`, 'success');
+}
+
+function _tossComboImgPick(idx) {
+  const input = document.getElementById('combo-img-input-' + idx);
+  if (input) input.click();
+}
+
+function _tossComboImgSelect(event, idx) {
+  const file = event.target.files[0];
+  if (!file) return;
+  event.target.value = '';
+  // 즉시 로컬 미리보기
+  const thumbEl = document.getElementById('combo-img-thumb-' + idx);
+  const localUrl = URL.createObjectURL(file);
+  if (thumbEl) {
+    thumbEl.outerHTML = `<img src="${localUrl}" style="width:40px; height:40px; object-fit:cover; border-radius:4px; border:1px solid var(--border);" id="combo-img-thumb-${idx}" />`;
+  }
+  // R2 업로드
+  const r2Key = `products/toss/combo-images/combo_${idx}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.jpg`;
+  showToast('옵션 이미지 업로드 중...', 'info');
+  uploadFile(file, r2Key).then(url => {
+    if (tossState.stockCombos[idx]) {
+      tossState.stockCombos[idx].representativeThumbnailImage = url;
+    }
+    // 미리보기를 CDN URL로 교체
+    const el = document.getElementById('combo-img-thumb-' + idx);
+    if (el) el.src = url;
+    showToast('✓ 옵션 이미지 업로드 완료', 'success');
+  }).catch(e => {
+    showToast('✗ 옵션 이미지 업로드 실패: ' + e.message, 'error');
+  });
 }
 
 // ============================================================
@@ -5449,6 +5502,7 @@ async function registerTossProduct() {
       salePrice: Number(c.salePrice) || 0,
       remainingCount: Number(c.remainingCount) || 0,
       managementCode: c.managementCode || '',
+      ...(c.representativeThumbnailImage ? { representativeThumbnailImage: c.representativeThumbnailImage } : {}),
     }));
 
   const sharedSalePrice = Number(document.getElementById('salePrice')?.value) || Number(sharedProduct.salePrice) || 0;
