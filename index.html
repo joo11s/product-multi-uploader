@@ -2172,7 +2172,7 @@ async function populateTossFormFromPayload(payload) {
   try {
     if (Array.isArray(payload.categoryId) && payload.categoryId.length > 0) {
       // 카테고리 트리가 아직 로드 안 됐으면 먼저 로드
-      if (!tossCategoryTree || tossCategoryTree.length === 0) {
+      if (!tossCatData || tossCatData.length === 0) {
         await loadTossCategories();
       }
       tossCatSelectedIds = payload.categoryId.slice();
@@ -2280,18 +2280,48 @@ async function populateTossFormFromPayload(payload) {
     }
   } catch(e) { console.error('[populateTossForm] 태그 복원 실패:', e); }
 
-  // 필수고시 복원 (notices 배열을 그대로 복원하고 DOM에 값을 채움)
+  // 필수고시 복원 (1차/2차 드롭다운 선택 → loadTossNoticeItems → 값 채우기)
   try {
     if (Array.isArray(payload.notices) && payload.notices.length > 0) {
-      tossState.notices = JSON.parse(JSON.stringify(payload.notices));
-      const notice = tossState.notices[0];
-      if (notice && notice.items) {
-        const container = document.getElementById('toss-notice-items');
-        if (container) {
-          const inputs = container.querySelectorAll('input[type="text"]');
-          notice.items.forEach((item, i) => {
-            if (inputs[i] !== undefined) inputs[i].value = item.value || '';
-          });
+      const noticeToRestore = payload.notices[0];
+      const categoryCode = noticeToRestore && noticeToRestore.code;
+      if (categoryCode) {
+        // 필수고시 카테고리 데이터 로드 (아직 없으면)
+        if (!tossNoticeCatsData) {
+          await loadTossNoticeCategories();
+        }
+        if (tossNoticeCatsData) {
+          const codes = tossNoticeCatsData.codes || (Array.isArray(tossNoticeCatsData) ? tossNoticeCatsData : []);
+          const matched = codes.find(c => c.categoryCode === categoryCode);
+          if (matched) {
+            // 1차 카테고리 드롭다운 선택
+            const cat1El = document.getElementById('toss-notice-cat1');
+            if (cat1El) {
+              cat1El.value = matched.firstCategoryName;
+              cat1El.dispatchEvent(new Event('change'));
+            }
+            // 2차 카테고리 드롭다운 선택
+            const cat2El = document.getElementById('toss-notice-cat2');
+            if (cat2El) {
+              cat2El.value = categoryCode;
+            }
+            // 입력창 생성 (loadTossNoticeItems는 tossState.notices를 덮어씌우므로 나중에 값 재적용)
+            await loadTossNoticeItems(categoryCode);
+            // 저장된 값 복원
+            const container = document.getElementById('toss-notice-items');
+            if (container && noticeToRestore.items) {
+              const inputs = container.querySelectorAll('input[type="text"]');
+              noticeToRestore.items.forEach((item, i) => {
+                if (inputs[i] !== undefined) inputs[i].value = item.value || '';
+              });
+              // tossState.notices의 값도 동기화
+              if (tossState.notices[0]) {
+                tossState.notices[0].items.forEach((si, i) => {
+                  if (noticeToRestore.items[i]) si.value = noticeToRestore.items[i].value || '';
+                });
+              }
+            }
+          }
         }
       }
     }
@@ -3386,6 +3416,10 @@ function resetToss() {
     if (nameEl) nameEl.value = '';
     const brandEl = document.getElementById('toss-brand-' + biz);
     if (brandEl) brandEl.value = '';
+    // 사업자별 대표이미지 초기화
+    tossBizImages[biz] = null;
+    const thumbEl = document.getElementById('toss-thumb-' + biz);
+    if (thumbEl) { thumbEl.src = ''; thumbEl.classList.remove('show'); }
   });
 
   // 검색 태그 초기화
