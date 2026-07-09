@@ -556,6 +556,14 @@
     vertical-align: middle;
   }
   .category-loading { font-size: 13px; color: var(--text3); padding: 16px 0; display: flex; align-items: center; gap: 8px; }
+  .category-breadcrumb.confirmed { border-color: rgba(46,204,113,0.4); }
+  .combo-field-wrap { display: flex; flex-direction: column; gap: 2px; }
+  .btn-bulk-apply {
+    display: none; font-size: 11px; padding: 2px 6px; cursor: pointer;
+    border: 1px solid var(--accent); border-radius: 4px; background: transparent;
+    color: var(--accent); white-space: nowrap; font-family: 'Noto Sans KR', sans-serif;
+  }
+  .btn-bulk-apply.show { display: block; }
 
   /* 이미지 크롭 UI */
   .crop-preview-container {
@@ -2058,7 +2066,7 @@ async function populateTossFormFromPayload(payload) {
         const restored = { id, name: opt.name || '', chips: opt.chips || [], type: opt.type || 'free', optUnits: opt.optUnits || [], optValues: opt.optValues || [] };
         tossState.options.push(restored);
         if (optContainer) {
-          _appendTossOptionRow(optContainer, id, restored.name, restored.type, restored.optValues, restored.optUnits);
+          _appendTossOptionRow(optContainer, id, restored.name, restored.type, restored.optValues, restored.optUnits, restored.isOption || false);
           // 칩 복원
           _renderTossOptChips(id);
         }
@@ -3631,8 +3639,13 @@ function selectTossCategory(depth, id, name) {
     tossState.categoryConfirmed = true;
     document.getElementById('toss-cat-unconfirmed-badge').style.display = 'none';
     document.getElementById('toss-cat-confirm-wrap').style.display = 'none';
-    // constraint template 로드
-    loadTossConstraintTemplate(id);
+    // 이미 복원된 옵션/조합이 있으면 constraint template 재로드 생략 (덮어쓰기 방지)
+    if (tossState.options.length > 0) {
+      const badge = document.getElementById('toss-constraint-badge');
+      if (badge) badge.textContent = '(옵션 복원됨 — 재로드하려면 옵션 전체 삭제 후 재선택)';
+    } else {
+      loadTossConstraintTemplate(id);
+    }
   } else {
     tossState.categoryLeafId = null;
     tossState.categoryConfirmed = false;
@@ -3655,12 +3668,22 @@ function updateTossCategoryBreadcrumb() {
   if (!bc || !pathEl) return;
   if (tossCatSelectedIds.length === 0) {
     bc.classList.remove('show');
+    bc.classList.remove('confirmed');
     return;
   }
   const path = buildTossCategoryPath();
   pathEl.textContent = path;
   tossState.categoryPath = path;
   bc.classList.add('show');
+  if (tossState.categoryConfirmed) {
+    bc.classList.add('confirmed');
+    const badge = document.getElementById('toss-cat-unconfirmed-badge');
+    if (badge) badge.style.display = 'none';
+    const confirmWrap = document.getElementById('toss-cat-confirm-wrap');
+    if (confirmWrap) confirmWrap.style.display = 'none';
+  } else {
+    bc.classList.remove('confirmed');
+  }
 }
 
 // 카페24 카테고리 → 토스 카테고리 자동 매칭 시도 (유사도 기반)
@@ -3907,20 +3930,25 @@ function renderTossConstraintOptions() {
     const optName = optDef.key || optDef.name || '';
     const optValues = optDef.valueCandidates || optDef.values || [];
     const optUnits = optDef.unitValues || [];
+    const isOption = optDef.isOption === true;
 
     // Determine type: 'unit' | 'select' | 'free'
     const type = optUnits.length > 0 ? 'unit' : (optValues.length > 0 ? 'select' : 'free');
-    tossState.options.push({ id, name: optName, chips: [], type, optUnits, optValues });
+    tossState.options.push({ id, name: optName, chips: [], type, optUnits, optValues, isOption });
 
-    _appendTossOptionRow(container, id, optName, type, optValues, optUnits);
+    _appendTossOptionRow(container, id, optName, type, optValues, optUnits, isOption);
   });
 }
 
 // Internal: build and append a chip-based option row to container
-function _appendTossOptionRow(container, id, optName, type, optValues, optUnits) {
+function _appendTossOptionRow(container, id, optName, type, optValues, optUnits, isOption) {
   const row = document.createElement('div');
   row.className = 'toss-option-row';
   row.id = 'toss-opt-row-' + id;
+
+  const labelHTML = isOption
+    ? `${optName} <span style="color:var(--text3); font-size:11px; font-weight:400;">(선택)</span>`
+    : optName;
 
   // Build input area based on type
   let inputHTML = '';
@@ -3941,7 +3969,7 @@ function _appendTossOptionRow(container, id, optName, type, optValues, optUnits)
 
   row.innerHTML = `
     <div class="toss-option-row-header">
-      <span class="toss-option-label">${optName}</span>
+      <span class="toss-option-label">${labelHTML}</span>
       <div class="toss-option-input-wrap">
         ${inputHTML}
         <button class="btn-opt-add-val" onclick="addTossOptionChip(${id})">추가</button>
@@ -4179,14 +4207,22 @@ function renderTossOptionCombos() {
     tr.innerHTML = `
       <td style="text-align:center;"><input type="checkbox" ${combo.checked ? 'checked' : ''} onchange="_tossComboCheckRow(${idx}, this.checked)" /></td>
       <td class="combo-label-cell">${combo.comboLabel}</td>
-      <td><input type="number" placeholder="정상가" value="${combo.originPrice}" min="0"
-        oninput="_tossComboFieldChange(${idx},'originPrice',this.value)" /></td>
-      <td><input type="number" placeholder="판매가" value="${combo.salePrice}" min="0"
-        oninput="_tossComboFieldChange(${idx},'salePrice',this.value)" /></td>
-      <td><input type="number" placeholder="재고" value="${combo.remainingCount}" min="0"
-        oninput="_tossComboFieldChange(${idx},'remainingCount',this.value)" /></td>
-      <td><input type="text" placeholder="선택입력" value="${combo.managementCode}"
-        oninput="_tossComboFieldChange(${idx},'managementCode',this.value)" /></td>`;
+      <td><div class="combo-field-wrap"><input type="number" placeholder="정상가" value="${combo.originPrice}" min="0"
+        oninput="_tossComboFieldChange(${idx},'originPrice',this.value)"
+        onfocus="_showBulkBtn(this)" onblur="_hideBulkBtn(this)" />
+        <button class="btn-bulk-apply" onmousedown="event.preventDefault()" onclick="_tossComboFillAll('originPrice',this.previousElementSibling.value)">↕ 일괄적용</button></div></td>
+      <td><div class="combo-field-wrap"><input type="number" placeholder="판매가" value="${combo.salePrice}" min="0"
+        oninput="_tossComboFieldChange(${idx},'salePrice',this.value)"
+        onfocus="_showBulkBtn(this)" onblur="_hideBulkBtn(this)" />
+        <button class="btn-bulk-apply" onmousedown="event.preventDefault()" onclick="_tossComboFillAll('salePrice',this.previousElementSibling.value)">↕ 일괄적용</button></div></td>
+      <td><div class="combo-field-wrap"><input type="number" placeholder="재고" value="${combo.remainingCount}" min="0"
+        oninput="_tossComboFieldChange(${idx},'remainingCount',this.value)"
+        onfocus="_showBulkBtn(this)" onblur="_hideBulkBtn(this)" />
+        <button class="btn-bulk-apply" onmousedown="event.preventDefault()" onclick="_tossComboFillAll('remainingCount',this.previousElementSibling.value)">↕ 일괄적용</button></div></td>
+      <td><div class="combo-field-wrap"><input type="text" placeholder="선택입력" value="${combo.managementCode}"
+        oninput="_tossComboFieldChange(${idx},'managementCode',this.value)"
+        onfocus="_showBulkBtn(this)" onblur="_hideBulkBtn(this)" />
+        <button class="btn-bulk-apply" onmousedown="event.preventDefault()" onclick="_tossComboFillAll('managementCode',this.previousElementSibling.value)">↕ 일괄적용</button></div></td>`;
     tbody.appendChild(tr);
   });
 }
@@ -4220,6 +4256,33 @@ function _tossComboFieldChange(idx, field, val) {
   if (tossState.stockCombos[idx]) {
     tossState.stockCombos[idx][field] = val;
   }
+}
+
+function _showBulkBtn(input) {
+  const btn = input.nextElementSibling;
+  if (btn && btn.classList.contains('btn-bulk-apply')) btn.classList.add('show');
+}
+
+function _hideBulkBtn(input) {
+  // setTimeout으로 버튼 클릭 이벤트가 먼저 처리되도록 함
+  setTimeout(() => {
+    const btn = input.nextElementSibling;
+    if (btn && btn.classList.contains('btn-bulk-apply')) btn.classList.remove('show');
+  }, 150);
+}
+
+function _tossComboFillAll(field, value) {
+  const tbody = document.getElementById('toss-combo-tbody');
+  const fieldColMap = { originPrice: 2, salePrice: 3, remainingCount: 4, managementCode: 5 };
+  const colIdx = fieldColMap[field];
+  tossState.stockCombos.forEach((c, idx) => {
+    c[field] = value;
+    if (tbody && tbody.rows[idx] && colIdx !== undefined) {
+      const inp = tbody.rows[idx].cells[colIdx] && tbody.rows[idx].cells[colIdx].querySelector('input');
+      if (inp) inp.value = value;
+    }
+  });
+  showToast(`${tossState.stockCombos.length}개 조합에 일괄 적용되었습니다.`, 'success');
 }
 
 // ============================================================
@@ -5148,9 +5211,14 @@ async function populateReturnLocationDropdown(biz, savedId) {
     select.innerHTML = '<option value="">-- 반품지 선택 --</option>' +
       templates.map(t => {
         const label = (t.address || '') + (t.detailAddress ? ' ' + t.detailAddress : '');
-        const selected = (String(t.id) === String(savedId)) ? ' selected' : '';
-        return `<option value="${t.id}"${selected}>${label}</option>`;
+        const sel = (String(t.id) === String(savedId)) ? ' selected' : '';
+        return `<option value="${t.id}"${sel}>${label}</option>`;
       }).join('');
+    // 프로그래밍 방식으로도 선택 처리 (innerHTML selected 어트리뷰트 파싱 신뢰성 보완)
+    if (savedId !== undefined && savedId !== '') {
+      const match = Array.from(select.options).find(o => String(o.value) === String(savedId));
+      if (match) match.selected = true;
+    }
   } catch(e) {
     select.innerHTML = '<option value="">반품지 목록 로드 실패</option>';
   }
