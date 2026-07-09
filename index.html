@@ -1556,7 +1556,7 @@
       <div class="toss-biz-row">
         <div class="toss-biz-label">소울스토어</div>
         <input type="text" id="toss-name-soul" placeholder="예: 노르웨이 순살 고등어 1kg" />
-        <input type="text" id="toss-brand-soul" placeholder="예: 소울스토어" value="소울스토어 협력사" />
+        <input type="text" id="toss-brand-soul" placeholder="예: 소울스토어" value="소울스토어" />
         <div class="toss-biz-img-wrap">
           <img class="toss-biz-img-thumb" id="toss-thumb-soul" src="" alt="" />
           <button class="btn-biz-img" onclick="openTossBizImgPicker('soul')">📷 이미지 선택</button>
@@ -1567,7 +1567,7 @@
       <div class="toss-biz-row">
         <div class="toss-biz-label">제이원</div>
         <input type="text" id="toss-name-j1" placeholder="예: 노르웨이 순살 고등어 1kg" />
-        <input type="text" id="toss-brand-j1" placeholder="예: 제이원" value="제이원 협력사" />
+        <input type="text" id="toss-brand-j1" placeholder="예: 제이원" value="제이원" />
         <div class="toss-biz-img-wrap">
           <img class="toss-biz-img-thumb" id="toss-thumb-j1" src="" alt="" />
           <button class="btn-biz-img" onclick="openTossBizImgPicker('j1')">📷 이미지 선택</button>
@@ -1578,7 +1578,7 @@
       <div class="toss-biz-row">
         <div class="toss-biz-label">행복산업</div>
         <input type="text" id="toss-name-happy" placeholder="예: 노르웨이 순살 고등어 1kg" />
-        <input type="text" id="toss-brand-happy" placeholder="예: 행복산업" value="행복산업 협력사" />
+        <input type="text" id="toss-brand-happy" placeholder="예: 행복산업" value="행복산업" />
         <div class="toss-biz-img-wrap">
           <img class="toss-biz-img-thumb" id="toss-thumb-happy" src="" alt="" />
           <button class="btn-biz-img" onclick="openTossBizImgPicker('happy')">📷 이미지 선택</button>
@@ -4594,7 +4594,7 @@ function copyFromCafe24Images() {
 // ============================================================
 function copyBrandsFromCafe24() {
   const bizes = ['soul', 'j1', 'happy'];
-  const defaults = { soul: '소울스토어 협력사', j1: '제이원 협력사', happy: '행복산업 협력사' };
+  const defaults = { soul: '소울스토어', j1: '제이원', happy: '행복산업' };
 
   bizes.forEach(biz => {
     const store = biz; // 카페24와 토스의 사업자 키가 동일
