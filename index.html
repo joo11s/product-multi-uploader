@@ -1844,6 +1844,47 @@ const HISTORY_KEY_TOSS = 'soulkit_upload_history_toss';
 const HISTORY_KEY_LEGACY = 'soulkit_upload_history';
 const HISTORY_RETENTION_DAYS = 30;
 
+// ===== 서버 이력 (Google Sheets via n8n) =====
+const HISTORY_GET_WEBHOOK = 'https://n8n.wonflowai.com/webhook/soulkit-upload-history-get';
+const HISTORY_SAVE_WEBHOOK = 'https://n8n.wonflowai.com/webhook/soulkit-upload-history-save';
+// 플랫폼별 서버 이력 캐시: { cafe24: [...], toss: [...] }
+const serverHistoryCache = { cafe24: null, toss: null };
+
+async function fetchServerHistory() {
+  try {
+    const res = await fetch(HISTORY_GET_WEBHOOK);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const items = Array.isArray(data.items) ? data.items : [];
+    // 플랫폼별로 분류하여 캐시 저장
+    serverHistoryCache.cafe24 = items.filter(i => i.platform === 'cafe24').reverse();
+    serverHistoryCache.toss = items.filter(i => i.platform === 'toss').reverse();
+    // 뱃지 및 드로어 갱신
+    updateHistoryBadge();
+    renderHistoryDrawer();
+  } catch (e) {
+    console.warn('[upload-history] 서버 이력 로드 실패, 로컬 캐시 사용:', e.message);
+  }
+}
+
+async function saveServerHistoryEntry(platform, itemNo, title, bizId) {
+  try {
+    await fetch(HISTORY_SAVE_WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ platform, itemNo, title, bizId: bizId || '' }),
+    });
+    // 저장 후 서버 이력 재조회
+    fetchServerHistory();
+  } catch (e) {
+    console.warn('[upload-history] 서버 이력 저장 실패:', e.message);
+  }
+}
+
+function getServerHistory(platform) {
+  return serverHistoryCache[platform] || null;
+}
+
 function getHistory(key) {
   const k = key || HISTORY_KEY_CAFE24;
   try {
@@ -1957,11 +1998,43 @@ function toggleHistoryDrawer() {
   d.classList.toggle('show');
 }
 function renderHistoryDrawer(key) {
-  const k = key || (currentPlatform === 'toss' ? HISTORY_KEY_TOSS : HISTORY_KEY_CAFE24);
-  const list = getHistory(k);
+  const platform = currentPlatform === 'toss' ? 'toss' : 'cafe24';
+  const k = key || (platform === 'toss' ? HISTORY_KEY_TOSS : HISTORY_KEY_CAFE24);
   const listEl = document.getElementById('historyList');
   const countEl = document.getElementById('historyCount');
   if (!listEl) return;
+
+  // 서버 이력이 있으면 서버 데이터를 표시 (source of truth)
+  const serverList = getServerHistory(platform);
+  if (serverList !== null) {
+    if (countEl) countEl.textContent = serverList.length;
+    if (serverList.length === 0) {
+      listEl.innerHTML = '<div style="color:var(--text3); font-size:13px; text-align:center; padding:24px 0;">전송 이력이 없습니다.</div>';
+      return;
+    }
+    listEl.innerHTML = '';
+    serverList.forEach(entry => {
+      const when = entry.uploadedAt ? new Date(entry.uploadedAt).toLocaleString('ko-KR') : '';
+      const row = document.createElement('div');
+      row.className = 'result-item';
+      row.style.display = 'flex';
+      row.style.flexDirection = 'column';
+      row.style.gap = '6px';
+      const bizLabel = entry.bizId ? ` · ${entry.bizId}` : '';
+      row.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <div>
+            <div style="font-weight:600;">✓ ${entry.title || '(상품명 없음)'}${bizLabel}</div>
+            <div style="color:var(--text3); font-size:11px;">${when}</div>
+          </div>
+        </div>`;
+      listEl.appendChild(row);
+    });
+    return;
+  }
+
+  // 서버 이력 미로드 시 로컬 캐시 폴백
+  const list = getHistory(k);
   if (countEl) countEl.textContent = list.length;
   if (list.length === 0) {
     listEl.innerHTML = '<div style="color:var(--text3); font-size:13px; text-align:center; padding:24px 0;">전송 이력이 없습니다.</div>';
@@ -3015,6 +3088,8 @@ document.addEventListener('DOMContentLoaded', () => {
   pruneHistory();
   renderRetryPanel();
   renderHistoryDrawer();
+  // 서버 이력 로드 (Google Sheets via n8n) — 비동기, 완료 시 자동 갱신
+  fetchServerHistory();
   document.getElementById('productName').addEventListener('input', () => {
     const newName = document.getElementById('productName').value;
     STORES.forEach(s => {
@@ -3236,6 +3311,8 @@ async function sendWebhook() {
       logMsg('✓ n8n 웹훅 전송 성공', 'ok');
       showToast('✓ 업로드 완료! n8n에 성공적으로 전송됐습니다.', 'success');
       saveHistoryEntry(uploadId, payload, 'success', '', HISTORY_KEY_CAFE24);
+      // 서버 이력 저장 (Google Sheets via n8n)
+      saveServerHistoryEntry('cafe24', uploadId, commonName, '');
     }
     else throw new Error('HTTP ' + res.status);
   } catch (e) {
@@ -3558,10 +3635,19 @@ document.addEventListener('DOMContentLoaded', () => {
 let currentPlatform = 'cafe24';
 
 function updateHistoryBadge(key) {
-  const k = key || (currentPlatform === 'toss' ? HISTORY_KEY_TOSS : HISTORY_KEY_CAFE24);
-  const list = getHistory(k);
+  const platform = currentPlatform === 'toss' ? 'toss' : 'cafe24';
   const countEl = document.getElementById('historyCount');
-  if (countEl) countEl.textContent = list.length;
+  if (!countEl) return;
+  // 서버 이력이 있으면 서버 카운트 사용 (source of truth)
+  const serverList = getServerHistory(platform);
+  if (serverList !== null) {
+    countEl.textContent = serverList.length;
+    return;
+  }
+  // 폴백: 로컬 캐시
+  const k = key || (platform === 'toss' ? HISTORY_KEY_TOSS : HISTORY_KEY_CAFE24);
+  const list = getHistory(k);
+  countEl.textContent = list.length;
 }
 
 function switchPlatform(platform) {
@@ -5915,6 +6001,15 @@ async function registerTossProduct() {
     },
   };
   saveHistoryEntry(tossUploadId, tossHistoryPayload, tossStatus, tossErrMsg, HISTORY_KEY_TOSS);
+
+  // 서버 이력 저장 (Google Sheets via n8n) — 성공한 사업자별로 각각 append
+  results.forEach((result, idx) => {
+    if (result.status === 'fulfilled') {
+      const biz = payloads[idx].biz;
+      const bizTitle = (tossHistoryPayload.bizFields[biz] && tossHistoryPayload.bizFields[biz].name) || tossHistoryName;
+      saveServerHistoryEntry('toss', tossUploadId, bizTitle, biz);
+    }
+  });
 
   console.log('[토스 3사업자 등록 결과]', results);
   if (btn) { btn.disabled = false; btn.textContent = '🚀 토스쇼핑 3개 사업자 동시 등록'; }
