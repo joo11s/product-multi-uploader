@@ -1,0 +1,292 @@
+{
+  "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "name": "SoulKit 등록완료 자동저장",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "inputDataFieldName": "data"
+      },
+      "id": "skas-trigger",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "rules": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.mall }}",
+                    "rightValue": "소울스토어",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "소울스토어"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.mall }}",
+                    "rightValue": "제이원투몰",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "제이원투몰"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.mall }}",
+                    "rightValue": "행복산업",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "행복산업"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "skas-switch",
+      "name": "Mall 분기",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const wh = $('상품등록 Webhook').first().json;\nlet body;\nif (Array.isArray(wh.body)) {\n  body = wh.body[0].body;\n} else {\n  body = wh.body || wh;\n}\nconst product = body.product || {};\nconst itemNo = (product.customProductCode || '').trim();\n\n// itemNo 없으면 소싱검토함 미통과 → skip\nif (!itemNo) return [];\n\nconst parsed = $('상품등록 데이터 파싱').first().json;\nconst regResult = $('소울스토어 상품등록').first().json;\nconst mall = '소울스토어';\nconst cafe24ProductNo = regResult.product.product_no;\nconst title = (parsed.soul || {}).product_name || parsed.product_name || '';\nconst thumb = (parsed.soul || {}).main_image || '';\nconst category = String((parsed.soul || {}).category_no || '');\nconst itemNo_mall = `${itemNo}_${mall}`;\n\nreturn [{ json: {\n  itemNo,\n  title,\n  category,\n  status: 'registered',\n  thumb,\n  mall,\n  cafe24ProductNo,\n  registered_at: new Date().toISOString(),\n  itemNo_mall\n} }];"
+      },
+      "id": "skas-soul-prep",
+      "name": "소울스토어 소싱상태 준비",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const wh = $('상품등록 Webhook').first().json;\nlet body;\nif (Array.isArray(wh.body)) {\n  body = wh.body[0].body;\n} else {\n  body = wh.body || wh;\n}\nconst product = body.product || {};\nconst itemNo = (product.customProductCode || '').trim();\n\n// itemNo 없으면 소싱검토함 미통과 → skip\nif (!itemNo) return [];\n\nconst parsed = $('상품등록 데이터 파싱').first().json;\nconst regResult = $('제이원투몰 상품등록').first().json;\nconst mall = '제이원투몰';\nconst cafe24ProductNo = regResult.product.product_no;\nconst title = (parsed.j12 || {}).product_name || parsed.product_name || '';\nconst thumb = (parsed.j12 || {}).main_image || '';\nconst category = String((parsed.j12 || {}).category_no || '');\nconst itemNo_mall = `${itemNo}_${mall}`;\n\nreturn [{ json: {\n  itemNo,\n  title,\n  category,\n  status: 'registered',\n  thumb,\n  mall,\n  cafe24ProductNo,\n  registered_at: new Date().toISOString(),\n  itemNo_mall\n} }];"
+      },
+      "id": "skas-j12-prep",
+      "name": "제이원투몰 소싱상태 준비",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const wh = $('상품등록 Webhook').first().json;\nlet body;\nif (Array.isArray(wh.body)) {\n  body = wh.body[0].body;\n} else {\n  body = wh.body || wh;\n}\nconst product = body.product || {};\nconst itemNo = (product.customProductCode || '').trim();\n\n// itemNo 없으면 소싱검토함 미통과 → skip\nif (!itemNo) return [];\n\nconst parsed = $('상품등록 데이터 파싱').first().json;\nconst regResult = $('행복산업 상품등록').first().json;\nconst mall = '행복산업';\nconst cafe24ProductNo = regResult.product.product_no;\nconst title = (parsed.happy || {}).product_name || parsed.product_name || '';\nconst thumb = (parsed.happy || {}).main_image || '';\nconst category = String((parsed.happy || {}).category_no || '');\nconst itemNo_mall = `${itemNo}_${mall}`;\n\nreturn [{ json: {\n  itemNo,\n  title,\n  category,\n  status: 'registered',\n  thumb,\n  mall,\n  cafe24ProductNo,\n  registered_at: new Date().toISOString(),\n  itemNo_mall\n} }];"
+      },
+      "id": "skas-happy-prep",
+      "name": "행복산업 소싱상태 준비",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://n8n.wonflowai.com/webhook/soulkit-sourcing-state-save",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "body",
+              "value": "={{ JSON.stringify($json) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "skas-soul-save",
+      "name": "소울스토어 소싱상태 저장",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        940,
+        180
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://n8n.wonflowai.com/webhook/soulkit-sourcing-state-save",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "body",
+              "value": "={{ JSON.stringify($json) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "skas-j12-save",
+      "name": "제이원투몰 소싱상태 저장",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        940,
+        300
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://n8n.wonflowai.com/webhook/soulkit-sourcing-state-save",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "body",
+              "value": "={{ JSON.stringify($json) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "skas-happy-save",
+      "name": "행복산업 소싱상태 저장",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        940,
+        420
+      ],
+      "continueOnFail": true
+    }
+  ],
+  "connections": {
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "Mall 분기",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mall 분기": {
+      "main": [
+        [
+          {
+            "node": "소울스토어 소싱상태 준비",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "제이원투몰 소싱상태 준비",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "행복산업 소싱상태 준비",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "소울스토어 소싱상태 준비": {
+      "main": [
+        [
+          {
+            "node": "소울스토어 소싱상태 저장",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "제이원투몰 소싱상태 준비": {
+      "main": [
+        [
+          {
+            "node": "제이원투몰 소싱상태 저장",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "행복산업 소싱상태 준비": {
+      "main": [
+        [
+          {
+            "node": "행복산업 소싱상태 저장",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": []
+}
