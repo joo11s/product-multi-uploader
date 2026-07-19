@@ -1856,7 +1856,13 @@ async function fetchServerHistory() {
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     const items = Array.isArray(data.items) ? data.items : [];
-    // 플랫폼별로 분류하여 캐시 저장
+    items.forEach(i => {
+      if (i.payload && typeof i.payload === 'string') {
+        try { i.payloadObj = JSON.parse(i.payload); } catch (e) { i.payloadObj = null; }
+      } else {
+        i.payloadObj = null;
+      }
+    });
     serverHistoryCache.cafe24 = items.filter(i => i.platform === 'cafe24').reverse();
     serverHistoryCache.toss = items.filter(i => i.platform === 'toss').reverse();
     // 뱃지 및 드로어 갱신
@@ -1867,12 +1873,12 @@ async function fetchServerHistory() {
   }
 }
 
-async function saveServerHistoryEntry(platform, itemNo, title, bizId) {
+async function saveServerHistoryEntry(platform, itemNo, title, bizId, payload) {
   try {
     await fetch(HISTORY_SAVE_WEBHOOK, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ platform, itemNo, title, bizId: bizId || '' }),
+      body: JSON.stringify({ platform, itemNo, title, bizId: bizId || '', payload: payload ? JSON.stringify(payload) : '' }),
     });
     // 저장 후 서버 이력 재조회
     fetchServerHistory();
@@ -2021,12 +2027,18 @@ function renderHistoryDrawer(key) {
       row.style.flexDirection = 'column';
       row.style.gap = '6px';
       const bizLabel = entry.bizId ? ` · ${entry.bizId}` : '';
+      const hasPayload = !!entry.payloadObj;
       row.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:flex-start;">
           <div>
             <div style="font-weight:600;">✓ ${entry.title || '(상품명 없음)'}${bizLabel}</div>
             <div style="color:var(--text3); font-size:11px;">${when}</div>
           </div>
+        </div>
+        <div style="display:flex; gap:6px;">
+          ${hasPayload
+            ? `<button class="btn-add-option" style="padding:5px 10px; font-size:11px;" onclick="loadFromServerEntry('${platform}', ${entry.row_number})">불러오기</button>`
+            : `<span style="color:var(--text3); font-size:11px;">이 기록은 저장 당시 원본 데이터가 없어 불러올 수 없습니다</span>`}
         </div>`;
       listEl.appendChild(row);
     });
@@ -2063,6 +2075,19 @@ function renderHistoryDrawer(key) {
       </div>`;
     listEl.appendChild(row);
   });
+}
+
+function loadFromServerEntry(platform, rowNumber) {
+  const list = serverHistoryCache[platform] || [];
+  const entry = list.find(e => e.row_number === rowNumber);
+  if (!entry || !entry.payloadObj) return;
+  if (platform === 'toss') {
+    populateTossFormFromPayload(entry.payloadObj);
+  } else {
+    populateFormFromPayload(entry.payloadObj);
+  }
+  toggleHistoryDrawer();
+  showToast('✓ "' + (entry.title || '') + '" 데이터를 폼에 불러왔습니다. 확인 후 업로드하세요.', 'success');
 }
 
 function loadFromHistory(id) {
@@ -3312,7 +3337,7 @@ async function sendWebhook() {
       showToast('✓ 업로드 완료! n8n에 성공적으로 전송됐습니다.', 'success');
       saveHistoryEntry(uploadId, payload, 'success', '', HISTORY_KEY_CAFE24);
       // 서버 이력 저장 (Google Sheets via n8n)
-      saveServerHistoryEntry('cafe24', uploadId, commonName, '');
+      saveServerHistoryEntry('cafe24', uploadId, commonName, '', payload);
     }
     else throw new Error('HTTP ' + res.status);
   } catch (e) {
@@ -6007,7 +6032,7 @@ async function registerTossProduct() {
     if (result.status === 'fulfilled') {
       const biz = payloads[idx].biz;
       const bizTitle = (tossHistoryPayload.bizFields[biz] && tossHistoryPayload.bizFields[biz].name) || tossHistoryName;
-      saveServerHistoryEntry('toss', tossUploadId, bizTitle, biz);
+      saveServerHistoryEntry('toss', tossUploadId, bizTitle, biz, tossHistoryPayload);
     }
   });
 
