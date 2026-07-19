@@ -1847,6 +1847,7 @@ const HISTORY_RETENTION_DAYS = 30;
 // ===== 서버 이력 (Google Sheets via n8n) =====
 const HISTORY_GET_WEBHOOK = 'https://n8n.wonflowai.com/webhook/soulkit-upload-history-get';
 const HISTORY_SAVE_WEBHOOK = 'https://n8n.wonflowai.com/webhook/soulkit-upload-history-save';
+const HISTORY_DELETE_WEBHOOK = 'https://n8n.wonflowai.com/webhook/soulkit-upload-history-delete';
 // 플랫폼별 서버 이력 캐시: { cafe24: [...], toss: [...] }
 const serverHistoryCache = { cafe24: null, toss: null };
 
@@ -1884,6 +1885,28 @@ async function saveServerHistoryEntry(platform, itemNo, title, bizId, payload) {
     fetchServerHistory();
   } catch (e) {
     console.warn('[upload-history] 서버 이력 저장 실패:', e.message);
+  }
+}
+
+async function deleteFromServerEntry(platform, rowNumber) {
+  try {
+    const res = await fetch(HISTORY_DELETE_WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ platform, rowNumber })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      if (serverHistoryCache[platform]) {
+        serverHistoryCache[platform] = serverHistoryCache[platform].filter(r => r.row_number !== rowNumber);
+      }
+      renderHistoryDrawer();
+      showToast('삭제되었습니다', 'success');
+    } else {
+      showToast(data.message || '삭제 실패', 'error');
+    }
+  } catch (e) {
+    showToast('삭제 중 오류가 발생했습니다', 'error');
   }
 }
 
@@ -2035,10 +2058,11 @@ function renderHistoryDrawer(key) {
             <div style="color:var(--text3); font-size:11px;">${when}</div>
           </div>
         </div>
-        <div style="display:flex; gap:6px;">
+        <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
           ${hasPayload
             ? `<button class="btn-add-option" style="padding:5px 10px; font-size:11px;" onclick="loadFromServerEntry('${platform}', ${entry.row_number})">불러오기</button>`
             : `<span style="color:var(--text3); font-size:11px;">이 기록은 저장 당시 원본 데이터가 없어 불러올 수 없습니다</span>`}
+          <button class="btn-reset" style="padding:5px 10px; font-size:11px;" onclick="if(confirm('정말 이 이력을 삭제하시겠습니까?')){deleteFromServerEntry('${platform}',${entry.row_number})}">삭제</button>
         </div>`;
       listEl.appendChild(row);
     });
