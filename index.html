@@ -3291,8 +3291,10 @@ async function uploadFile(file, r2Key) {
 }
 
 function buildStorePayload(store) {
+  const name = document.getElementById(store + '-productName').value.trim();
+  if (!name) return null;
   return {
-    productName: document.getElementById(store + '-productName').value.trim() || getProductName(),
+    productName: name,
     categoryCode: document.getElementById('categoryCode-' + store).value || '',
     categoryText: document.getElementById('catSearchInput-' + store).value.trim() || '',
     manufacturer: document.getElementById(store + '-manufacturer').value.trim(),
@@ -3316,6 +3318,16 @@ async function sendWebhook() {
   // task_id: 처음 생성 시 한 번만 만들고, 이후 같은 항목을 재전송할 때도 동일한 값을 유지해야
   // n8n에서 "이 task가 어디까지 진행됐는지"를 조회할 수 있음.
   const uploadId = 'task_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+
+  const storePayloads = {};
+  ['soul', 'j1', 'happy'].forEach(s => {
+    const p = buildStorePayload(s);
+    if (p) storePayloads[s] = p;
+  });
+  if (Object.keys(storePayloads).length === 0) {
+    showToast('등록할 사업자 상품명을 입력해주세요.', 'error');
+    return;
+  }
 
   const payload = {
     task_id: uploadId,
@@ -3349,7 +3361,7 @@ async function sendWebhook() {
       detailHtmlUrl: detailHtmlUrl || '',
     },
     overseas: getOverseasData(),
-    stores: { soul: buildStorePayload('soul'), j1: buildStorePayload('j1'), happy: buildStorePayload('happy') },
+    stores: storePayloads,
     commonImages: { detail: uploadedUrls['common-detail'], notice: uploadedUrls['common-notice'], extra: uploadedUrls['common-extra'] },
   };
 
