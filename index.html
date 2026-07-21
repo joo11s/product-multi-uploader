@@ -6094,6 +6094,36 @@ document.addEventListener('DOMContentLoaded', () => {
   // 토스 섹션 진입 전에도 템플릿 미리 로드해 두기 (선택 사항)
   // 실제 미리보기는 switchPlatform('toss') 시 renderAllTemplatePreview()로 표시
 });
+
+// ============================================================
+// SoulKit 소싱검토함 → 통합업로더 데이터 수신 리스너
+// ============================================================
+window.addEventListener('message', function(e) {
+  if (!e.data || e.data.channel !== 'soulkit-transfer' || e.data.target !== 'uploader') return;
+  var msgId = e.data.__msgId;
+  window.__processedMsgIds = window.__processedMsgIds || new Set();
+  if (msgId && window.__processedMsgIds.has(msgId)) {
+    if (window.parent) window.parent.postMessage({ channel: 'soulkit-transfer-ack', msgId: msgId }, '*');
+    return;
+  }
+  if (msgId) window.__processedMsgIds.add(msgId);
+
+  var payload = e.data.payload || {};
+  if (payload.supplierProductName) {
+    var elS = document.getElementById('supplierProductName');
+    if (elS) elS.value = payload.supplierProductName;
+  }
+  if (payload.modelName) {
+    var elM = document.getElementById('modelName');
+    if (elM) elM.value = payload.modelName;
+  }
+  if (payload.customProductCode) {
+    var elC = document.getElementById('customProductCode');
+    if (elC) elC.value = payload.customProductCode;
+  }
+
+  if (msgId && window.parent) window.parent.postMessage({ channel: 'soulkit-transfer-ack', msgId: msgId }, '*');
+});
 </script>
 </body>
 </html>
